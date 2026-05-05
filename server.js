@@ -18,28 +18,24 @@ app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
-// Hostinger resolves 'localhost' to ::1 (IPv6 TCP) which MySQL rejects.
-// Must use the Unix socket directly for local connections.
-const SOCKET_PATHS = [
-  '/var/run/mysqld/mysqld.sock',
-  '/tmp/mysql.sock',
-  '/var/lib/mysql/mysql.sock',
-]
-const socketPath = SOCKET_PATHS.find(p => existsSync(p))
+// MySQL is on Hostinger's shared DB server (auth-db1729.hstgr.io), not localhost.
+const dbHost = process.env.DATABASE_HOST || 'auth-db1729.hstgr.io'
+console.log('DB connect via TCP:', dbHost)
 
-const dbConfig = socketPath
-  ? { socketPath, database: process.env.DATABASE_NAME, user: process.env.DATABASE_USER, password: process.env.DATABASE_PASSWORD }
-  : { host: process.env.DATABASE_HOST || '127.0.0.1', database: process.env.DATABASE_NAME, user: process.env.DATABASE_USER, password: process.env.DATABASE_PASSWORD }
-
-console.log('DB connect via:', socketPath || ('TCP ' + (process.env.DATABASE_HOST || '127.0.0.1')))
-
-const db = mysql.createPool({ ...dbConfig, waitForConnections: true, connectionLimit: 10 })
+const db = mysql.createPool({
+  host:               dbHost,
+  database:           process.env.DATABASE_NAME,
+  user:               process.env.DATABASE_USER,
+  password:           process.env.DATABASE_PASSWORD,
+  waitForConnections: true,
+  connectionLimit:    10,
+})
 
 // ── Auto-init: create tables + first admin on first boot ──────────
 async function initDb() {
   console.log('Initializing database…')
   await db.query(`
-    CREATE TABLE IF NOT EXISTS admins (
+    CREATE TABLE IF NOT EXISTS admin_users (
       id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
       email         VARCHAR(255) NOT NULL,
       password_hash VARCHAR(255) NOT NULL,
@@ -47,7 +43,7 @@ async function initDb() {
       created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
-      UNIQUE KEY admins_email_unique (email)
+      UNIQUE KEY admin_users_email_unique (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
   await db.query(`
@@ -108,12 +104,12 @@ async function initDb() {
   `)
 
   // Create first admin if none exist
-  const [existing] = await db.query('SELECT id FROM admins LIMIT 1')
+  const [existing] = await db.query('SELECT id FROM admin_users LIMIT 1')
   if (existing.length === 0) {
     const email = process.env.ADMIN_EMAIL || 'admin@carrai.com'
     const pass  = process.env.ADMIN_PASS  || 'Admin123!'
     const hash  = await bcrypt.hash(pass, 12)
-    await db.query('INSERT INTO admins (email, password_hash, name) VALUES (?, ?, ?)', [email, hash, 'Admin'])
+    await db.query('INSERT INTO admin_users (email, password_hash, name) VALUES (?, ?, ?)', [email, hash, 'Admin'])
     console.log(`✓ Admin created: ${email}`)
   }
   console.log('✓ Database ready')
@@ -192,7 +188,7 @@ app.post('/api/auth.php', async (req, res) => {
   try {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' })
-    const [rows] = await db.query('SELECT * FROM admins WHERE email = ?', [email])
+    const [rows] = await db.query('SELECT * FROM admin_users WHERE email = ?', [email])
     const admin = rows[0]
     if (!admin || !(await bcrypt.compare(password, admin.password_hash))) {
       return res.status(401).json({ error: 'Invalid email or password' })
