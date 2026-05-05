@@ -18,8 +18,12 @@ app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
-// MySQL is on Hostinger's shared DB server (auth-db1729.hstgr.io), not localhost.
-const dbHost = process.env.DATABASE_HOST || 'auth-db1729.hstgr.io'
+// DATABASE_HOST env var on Hostinger Node.js defaults to '127.0.0.1' but MySQL
+// lives on the shared DB server auth-db1729.hstgr.io — override localhost/127.
+const _rawHost = process.env.DATABASE_HOST
+const dbHost = (!_rawHost || _rawHost === '127.0.0.1' || _rawHost === 'localhost')
+  ? 'auth-db1729.hstgr.io'
+  : _rawHost
 console.log('DB connect via TCP:', dbHost)
 
 const db = mysql.createPool({
