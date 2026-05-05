@@ -18,18 +18,22 @@ app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
-// On Hostinger, 127.0.0.1 uses TCP but MySQL only allows Unix socket (localhost)
-const rawHost = process.env.DATABASE_HOST || 'localhost'
-const dbHost  = rawHost === '127.0.0.1' ? 'localhost' : rawHost
+// Hostinger resolves 'localhost' to ::1 (IPv6 TCP) which MySQL rejects.
+// Must use the Unix socket directly for local connections.
+const SOCKET_PATHS = [
+  '/var/run/mysqld/mysqld.sock',
+  '/tmp/mysql.sock',
+  '/var/lib/mysql/mysql.sock',
+]
+const socketPath = SOCKET_PATHS.find(p => existsSync(p))
 
-const db = mysql.createPool({
-  host:               dbHost,
-  database:           process.env.DATABASE_NAME,
-  user:               process.env.DATABASE_USER,
-  password:           process.env.DATABASE_PASSWORD,
-  waitForConnections: true,
-  connectionLimit:    10,
-})
+const dbConfig = socketPath
+  ? { socketPath, database: process.env.DATABASE_NAME, user: process.env.DATABASE_USER, password: process.env.DATABASE_PASSWORD }
+  : { host: process.env.DATABASE_HOST || '127.0.0.1', database: process.env.DATABASE_NAME, user: process.env.DATABASE_USER, password: process.env.DATABASE_PASSWORD }
+
+console.log('DB connect via:', socketPath || ('TCP ' + (process.env.DATABASE_HOST || '127.0.0.1')))
+
+const db = mysql.createPool({ ...dbConfig, waitForConnections: true, connectionLimit: 10 })
 
 // ── Auto-init: create tables + first admin on first boot ──────────
 async function initDb() {
