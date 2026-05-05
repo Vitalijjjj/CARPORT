@@ -10,10 +10,10 @@ import mysql from 'mysql2/promise'
 import bcrypt from 'bcryptjs'
 
 const db = await mysql.createConnection({
-  host:     process.env.DB_HOST || '127.0.0.1',
-  database: process.env.DB_NAME,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASS,
+  host:     process.env.DATABASE_HOST || '127.0.0.1',
+  database: process.env.DATABASE_NAME,
+  user:     process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
 })
 
 // Create tables if they don't exist
@@ -86,7 +86,7 @@ await db.query(`
 `)
 
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@carrai.com'
-const adminPass  = process.env.ADMIN_PASS  || 'changeme123'
+const adminPass  = process.env.ADMIN_PASS  || 'Admin123!'
 const hash = await bcrypt.hash(adminPass, 12)
 
 const [existing] = await db.query('SELECT id FROM admins WHERE email = ?', [adminEmail])

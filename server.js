@@ -19,16 +19,16 @@ app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database ──────────────────────────────────────────────────────
 const db = mysql.createPool({
-  host:               process.env.DB_HOST || '127.0.0.1',
-  database:           process.env.DB_NAME,
-  user:               process.env.DB_USER,
-  password:           process.env.DB_PASS,
+  host:               process.env.DATABASE_HOST || '127.0.0.1',
+  database:           process.env.DATABASE_NAME,
+  user:               process.env.DATABASE_USER,
+  password:           process.env.DATABASE_PASSWORD,
   waitForConnections: true,
   connectionLimit:    10,
 })
 
 // ── Auth helpers ──────────────────────────────────────────────────
-const SECRET  = process.env.JWT_SECRET || 'change-before-deploy'
+const SECRET  = process.env.JWT_SECRET || 'change-before-deploy-50-chars-minimum-please'
 const TTL     = 86400 * 30
 
 function makeToken(payload) {
