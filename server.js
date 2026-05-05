@@ -18,8 +18,12 @@ app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
+// On Hostinger, 127.0.0.1 uses TCP but MySQL only allows Unix socket (localhost)
+const rawHost = process.env.DATABASE_HOST || 'localhost'
+const dbHost  = rawHost === '127.0.0.1' ? 'localhost' : rawHost
+
 const db = mysql.createPool({
-  host:               process.env.DATABASE_HOST || '127.0.0.1',
+  host:               dbHost,
   database:           process.env.DATABASE_NAME,
   user:               process.env.DATABASE_USER,
   password:           process.env.DATABASE_PASSWORD,
