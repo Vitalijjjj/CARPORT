@@ -1,10 +1,21 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import App from './App.jsx'
-import CarPage from './CarPage.jsx'
+
+// Public pages
+import App        from './App.jsx'
+import CarPage    from './CarPage.jsx'
+import CatalogPage from './CatalogPage.jsx'
 import FloatingWidget from './FloatingWidget.jsx'
-import LeadPopup from './LeadPopup.jsx'
+import LeadPopup  from './LeadPopup.jsx'
+
+// Admin pages
+import AdminGuard         from './admin/AdminGuard.jsx'
+import AdminLayout        from './admin/AdminLayout.jsx'
+import AdminLoginPage     from './admin/pages/AdminLoginPage.jsx'
+import AdminDashboardPage from './admin/pages/AdminDashboardPage.jsx'
+import AdminCarsListPage  from './admin/pages/AdminCarsListPage.jsx'
+import AdminCarFormPage   from './admin/pages/AdminCarFormPage.jsx'
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation()
@@ -19,16 +30,47 @@ function ScrollToTop() {
   return null
 }
 
+// Only render site-wide widgets on non-admin pages
+function SiteWidgets() {
+  const { pathname } = useLocation()
+  if (pathname.startsWith('/admin')) return null
+  return (
+    <>
+      <FloatingWidget />
+      <LeadPopup />
+    </>
+  )
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <ScrollToTop />
+
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/car/:id" element={<CarPage />} />
+        {/* ── Public routes ─────────────────────────────────────── */}
+        <Route path="/"         element={<App />} />
+        <Route path="/cars"     element={<CatalogPage />} />
+        <Route path="/car/:id"  element={<CarPage />} />
+
+        {/* ── Admin routes ──────────────────────────────────────── */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminGuard>
+              <AdminLayout />
+            </AdminGuard>
+          }
+        >
+          <Route index            element={<AdminDashboardPage />} />
+          <Route path="cars"      element={<AdminCarsListPage />} />
+          <Route path="cars/create"    element={<AdminCarFormPage />} />
+          <Route path="cars/:id/edit"  element={<AdminCarFormPage />} />
+        </Route>
       </Routes>
-      <FloatingWidget />
-      <LeadPopup />
+
+      <SiteWidgets />
     </BrowserRouter>
   </StrictMode>,
 )

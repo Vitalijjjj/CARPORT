@@ -11,7 +11,7 @@ export default function LeadPopup() {
 
   function trigger() {
     if (fired.current) return
-    if (localStorage.getItem('olimp_popup_sent')) return
+    if (localStorage.getItem('carrai_popup_sent')) return
     fired.current = true
     setShow(true)
   }
@@ -46,7 +46,7 @@ export default function LeadPopup() {
     if (phone.replace(/\D/g, '').length < 5) errs.phone = 'Enter a valid phone number'
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSent(true)
-    localStorage.setItem('olimp_popup_sent', '1')
+    localStorage.setItem('carrai_popup_sent', '1')
     setTimeout(close, 3500)
   }
 
@@ -73,9 +73,9 @@ export default function LeadPopup() {
           </div>
         ) : (
           <>
-            <span className="lp-eyebrow">Personal selection</span>
-            <h3 className="lp-heading">We'll find the right car<br/>for your needs</h3>
-            <p className="lp-sub">Leave your contact — our manager will call within 15 minutes with options tailored to you.</p>
+            <span className="lp-eyebrow">Get a Personal Offer</span>
+            <h3 className="lp-heading">Find the right BMW<br/>or Mercedes for you</h3>
+            <p className="lp-sub">Tell us what you are looking for and we will help you find the best available option in stock or through import from Germany.</p>
             <form onSubmit={handleSubmit} noValidate>
               <div className="lp-field">
                 <input
@@ -90,7 +90,7 @@ export default function LeadPopup() {
               <div className="lp-field">
                 <input
                   type="tel"
-                  placeholder="+1 (000) 000-0000"
+                  placeholder="+351 000 000 000"
                   value={phone}
                   onChange={e => { setPhone(e.target.value); setErrors(p => ({ ...p, phone: '' })) }}
                   autoComplete="tel"
@@ -98,7 +98,7 @@ export default function LeadPopup() {
                 {errors.phone && <span className="lp-err">{errors.phone}</span>}
               </div>
               <button type="submit" className="lp-submit">
-                Get a personalised selection
+                Send Request
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="m9 5 7 7-7 7"/>
                 </svg>
@@ -106,8 +106,8 @@ export default function LeadPopup() {
               <p className="lp-disclaimer">No spam. One call. No obligations.</p>
             </form>
             <div className="lp-alts">
-              <a href="https://wa.me/11234567890" target="_blank" rel="noopener noreferrer" className="lp-alt lp-wa">WhatsApp</a>
-              <a href="https://t.me/olimpcars" target="_blank" rel="noopener noreferrer" className="lp-alt lp-tg">Telegram</a>
+              <a href="https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D" target="_blank" rel="noopener noreferrer" className="lp-alt lp-ig">Instagram</a>
+              <a href="https://www.facebook.com/share/1D3kQ3XXpu/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="lp-alt lp-fb">Facebook</a>
             </div>
           </>
         )}

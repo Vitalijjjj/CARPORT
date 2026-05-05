@@ -1,0 +1,20 @@
+# Hostinger SPA routing — redirect all non-file requests to index.html
+# Place this file at public_html/.htaccess after deploying the React build
+
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# Let Apache serve api/ directory as PHP — do not rewrite
+RewriteRule ^api/ - [L]
+
+# Let Apache serve uploads/ directory directly
+RewriteRule ^uploads/ - [L]
+
+# Serve existing static files and directories as-is
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else → React SPA entry point
+RewriteRule ^ index.html [L]

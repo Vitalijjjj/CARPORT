@@ -1,37 +1,63 @@
 import { useState } from 'react'
-import { OLIMP_CARS } from './cars-data'
 import './Quiz.css'
 
 const STEPS = [
   {
-    id: 'goal',
-    question: 'What are you looking for?',
+    id: 'brand',
+    question: 'Which brand are you interested in?',
     options: [
-      { label: 'Rent a car', value: 'rent' },
-      { label: 'Buy a car', value: 'buy' },
-      { label: 'Trade-in my car', value: 'trade' },
-      { label: 'Order car import', value: 'import' },
+      { label: 'BMW',            value: 'bmw' },
+      { label: 'Mercedes-Benz', value: 'mercedes' },
+      { label: 'Both',          value: 'both' },
+      { label: 'Not sure yet',  value: 'unsure' },
     ],
   },
   {
-    id: 'category',
-    question: "What's the car for?",
+    id: 'type',
+    question: 'What type of vehicle are you looking for?',
     options: [
-      { label: 'Business trips', value: 'business' },
-      { label: 'Family', value: 'family' },
-      { label: 'Adventures', value: 'adventure' },
-      { label: 'Special occasion', value: 'wedding' },
+      { label: 'Electric',       value: 'electric' },
+      { label: 'Hybrid',         value: 'hybrid' },
+      { label: 'Plug-in Hybrid', value: 'phev' },
+      { label: 'Not sure yet',   value: 'unsure' },
+    ],
+  },
+  {
+    id: 'budget',
+    question: 'What is your approximate budget?',
+    options: [
+      { label: 'Up to €30,000',     value: 'under30' },
+      { label: '€30,000 – €45,000', value: '30to45' },
+      { label: '€45,000 – €65,000', value: '45to65' },
+      { label: '€65,000+',          value: 'over65' },
+    ],
+  },
+  {
+    id: 'financing',
+    question: 'Are you interested in financing?',
+    options: [
+      { label: 'Yes',                               value: 'yes' },
+      { label: 'No',                                value: 'no' },
+      { label: 'Maybe — I want to compare options', value: 'maybe' },
     ],
   },
   {
     id: 'timing',
-    question: 'When do you need it?',
+    question: 'When are you planning to buy?',
     options: [
-      { label: 'This week', value: 'week' },
-      { label: 'This month', value: 'month' },
-      { label: "I'm just planning", value: 'planning' },
+      { label: 'As soon as possible', value: 'asap' },
+      { label: 'Within 30 days',      value: '30days' },
+      { label: 'Within 2–3 months',   value: '2to3months' },
+      { label: 'Just researching',    value: 'researching' },
     ],
   },
+]
+
+const FEATURES = [
+  'BMW & Mercedes-Benz in stock',
+  'Electric & Hybrid, selected for Portugal',
+  'Warranty and financing available',
+  'Import from Germany, end-to-end',
 ]
 
 export default function Quiz() {
@@ -61,99 +87,131 @@ export default function Quiz() {
     setSent(true)
   }
 
-  const matchCount = answers.category
-    ? OLIMP_CARS.filter(c => c.category === answers.category).length
-    : OLIMP_CARS.length
-
   return (
     <section className="quiz-section" id="quiz">
       <div className="wrap">
-        <div className="quiz-box">
+        <div className="quiz-layout">
 
-          {sent ? (
-            <div className="quiz-sent">
-              <div className="quiz-sent-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="m5 12 5 5 9-10"/>
-                </svg>
+          {/* ── Left: always-visible context panel ── */}
+          <div className="quiz-left">
+            <span className="quiz-eyebrow">Car Finder</span>
+            <h2 className="quiz-heading">Find Your Perfect<br/>Car in 3 Minutes</h2>
+            <p className="quiz-left-desc">
+              Answer a few quick questions and our team prepares a personalised offer — matching your brand, budget and needs.
+            </p>
+            <ul className="quiz-features">
+              {FEATURES.map(f => <li key={f}>{f}</li>)}
+            </ul>
+            <div className="quiz-left-stats">
+              <div className="quiz-stat-item">
+                <span className="quiz-stat-n">500+</span>
+                <span className="quiz-stat-l">cars sourced</span>
               </div>
-              <h3>Request received!</h3>
-              <p>Our manager will call within 15 minutes with a personalised car selection.</p>
+              <div className="quiz-stat-sep" />
+              <div className="quiz-stat-item">
+                <span className="quiz-stat-n">3 min</span>
+                <span className="quiz-stat-l">to get matched</span>
+              </div>
+              <div className="quiz-stat-sep" />
+              <div className="quiz-stat-item">
+                <span className="quiz-stat-n">Free</span>
+                <span className="quiz-stat-l">consultation</span>
+              </div>
             </div>
+          </div>
 
-          ) : isIntro ? (
-            <div className="quiz-intro">
-              <span className="quiz-eyebrow">Car Finder</span>
-              <h2 className="quiz-heading">Not sure which car fits you?<br/>Answer 3 quick questions</h2>
-              <p>Takes under 1 minute. Get a free personalised selection from our manager.</p>
-              <button className="quiz-start-btn" onClick={() => setStep(1)}>
-                Start the quiz
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="m9 5 7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
+          {/* ── Right: quiz interaction card ── */}
+          <div className="quiz-right">
+            <div className="quiz-box">
 
-          ) : isForm ? (
-            <div className="quiz-form-step">
-              <div className="quiz-progress-wrap">
-                <div className="quiz-progress-bar" style={{ width: '100%' }} />
-              </div>
-              <div className="quiz-match">
-                <span className="quiz-match-num">{matchCount}</span>
-                {' '}car{matchCount !== 1 ? 's' : ''} match your criteria
-              </div>
-              <h3 className="quiz-q">Leave your contact — we'll send a selection within 15 minutes</h3>
-              <form onSubmit={handleSubmit} noValidate>
-                <div className="quiz-field">
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })) }}
-                    autoComplete="name"
-                  />
-                  {errors.name && <span className="quiz-err">{errors.name}</span>}
+              {sent ? (
+                <div className="quiz-sent">
+                  <div className="quiz-sent-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="m5 12 5 5 9-10"/>
+                    </svg>
+                  </div>
+                  <h3>Request received!</h3>
+                  <p>Our team will review your preferences and contact you with suitable options.</p>
                 </div>
-                <div className="quiz-field">
-                  <input
-                    type="tel"
-                    placeholder="+1 (000) 000-0000"
-                    value={phone}
-                    onChange={e => { setPhone(e.target.value); setErrors(p => ({ ...p, phone: '' })) }}
-                    autoComplete="tel"
-                  />
-                  {errors.phone && <span className="quiz-err">{errors.phone}</span>}
-                </div>
-                <button type="submit" className="quiz-submit-btn">
-                  Get my selection
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="m9 5 7 7-7 7"/>
-                  </svg>
-                </button>
-                <p className="quiz-disclaimer">No spam. One call from your manager. No obligations.</p>
-              </form>
-            </div>
 
-          ) : (
-            <div className="quiz-step">
-              <div className="quiz-progress-wrap">
-                <div className="quiz-progress-bar" style={{ width: `${(step / totalSteps) * 100}%` }} />
-              </div>
-              <div className="quiz-step-label">Step {step} of {totalSteps}</div>
-              <h3 className="quiz-q">{currentStep.question}</h3>
-              <div className="quiz-options">
-                {currentStep.options.map(opt => (
-                  <button key={opt.value} className="quiz-opt" onClick={() => pickOption(currentStep.id, opt.value)}>
-                    {opt.label}
+              ) : isIntro ? (
+                <div className="quiz-intro">
+                  <div className="quiz-intro-icon">
+                    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 30h28M10 30l4-10h20l4 10M10 30v6h4v-6M34 30v6h4v-6"/>
+                      <circle cx="16" cy="36" r="3"/><circle cx="32" cy="36" r="3"/>
+                      <path d="M18 20h12"/>
+                    </svg>
+                  </div>
+                  <p className="quiz-intro-label">5 quick questions · No account needed</p>
+                  <button className="quiz-start-btn" onClick={() => setStep(1)}>
+                    Start Car Selection
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="m9 5 7 7-7 7"/>
+                    </svg>
                   </button>
-                ))}
-              </div>
-              {step > 1 && (
-                <button className="quiz-back" onClick={() => setStep(s => s - 1)}>← Back</button>
+                </div>
+
+              ) : isForm ? (
+                <div className="quiz-form-step">
+                  <div className="quiz-progress-wrap">
+                    <div className="quiz-progress-bar" style={{ width: '100%' }} />
+                  </div>
+                  <h3 className="quiz-q">Where should we send your personalised offer?</h3>
+                  <form onSubmit={handleSubmit} noValidate>
+                    <div className="quiz-field">
+                      <input
+                        type="text"
+                        placeholder="Your name"
+                        value={name}
+                        onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })) }}
+                        autoComplete="name"
+                      />
+                      {errors.name && <span className="quiz-err">{errors.name}</span>}
+                    </div>
+                    <div className="quiz-field">
+                      <input
+                        type="tel"
+                        placeholder="+351 000 000 000"
+                        value={phone}
+                        onChange={e => { setPhone(e.target.value); setErrors(p => ({ ...p, phone: '' })) }}
+                        autoComplete="tel"
+                      />
+                      {errors.phone && <span className="quiz-err">{errors.phone}</span>}
+                    </div>
+                    <button type="submit" className="quiz-submit-btn">
+                      Get My Car Offer
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="m9 5 7 7-7 7"/>
+                      </svg>
+                    </button>
+                    <p className="quiz-disclaimer">No spam. One call from our team. No obligations.</p>
+                  </form>
+                </div>
+
+              ) : (
+                <div className="quiz-step">
+                  <div className="quiz-progress-wrap">
+                    <div className="quiz-progress-bar" style={{ width: `${(step / totalSteps) * 100}%` }} />
+                  </div>
+                  <div className="quiz-step-label">Step {step} of {totalSteps}</div>
+                  <h3 className="quiz-q">{currentStep.question}</h3>
+                  <div className="quiz-options">
+                    {currentStep.options.map(opt => (
+                      <button key={opt.value} className="quiz-opt" onClick={() => pickOption(currentStep.id, opt.value)}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  {step > 1 && (
+                    <button className="quiz-back" onClick={() => setStep(s => s - 1)}>← Back</button>
+                  )}
+                </div>
               )}
+
             </div>
-          )}
+          </div>
 
         </div>
       </div>

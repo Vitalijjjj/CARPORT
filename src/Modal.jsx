@@ -43,7 +43,7 @@ export default function Modal({ onClose, carName }) {
               </svg>
             </div>
             <h3>Request sent!</h3>
-            <p>Our manager will call you within 15 minutes.</p>
+            <p>Our team will review your request and contact you with suitable options.</p>
             <button className="btn btn-primary" style={{ margin: '0 auto' }} onClick={onClose}>
               Close
             </button>
@@ -51,8 +51,8 @@ export default function Modal({ onClose, carName }) {
         ) : (
           <>
             <div className="modal-head">
-              <h3>{carName ? `Book ${carName}` : 'Submit a request'}</h3>
-              <p>{carName ? `Reserve your ${carName}. Our manager will confirm within 15 minutes.` : 'Leave your details and our manager will call within 15 minutes.'}</p>
+              <h3>{carName ? `Ask About ${carName}` : 'Get a Personal Offer'}</h3>
+              <p>{carName ? `Tell us about your interest in the ${carName}. Our team will contact you with details and availability.` : 'Tell us what you are looking for and we will help you find the best available option in stock or through import from Germany.'}</p>
             </div>
             <form className="modal-form" onSubmit={handleSubmit} noValidate>
               <div className="modal-field">
@@ -89,8 +89,8 @@ export default function Modal({ onClose, carName }) {
             <div className="modal-alts">
               <span className="modal-alts-label">Or reach us via</span>
               <div className="modal-alts-btns">
-                <a href="https://wa.me/11234567890" target="_blank" rel="noopener noreferrer" className="modal-alt modal-wa">WhatsApp</a>
-                <a href="https://t.me/olimpcars" target="_blank" rel="noopener noreferrer" className="modal-alt modal-tg">Telegram</a>
+                <a href="https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D" target="_blank" rel="noopener noreferrer" className="modal-alt modal-ig">Instagram</a>
+                <a href="https://www.facebook.com/share/1D3kQ3XXpu/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="modal-alt modal-fb">Facebook</a>
               </div>
             </div>
           </>

@@ -190,8 +190,8 @@
   transition: opacity .2s;
 }
 .fw-alt:hover { opacity: 0.85; }
-.fw-wa { background: #25d366; color: #fff; }
-.fw-tg { background: #229ed9; color: #fff; }
+.fw-ig { background: #c13584; color: #fff; }
+.fw-fb { background: #1877f2; color: #fff; }
 
 /* ── Sent ── */
 .fw-sent {

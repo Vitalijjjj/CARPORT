@@ -10,7 +10,7 @@ export default function FloatingWidget() {
   const [errors, setErrors]   = useState({})
 
   useEffect(() => {
-    if (localStorage.getItem('olimp_widget_sent')) return
+    if (localStorage.getItem('carrai_widget_sent')) return
 
     let triggered = false
     function show() {
@@ -22,8 +22,7 @@ export default function FloatingWidget() {
     const timer = setTimeout(show, 30000)
 
     function onScroll() {
-      const pct = window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1)
-      if (pct > 0.4) show()
+      if (window.scrollY > window.innerHeight) show()
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -40,7 +39,7 @@ export default function FloatingWidget() {
     if (phone.replace(/\D/g, '').length < 5) errs.phone = 'Enter phone'
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSent(true)
-    localStorage.setItem('olimp_widget_sent', '1')
+    localStorage.setItem('carrai_widget_sent', '1')
   }
 
   if (!visible) return null
@@ -73,7 +72,7 @@ export default function FloatingWidget() {
                   <div className="fw-status"><span className="fw-dot" />Online now</div>
                 </div>
               </div>
-              <p className="fw-intro">Hi! I'll help you find the right car in 2 minutes.</p>
+              <p className="fw-intro">Hi! I can help you find the right BMW or Mercedes-Benz in stock or through import from Germany.</p>
               <form onSubmit={handleSubmit} noValidate>
                 <div className="fw-field">
                   <input
@@ -87,7 +86,7 @@ export default function FloatingWidget() {
                 <div className="fw-field">
                   <input
                     type="tel"
-                    placeholder="+1 (000) 000-0000"
+                    placeholder="+351 000 000 000"
                     value={phone}
                     onChange={e => { setPhone(e.target.value); setErrors(p => ({ ...p, phone: '' })) }}
                   />
@@ -96,8 +95,8 @@ export default function FloatingWidget() {
                 <button type="submit" className="fw-submit">Get a consultation</button>
               </form>
               <div className="fw-alts">
-                <a href="https://wa.me/11234567890" className="fw-alt fw-wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-                <a href="https://t.me/olimpcars" className="fw-alt fw-tg" target="_blank" rel="noopener noreferrer">Telegram</a>
+                <a href="https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D" className="fw-alt fw-ig" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://www.facebook.com/share/1D3kQ3XXpu/?mibextid=wwXIfr" className="fw-alt fw-fb" target="_blank" rel="noopener noreferrer">Facebook</a>
               </div>
             </>
           )}
@@ -106,7 +105,7 @@ export default function FloatingWidget() {
         <button className="fw-trigger" onClick={() => setOpen(true)}>
           <div className="fw-trigger-avatar" />
           <div className="fw-trigger-text">
-            <span>Need help?</span>
+            <span>Need help choosing?</span>
             <span className="fw-trigger-status"><span className="fw-dot" />Online now</span>
           </div>
         </button>
