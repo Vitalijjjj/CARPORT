@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { OLIMP_CARS } from './cars-data'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { fetchPublicCar, fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
 import './CarPage.css'
@@ -38,20 +38,57 @@ const TERMS = [
   },
 ]
 
-export default function CarPage() {
-  const { id } = useParams()
-  const car = OLIMP_CARS.find(c => c.id === id) || OLIMP_CARS[0]
+function imgUrl(src) {
+  if (!src) return ''
+  if (src.startsWith('/') || src.startsWith('http')) return src
+  return `/${src}`
+}
 
+export default function CarPage() {
+  const { id }     = useParams()
+  const navigate   = useNavigate()
+
+  const [car,       setCar]       = useState(null)
+  const [similar,   setSimilar]   = useState([])
+  const [loading,   setLoading]   = useState(true)
   const [activeTab, setActiveTab] = useState(0)
   const [modal,     setModal]     = useState(false)
 
-  const similar = useMemo(() => {
-    const others = OLIMP_CARS.filter(c => c.id !== car.id)
-    const shuffled = [...others].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 2)
-  }, [car.id])
+  useEffect(() => {
+    setLoading(true)
+    setCar(null)
+    setSimilar([])
 
-  const term = TERMS[activeTab]
+    fetchPublicCar(id)
+      .then(data => {
+        setCar(data)
+        // Fetch all cars for the "similar" section
+        return fetchPublicCars().then(all => {
+          const others = all.filter(c => c.id !== data.id)
+          const shuffled = [...others].sort(() => Math.random() - 0.5)
+          setSimilar(shuffled.slice(0, 2))
+        })
+      })
+      .catch(() => navigate('/cars', { replace: true }))
+      .finally(() => setLoading(false))
+  }, [id, navigate])
+
+  if (loading || !car) {
+    return (
+      <div className="page">
+        <Navbar onCta={() => {}} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 12, color: '#888' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ animation: 'cat-spin 0.8s linear infinite' }}>
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          Loading…
+        </div>
+      </div>
+    )
+  }
+
+  const mainImg = imgUrl(car.img)
+  const term    = TERMS[activeTab]
 
   return (
     <div className="page">
@@ -62,7 +99,7 @@ export default function CarPage() {
       {/* BREADCRUMB */}
       <div className="wrap">
         <div className="crumb">
-          <Link to="/">Home</Link> / <Link to="/#models">Models</Link> / <span>{car.name}</span>
+          <Link to="/">Home</Link> / <Link to="/cars">Catalog</Link> / <span>{car.name}</span>
         </div>
       </div>
 
@@ -72,7 +109,7 @@ export default function CarPage() {
           <div className="top-grid">
             <div
               className="big-image"
-              style={{ backgroundImage: `url('/${car.img}')` }}
+              style={{ backgroundImage: mainImg ? `url('${mainImg}')` : 'none' }}
             />
 
             <div className="info">
@@ -86,20 +123,19 @@ export default function CarPage() {
               <p className="desc">{car.description}</p>
 
               <div className="price-row">
-                <span className="big">${car.price}</span>
-                <span className="per">/Per {car.priceUnit}</span>
+                <span className="big">€ {car.price?.toLocaleString('de-DE')}</span>
               </div>
 
               <div className="cta-row">
                 <button className="btn btn-primary" onClick={() => setModal(true)}>
-                  Book now
+                  Request info
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="m9 5 7 7-7 7"/>
                   </svg>
                 </button>
                 <div className="book-by">
                   <span className="k">Or by call</span>
-                  <a href="tel:+11234567890" className="v phone-link">+1 (123) 456-7890</a>
+                  <a href="tel:+351000000000" className="v phone-link">+351 000 000 000</a>
                 </div>
               </div>
 
@@ -112,7 +148,7 @@ export default function CarPage() {
                       <path d="M7 28h22"/>
                     </svg>
                   </span>
-                  <div><span className="k">Seat</span><span className="v">{car.seats}</span></div>
+                  <div><span className="k">Seats</span><span className="v">{car.seats}</span></div>
                 </div>
                 <div className="qstat">
                   <span className="ic">
@@ -126,16 +162,6 @@ export default function CarPage() {
                 </div>
                 <div className="qstat">
                   <span className="ic">
-                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
-                      <rect x="11" y="12" width="18" height="20" rx="2"/>
-                      <path d="M16 12V8h8v4"/>
-                      <path d="M11 18h18M11 26h18"/>
-                    </svg>
-                  </span>
-                  <div><span className="k">Luggage</span><span className="v">{car.luggage}</span></div>
-                </div>
-                <div className="qstat">
-                  <span className="ic">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                       <circle cx="20" cy="20" r="13"/>
                       <path d="M20 12v8l6 3"/>
@@ -143,16 +169,19 @@ export default function CarPage() {
                   </span>
                   <div><span className="k">Year</span><span className="v">{car.year}</span></div>
                 </div>
+                <div className="qstat">
+                  <span className="ic">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M8 28 L20 12 L32 28"/>
+                      <path d="M14 22 h12"/>
+                    </svg>
+                  </span>
+                  <div><span className="k">Power</span><span className="v">{car.hp}</span></div>
+                </div>
               </div>
 
               <div className="features-head">
                 <h3>Vehicle features</h3>
-                <a href="#" className="see-more">
-                  See all
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="m9 5 7 7-7 7"/>
-                  </svg>
-                </a>
               </div>
               <div className="features">
                 {car.features.map((f, i) => (
@@ -168,20 +197,22 @@ export default function CarPage() {
       </section>
 
       {/* GALLERY */}
-      <section className="gallery">
-        <div className="wrap">
-          <h2>Vehicle gallery</h2>
-          <div className="gallery-grid">
-            {car.gallery.slice(0, 5).map((g, i) => (
-              <div
-                key={i}
-                className="gphoto"
-                style={{ backgroundImage: `url('/${g}')` }}
-              />
-            ))}
+      {car.gallery.length > 0 && (
+        <section className="gallery">
+          <div className="wrap">
+            <h2>Vehicle gallery</h2>
+            <div className="gallery-grid">
+              {car.gallery.slice(0, 5).map((g, i) => (
+                <div
+                  key={i}
+                  className="gphoto"
+                  style={{ backgroundImage: `url('${imgUrl(g)}')` }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* POST-GALLERY CTA */}
       <div className="wrap">
@@ -191,7 +222,7 @@ export default function CarPage() {
             <p className="pgc-sub">Reserve this car — our manager will confirm your dates within 15 minutes.</p>
           </div>
           <button className="btn btn-primary" onClick={() => setModal(true)}>
-            Book this car
+            Request info
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="m9 5 7 7-7 7"/>
             </svg>
@@ -240,7 +271,7 @@ export default function CarPage() {
         <div className="wrap">
           <div className="feedback-grid">
             <div>
-              <h2>Feedback from<br/>satisfied renter</h2>
+              <h2>Feedback from<br/>satisfied customers</h2>
               <div className="fb-arrows">
                 <button className="fb-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
@@ -257,8 +288,8 @@ export default function CarPage() {
             <div className="fb-cards">
               <div className="fb-card">
                 <div className="fb-stars">★★★★★</div>
-                <div className="fb-title">Perfect ride for my business trip!</div>
-                <p className="fb-text">I needed a reliable car for my client meetings, and this vehicle exceeded my expectations. The booking process was seamless, and the car was in excellent condition. Highly recommended for any traveller!</p>
+                <div className="fb-title">Perfect car for my business trip!</div>
+                <p className="fb-text">I needed a reliable car for my client meetings, and this vehicle exceeded my expectations. The booking process was seamless, and the car was in excellent condition. Highly recommended!</p>
                 <div className="fb-author">
                   <div className="fb-avatar" style={{ backgroundImage: "url('/assets/customer-2.jpg')" }} />
                   <div className="name">Mark Stevens</div>
@@ -266,8 +297,8 @@ export default function CarPage() {
               </div>
               <div className="fb-card">
                 <div className="fb-stars">★★★★★</div>
-                <div className="fb-title">Comfortable and affordable!</div>
-                <p className="fb-text">I rented a car for a weekend trip, and the service rocked. For an economy car, the drive was refined, and the fuel usage was frugal. Definitely the car to go to at this price point again.</p>
+                <div className="fb-title">Comfortable and great value!</div>
+                <p className="fb-text">I purchased a car through TurboEagle and the service was excellent. Transparent process, full history provided, and delivery to Porto was on time. Definitely coming back.</p>
                 <div className="fb-author">
                   <div className="fb-avatar" style={{ backgroundImage: "url('/assets/customer-1.jpg')" }} />
                   <div className="name">Emma Johnson</div>
@@ -279,71 +310,73 @@ export default function CarPage() {
       </section>
 
       {/* SIMILAR */}
-      <section className="similar">
-        <div className="wrap">
-          <h2>You may also like</h2>
-          <div className="similar-grid">
-            {similar.map(c => (
-              <Link key={c.id} className="mcard" to={`/car/${c.id}`}>
-                <div className="shot" style={{ backgroundImage: `url('/${c.img}')` }} />
-                <div>
-                  <div className="row-name">
+      {similar.length > 0 && (
+        <section className="similar">
+          <div className="wrap">
+            <h2>You may also like</h2>
+            <div className="similar-grid">
+              {similar.map(c => {
+                const cImg = imgUrl(c.img)
+                return (
+                  <Link key={c.id} className="mcard" to={`/car/${c.id}`}>
+                    <div className="shot" style={{ backgroundImage: cImg ? `url('${cImg}')` : 'none' }} />
                     <div>
-                      <h3>{c.name}</h3>
-                      <div className="sub">{c.tagline}</div>
+                      <div className="row-name">
+                        <div>
+                          <h3>{c.name}</h3>
+                          <div className="sub">{c.tagline}</div>
+                        </div>
+                        <div className="price">€ {c.price?.toLocaleString('de-DE')}</div>
+                      </div>
+                      <div className="stats">
+                        <div className="mstat">
+                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_SEAT }} />
+                          <div><span className="k">Seats</span><span className="v">{c.seats}</span></div>
+                        </div>
+                        <div className="mstat">
+                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
+                          <div><span className="k">Gearbox</span><span className="v">{c.gearbox}</span></div>
+                        </div>
+                        <div className="mstat">
+                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_LUGGAGE }} />
+                          <div><span className="k">Mileage</span><span className="v">{c.mileage}</span></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="price">${c.price}<span className="per">/Per {c.priceUnit}</span></div>
-                  </div>
-                  <div className="stats">
-                    <div className="mstat">
-                      <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_SEAT }} />
-                      <div><span className="k">Seat</span><span className="v">{c.seats}</span></div>
-                    </div>
-                    <div className="mstat">
-                      <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
-                      <div><span className="k">Gearbox</span><span className="v">{c.gearbox}</span></div>
-                    </div>
-                    <div className="mstat">
-                      <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_LUGGAGE }} />
-                      <div><span className="k">Luggage</span><span className="v">{c.luggage}</span></div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* FOOTER */}
       <footer className="car-footer">
         <div className="footer-inner">
           <div className="footer-top">
-            <h2>Drive Your Dreams with<br/>the Olimp Cars Elite Luxury!</h2>
+            <h2>Drive Your Dreams with<br/>TurboEagle!</h2>
             <div className="footer-info">
               <div className="footer-row">
                 <div className="footer-col">
                   <Link to="/">Home</Link>
                   <Link to="/#about">About</Link>
-                  <Link to="/#models">Models</Link>
-                  <Link to="/#blog">Blog</Link>
+                  <Link to="/cars">Catalog</Link>
                   <Link to="/#contact">Contact</Link>
                 </div>
                 <div className="footer-col">
-                  <a href="#">Style Guide</a>
-                  <a href="#">Licences</a>
-                  <a href="#">Changelog</a>
+                  <a href="#">Instagram</a>
+                  <a href="#">Facebook</a>
                 </div>
                 <div className="footer-col">
-                  <a href="#">Info@OlimpCars.Com</a>
-                  <a href="#">+1 (123) 456-7890</a>
-                  <a href="#">Miami, Florida</a>
-                  <a href="#">Tampa, Florida</a>
+                  <a href="mailto:info@turboeagle.pt">info@turboeagle.pt</a>
+                  <a href="tel:+351000000000">+351 000 000 000</a>
+                  <a href="#">Portugal</a>
                 </div>
                 <div className="footer-cta">
-                  <span>Find top luxury cars fast!</span>
-                  <Link className="btn" style={{ background: '#fff', color: 'var(--ink)' }} to="/#models">
-                    Explore Models
+                  <span>Find your next BMW or Mercedes!</span>
+                  <Link className="btn" style={{ background: '#fff', color: 'var(--ink)' }} to="/cars">
+                    View Catalog
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="m9 5 7 7-7 7"/>
                     </svg>
@@ -363,11 +396,6 @@ export default function CarPage() {
                       <path d="M3 3l7 9-7 9h2.5L11 13.8 16.5 21H21l-7.3-9.4L20.5 3H18l-5.7 7L7 3H3z"/>
                     </svg>
                   </a>
-                  <a href="#">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M22 7.5a3 3 0 0 0-2.1-2.1C18 5 12 5 12 5s-6 0-7.9.4A3 3 0 0 0 2 7.5 31 31 0 0 0 1.6 12 31 31 0 0 0 2 16.5a3 3 0 0 0 2.1 2.1C6 19 12 19 12 19s6 0 7.9-.4a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .4-4.5 31 31 0 0 0-.4-4.5ZM10 15V9l5 3-5 3Z"/>
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -378,10 +406,10 @@ export default function CarPage() {
       {/* MOBILE STICKY CTA */}
       <div className="car-sticky-cta">
         <div className="car-sticky-price">
-          ${car.price}<span>/{car.priceUnit}</span>
+          € {car.price?.toLocaleString('de-DE')}
         </div>
         <button className="car-sticky-btn" onClick={() => setModal(true)}>
-          Book now
+          Request info
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m9 5 7 7-7 7"/>
           </svg>

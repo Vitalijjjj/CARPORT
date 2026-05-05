@@ -120,3 +120,24 @@ function getMethod(): string
 {
     return strtoupper($_SERVER['REQUEST_METHOD']);
 }
+
+// ── Decode JSON columns + cast types before sending to client ──────
+function decodeCar(array $car): array
+{
+    $car['features'] = json_decode($car['features'] ?? '[]', true) ?? [];
+    $car['gallery']  = json_decode($car['gallery']  ?? '[]', true) ?? [];
+    $car['id']                = (int)   $car['id'];
+    $car['year']              = (int)   $car['year'];
+    $car['price']             = (float) $car['price'];
+    $car['mileage']           = (int)   $car['mileage'];
+    $car['power']             = $car['power']            !== null ? (int)   $car['power']            : null;
+    $car['battery_health']    = $car['battery_health']   !== null ? (int)   $car['battery_health']   : null;
+    $car['electric_range']    = $car['electric_range']   !== null ? (int)   $car['electric_range']   : null;
+    $car['battery_capacity']  = $car['battery_capacity'] !== null ? (float) $car['battery_capacity'] : null;
+    $car['warranty_available']          = (bool) $car['warranty_available'];
+    $car['financing_available']         = (bool) $car['financing_available'];
+    $car['trade_in_available']          = (bool) $car['trade_in_available'];
+    $car['service_history_available']   = (bool) $car['service_history_available'];
+    $car['delivery_available_portugal'] = (bool) $car['delivery_available_portugal'];
+    return $car;
+}

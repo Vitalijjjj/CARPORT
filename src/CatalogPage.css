@@ -621,6 +621,26 @@
 .cc-btn-view:hover { border-color: var(--ink); background: var(--soft); }
 
 /* ── Empty state ────────────────────────────────────────────────── */
+.cat-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: var(--muted);
+  font-size: 15px;
+}
+@keyframes cat-spin { to { transform: rotate(360deg); } }
+
+.cc-img--placeholder {
+  background: #e5e5e3;
+}
+
+.cc-status--reserved {
+  background: #a855f7;
+  color: #fff;
+}
+
 .cat-empty {
   display: flex;
   flex-direction: column;

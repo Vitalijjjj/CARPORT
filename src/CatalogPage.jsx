@@ -1,26 +1,9 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { OLIMP_CARS } from './cars-data'
+import { fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
 import './CatalogPage.css'
-
-const PRICE_MIN  = Math.min(...OLIMP_CARS.map(c => c.price))
-const PRICE_MAX  = Math.max(...OLIMP_CARS.map(c => c.price))
-const YEAR_MIN   = Math.min(...OLIMP_CARS.map(c => c.year))
-const YEAR_MAX   = Math.max(...OLIMP_CARS.map(c => c.year))
-const MIL_MAX    = Math.max(...OLIMP_CARS.map(c => c.mileageNum))
-
-const INIT = {
-  brand:      'all',
-  fuelType:   'all',
-  priceMax:   PRICE_MAX,
-  yearMin:    YEAR_MIN,
-  mileageMax: MIL_MAX,
-  status:     'all',
-  financing:  false,
-  warranty:   false,
-}
 
 function fmt(n) { return n.toLocaleString('de-DE') }
 
@@ -123,16 +106,24 @@ function BrandSelect({ value, onChange }) {
 }
 
 /* ─── CatalogCard ───────────────────────────────────────────────── */
+const STATUS_LABELS = { in_stock: 'In Stock', reserved: 'Reserved', incoming: 'Incoming' }
+
 function CatalogCard({ car, onRequest }) {
-  const brandLabel = car.brand === 'bmw' ? 'BMW' : 'Mercedes-Benz'
+  const brandLabel = BRAND_META[car.brand]?.label ?? car.brand
   const fuelLabel  = car.fuelType === 'electric' ? 'Electric' : 'Hybrid'
+  const imgSrc     = car.img
+    ? (car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
+    : ''
 
   return (
     <article className="cc">
       <div className="cc-img-wrap">
-        <div className="cc-img" style={{ backgroundImage: `url('/${car.img}')` }} />
+        {imgSrc
+          ? <div className="cc-img" style={{ backgroundImage: `url('${imgSrc}')` }} />
+          : <div className="cc-img cc-img--placeholder" />
+        }
         <span className={`cc-status-badge cc-status--${car.status}`}>
-          {car.status === 'in_stock' ? 'In Stock' : 'Incoming'}
+          {STATUS_LABELS[car.status] ?? car.status}
         </span>
         <span className="cc-brand-badge">{brandLabel}</span>
       </div>
@@ -187,7 +178,7 @@ function CatalogCard({ car, onRequest }) {
 }
 
 /* ─── Sidebar ───────────────────────────────────────────────────── */
-function Sidebar({ filters, set, reset, activeCount, onClose }) {
+function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax, yearMin, yearMax, milMax }) {
   return (
     <aside className="cat-sidebar">
       <div className="cat-sb-head">
@@ -226,7 +217,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose }) {
         <input
           type="range"
           className="cat-range"
-          min={PRICE_MIN} max={PRICE_MAX} step={1000}
+          min={priceMin} max={priceMax} step={1000}
           value={filters.priceMax}
           onChange={e => set('priceMax', +e.target.value)}
         />
@@ -237,7 +228,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose }) {
         <input
           type="range"
           className="cat-range"
-          min={YEAR_MIN} max={YEAR_MAX} step={1}
+          min={yearMin} max={yearMax} step={1}
           value={filters.yearMin}
           onChange={e => set('yearMin', +e.target.value)}
         />
@@ -248,7 +239,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose }) {
         <input
           type="range"
           className="cat-range"
-          min={10000} max={MIL_MAX} step={5000}
+          min={0} max={milMax} step={5000}
           value={filters.mileageMax}
           onChange={e => set('mileageMax', +e.target.value)}
         />
@@ -257,7 +248,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose }) {
       {/* Status */}
       <FilterGroup label="Availability" defaultOpen={false}>
         <Pills
-          options={[['all','All'],['in_stock','In Stock'],['incoming','Incoming']]}
+          options={[['all','All'],['in_stock','Available'],['reserved','Reserved']]}
           value={filters.status}
           onChange={v => set('status', v)}
         />
@@ -320,30 +311,67 @@ function Toggle({ label, checked, onChange }) {
 
 /* ─── CatalogPage ───────────────────────────────────────────────── */
 export default function CatalogPage() {
-  const [filters,     setFilters]     = useState(INIT)
-  const [sort,        setSort]        = useState('newest')
-  const [modal,       setModal]       = useState(false)
-  const [drawerOpen,  setDrawerOpen]  = useState(false)
+  const [cars,       setCars]       = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [filters,    setFilters]    = useState({
+    brand: 'all', fuelType: 'all',
+    priceMax: 200000, yearMin: 2018, mileageMax: 200000,
+    status: 'all', financing: false, warranty: false,
+  })
+  const [sort,       setSort]       = useState('newest')
+  const [modal,      setModal]      = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const initDone = useRef(false)
+
+  // Derived ranges from actual loaded data
+  const PRICE_MIN = cars.length ? Math.min(...cars.map(c => c.price))      : 0
+  const PRICE_MAX = cars.length ? Math.max(...cars.map(c => c.price))      : 200000
+  const YEAR_MIN  = cars.length ? Math.min(...cars.map(c => c.year))       : 2018
+  const YEAR_MAX  = cars.length ? Math.max(...cars.map(c => c.year))       : 2025
+  const MIL_MAX   = cars.length ? Math.max(...cars.map(c => c.mileageNum)) : 200000
+
+  useEffect(() => {
+    fetchPublicCars()
+      .then(data => {
+        setCars(data)
+        if (!initDone.current && data.length) {
+          initDone.current = true
+          setFilters(f => ({
+            ...f,
+            priceMax:   Math.max(...data.map(c => c.price)),
+            yearMin:    Math.min(...data.map(c => c.year)),
+            mileageMax: Math.max(...data.map(c => c.mileageNum)),
+          }))
+        }
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   function set(key, val) { setFilters(f => ({ ...f, [key]: val })) }
-  function reset() { setFilters(INIT) }
+  function reset() {
+    setFilters({
+      brand: 'all', fuelType: 'all',
+      priceMax: PRICE_MAX, yearMin: YEAR_MIN, mileageMax: MIL_MAX,
+      status: 'all', financing: false, warranty: false,
+    })
+  }
 
   const activeCount = [
-    filters.brand !== 'all',
-    filters.fuelType !== 'all',
-    filters.priceMax < PRICE_MAX,
-    filters.yearMin  > YEAR_MIN,
+    filters.brand     !== 'all',
+    filters.fuelType  !== 'all',
+    filters.priceMax  < PRICE_MAX,
+    filters.yearMin   > YEAR_MIN,
     filters.mileageMax < MIL_MAX,
-    filters.status !== 'all',
+    filters.status    !== 'all',
     filters.financing,
     filters.warranty,
   ].filter(Boolean).length
 
   const results = useMemo(() => {
-    const filtered = OLIMP_CARS.filter(c => {
-      if (filters.brand     !== 'all' && c.brand     !== filters.brand)     return false
-      if (filters.fuelType  !== 'all' && c.fuelType  !== filters.fuelType)  return false
-      if (filters.status    !== 'all' && c.status    !== filters.status)     return false
+    const filtered = cars.filter(c => {
+      if (filters.brand     !== 'all' && c.brand    !== filters.brand)    return false
+      if (filters.fuelType  !== 'all' && c.fuelType !== filters.fuelType) return false
+      if (filters.status    !== 'all' && c.status   !== filters.status)   return false
       if (c.price      > filters.priceMax)   return false
       if (c.year       < filters.yearMin)    return false
       if (c.mileageNum > filters.mileageMax) return false
@@ -357,7 +385,14 @@ export default function CatalogPage() {
       case 'mileage_asc': return [...filtered].sort((a, b) => a.mileageNum - b.mileageNum)
       default:            return [...filtered].sort((a, b) => b.year       - a.year)
     }
-  }, [filters, sort])
+  }, [cars, filters, sort])
+
+  const sidebarProps = {
+    filters, set, reset, activeCount,
+    priceMin: PRICE_MIN, priceMax: PRICE_MAX,
+    yearMin: YEAR_MIN, yearMax: YEAR_MAX,
+    milMax: MIL_MAX,
+  }
 
   return (
     <div className="cat-page">
@@ -378,7 +413,7 @@ export default function CatalogPage() {
             Selected BMW and Mercedes-Benz electric &amp; hybrid vehicles — in stock or available for import from Germany.
           </p>
           <div className="cat-hero-stats">
-            <div className="cat-hs"><span className="cat-hs-n">{OLIMP_CARS.length}</span><span className="cat-hs-l">Cars listed</span></div>
+            <div className="cat-hs"><span className="cat-hs-n">{cars.length || '—'}</span><span className="cat-hs-l">Cars listed</span></div>
             <div className="cat-hs-div" />
             <div className="cat-hs"><span className="cat-hs-n">2</span><span className="cat-hs-l">Brands</span></div>
             <div className="cat-hs-div" />
@@ -391,25 +426,13 @@ export default function CatalogPage() {
       <div className="cat-layout cat-wrap">
 
         {/* Desktop sidebar */}
-        <Sidebar
-          filters={filters}
-          set={set}
-          reset={reset}
-          activeCount={activeCount}
-          onClose={() => setDrawerOpen(false)}
-        />
+        <Sidebar {...sidebarProps} onClose={() => setDrawerOpen(false)} />
 
         {/* Mobile drawer */}
         {drawerOpen && (
           <div className="cat-drawer-backdrop" onClick={() => setDrawerOpen(false)}>
             <div className="cat-drawer" onClick={e => e.stopPropagation()}>
-              <Sidebar
-                filters={filters}
-                set={set}
-                reset={reset}
-                activeCount={activeCount}
-                onClose={() => setDrawerOpen(false)}
-              />
+              <Sidebar {...sidebarProps} onClose={() => setDrawerOpen(false)} />
             </div>
           </div>
         )}
@@ -427,7 +450,7 @@ export default function CatalogPage() {
               {activeCount > 0 && <span className="cat-filter-badge">{activeCount}</span>}
             </button>
             <span className="cat-count">
-              {results.length} {results.length === 1 ? 'car' : 'cars'}
+              {loading ? '…' : `${results.length} ${results.length === 1 ? 'car' : 'cars'}`}
             </span>
             <div className="cat-sort-wrap">
               <select className="cat-sort" value={sort} onChange={e => setSort(e.target.value)}>
@@ -443,7 +466,7 @@ export default function CatalogPage() {
           {activeCount > 0 && (
             <div className="cat-active-chips">
               {filters.brand !== 'all' && (
-                <Chip label={filters.brand === 'bmw' ? 'BMW' : 'Mercedes-Benz'} onRemove={() => set('brand', 'all')} />
+                <Chip label={BRAND_META[filters.brand]?.label ?? filters.brand} onRemove={() => set('brand', 'all')} />
               )}
               {filters.fuelType !== 'all' && (
                 <Chip label={filters.fuelType === 'electric' ? 'Electric' : 'Hybrid'} onRemove={() => set('fuelType', 'all')} />
@@ -458,7 +481,7 @@ export default function CatalogPage() {
                 <Chip label={`Max ${fmt(filters.mileageMax)} km`} onRemove={() => set('mileageMax', MIL_MAX)} />
               )}
               {filters.status !== 'all' && (
-                <Chip label={filters.status === 'in_stock' ? 'In Stock' : 'Incoming'} onRemove={() => set('status', 'all')} />
+                <Chip label={STATUS_LABELS[filters.status] ?? filters.status} onRemove={() => set('status', 'all')} />
               )}
               {filters.financing && <Chip label="Financing" onRemove={() => set('financing', false)} />}
               {filters.warranty  && <Chip label="Warranty"  onRemove={() => set('warranty',  false)} />}
@@ -466,7 +489,14 @@ export default function CatalogPage() {
           )}
 
           {/* Grid */}
-          {results.length === 0 ? (
+          {loading ? (
+            <div className="cat-loading">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ animation: 'cat-spin 0.8s linear infinite' }}>
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>Loading cars…</span>
+            </div>
+          ) : results.length === 0 ? (
             <div className="cat-empty">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
