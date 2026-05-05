@@ -17,7 +17,7 @@ app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','OPTIO
 app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
-// ── Database ──────────────────────────────────────────────────────
+// ── Database pool ─────────────────────────────────────────────────
 const db = mysql.createPool({
   host:               process.env.DATABASE_HOST || '127.0.0.1',
   database:           process.env.DATABASE_NAME,
@@ -27,13 +27,95 @@ const db = mysql.createPool({
   connectionLimit:    10,
 })
 
-// ── Auth helpers ──────────────────────────────────────────────────
-const SECRET  = process.env.JWT_SECRET || 'change-before-deploy-50-chars-minimum-please'
-const TTL     = 86400 * 30
+// ── Auto-init: create tables + first admin on first boot ──────────
+async function initDb() {
+  console.log('Initializing database…')
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS admins (
+      id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      email         VARCHAR(255) NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      name          VARCHAR(100) NOT NULL DEFAULT 'Admin',
+      created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY admins_email_unique (email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS cars (
+      id                          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      brand                       VARCHAR(100) NOT NULL,
+      model                       VARCHAR(100) NOT NULL,
+      version                     VARCHAR(150) DEFAULT NULL,
+      year                        SMALLINT UNSIGNED NOT NULL,
+      price                       DECIMAL(10,2) NOT NULL,
+      mileage                     INT UNSIGNED NOT NULL DEFAULT 0,
+      fuel_type                   ENUM('electric','hybrid','petrol','diesel') NOT NULL DEFAULT 'electric',
+      transmission                ENUM('automatic','manual') NOT NULL DEFAULT 'automatic',
+      power                       SMALLINT UNSIGNED DEFAULT NULL,
+      battery_capacity            DECIMAL(5,1) DEFAULT NULL,
+      battery_health              TINYINT UNSIGNED DEFAULT NULL,
+      electric_range              SMALLINT UNSIGNED DEFAULT NULL,
+      drive_type                  VARCHAR(10) DEFAULT NULL,
+      exterior_color              VARCHAR(100) DEFAULT NULL,
+      interior_color              VARCHAR(100) DEFAULT NULL,
+      location                    VARCHAR(200) DEFAULT NULL,
+      status                      ENUM('available','reserved','sold','hidden') NOT NULL DEFAULT 'available',
+      warranty_available          TINYINT(1) NOT NULL DEFAULT 0,
+      warranty_term               VARCHAR(100) DEFAULT NULL,
+      financing_available         TINYINT(1) NOT NULL DEFAULT 0,
+      trade_in_available          TINYINT(1) NOT NULL DEFAULT 0,
+      service_history_available   TINYINT(1) NOT NULL DEFAULT 0,
+      delivery_available_portugal TINYINT(1) NOT NULL DEFAULT 0,
+      short_description           TEXT DEFAULT NULL,
+      full_description            MEDIUMTEXT DEFAULT NULL,
+      equipment                   TEXT DEFAULT NULL,
+      features                    JSON DEFAULT NULL,
+      gallery                     JSON DEFAULT NULL,
+      main_image                  VARCHAR(500) DEFAULT NULL,
+      meta_title                  VARCHAR(200) DEFAULT NULL,
+      meta_description            TEXT DEFAULT NULL,
+      created_at                  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at                  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY cars_status_idx (status),
+      KEY cars_brand_idx  (brand),
+      KEY cars_price_idx  (price)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS leads (
+      id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      name         VARCHAR(200) DEFAULT NULL,
+      phone        VARCHAR(50)  DEFAULT NULL,
+      email        VARCHAR(255) DEFAULT NULL,
+      message      TEXT         DEFAULT NULL,
+      source       VARCHAR(50)  NOT NULL DEFAULT 'form',
+      car_id       INT UNSIGNED DEFAULT NULL,
+      quiz_answers JSON         DEFAULT NULL,
+      created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
 
-function makeToken(payload) {
-  return jwt.sign(payload, SECRET, { expiresIn: TTL })
+  // Create first admin if none exist
+  const [existing] = await db.query('SELECT id FROM admins LIMIT 1')
+  if (existing.length === 0) {
+    const email = process.env.ADMIN_EMAIL || 'admin@carrai.com'
+    const pass  = process.env.ADMIN_PASS  || 'Admin123!'
+    const hash  = await bcrypt.hash(pass, 12)
+    await db.query('INSERT INTO admins (email, password_hash, name) VALUES (?, ?, ?)', [email, hash, 'Admin'])
+    console.log(`✓ Admin created: ${email}`)
+  }
+  console.log('✓ Database ready')
 }
+
+// ── Auth helpers ──────────────────────────────────────────────────
+const SECRET = process.env.JWT_SECRET || 'change-before-deploy-50-chars-minimum-please'
+const TTL    = 86400 * 30
+
+function makeToken(payload) { return jwt.sign(payload, SECRET, { expiresIn: TTL }) }
 
 function readToken(req) {
   const auth = req.headers.authorization || ''
@@ -112,7 +194,7 @@ app.post('/api/auth.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// DELETE /api/auth.php — logout (stateless: just acknowledge)
+// DELETE /api/auth.php — logout
 app.delete('/api/auth.php', (_req, res) => res.json({ ok: true }))
 
 // ── GET /api/public_cars.php — public catalog ─────────────────────
@@ -129,10 +211,10 @@ app.get('/api/public_cars.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// ── GET /api/cars.php — admin car list ───────────────────────────
+// ── /api/cars.php — admin CRUD ────────────────────────────────────
 app.get('/api/cars.php', async (req, res) => {
   try {
-    const auth  = readToken(req)
+    const auth = readToken(req)
     const { id } = req.query
     if (id) {
       const [rows] = await db.query('SELECT * FROM cars WHERE id = ?', [id])
@@ -147,7 +229,6 @@ app.get('/api/cars.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// POST /api/cars.php — create car
 app.post('/api/cars.php', async (req, res) => {
   try {
     if (!requireAuth(req, res)) return
@@ -156,7 +237,6 @@ app.post('/api/cars.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// PUT /api/cars.php?id= — update car
 app.put('/api/cars.php', async (req, res) => {
   try {
     if (!requireAuth(req, res)) return
@@ -167,7 +247,6 @@ app.put('/api/cars.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// PATCH /api/cars.php?id= — update status only
 app.patch('/api/cars.php', async (req, res) => {
   try {
     if (!requireAuth(req, res)) return
@@ -180,7 +259,6 @@ app.patch('/api/cars.php', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// DELETE /api/cars.php?id= — delete car
 app.delete('/api/cars.php', async (req, res) => {
   try {
     if (!requireAuth(req, res)) return
@@ -213,7 +291,7 @@ app.post('/api/upload.php', upload.single('image'), async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
-// ── POST /api/leads.php — contact form ───────────────────────────
+// ── POST /api/leads.php ───────────────────────────────────────────
 app.post('/api/leads.php', async (req, res) => {
   const { name, phone, email, message, source, car_id } = req.body
   if (!name && !phone && !email) return res.status(400).json({ error: 'At least name, phone, or email is required' })
@@ -222,11 +300,11 @@ app.post('/api/leads.php', async (req, res) => {
       'INSERT INTO leads (name, phone, email, message, source, car_id) VALUES (?, ?, ?, ?, ?, ?)',
       [name || null, phone || null, email || null, message || null, source || 'form', car_id || null]
     )
-  } catch { /* leads table may not exist yet — still return success */ }
+  } catch { /* ignore if table missing */ }
   res.json({ success: true, message: 'Thank you! We will contact you soon.' })
 })
 
-// ── POST /api/quiz.php — quiz widget ─────────────────────────────
+// ── POST /api/quiz.php ────────────────────────────────────────────
 app.post('/api/quiz.php', async (req, res) => {
   const { name, phone, email, message, answers } = req.body
   if (!name && !phone && !email) return res.status(400).json({ error: 'At least name, phone, or email is required' })
@@ -241,7 +319,7 @@ app.post('/api/quiz.php', async (req, res) => {
         'INSERT INTO leads (name, phone, email, message, source) VALUES (?, ?, ?, ?, ?)',
         [name || null, phone || null, email || null, message || null, 'quiz']
       )
-    } catch { /* leads table may not exist yet */ }
+    } catch { /* ignore */ }
   }
   res.json({ success: true, message: 'Quiz submitted successfully. We will be in touch soon!' })
 })
@@ -252,13 +330,16 @@ app.get('/api/health.php', async (_req, res) => {
     await db.query('SELECT 1')
     res.json({ success: true, message: 'API is working', db: 'connected', time: new Date().toISOString() })
   } catch (err) {
-    res.json({ success: true, message: 'API is working', db: 'error: ' + err.message })
+    res.json({ success: false, message: 'API is working', db: 'error: ' + err.message })
   }
 })
 
-// ── Static files ──────────────────────────────────────────────────
+// ── Static files + SPA fallback ───────────────────────────────────
 app.use('/uploads', express.static(join(__dirname, 'uploads')))
 app.use(express.static(join(__dirname, 'dist')))
 app.get('*', (_req, res) => res.sendFile(join(__dirname, 'dist', 'index.html')))
 
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
+// ── Start ─────────────────────────────────────────────────────────
+initDb()
+  .then(() => app.listen(PORT, () => console.log(`✓ Server running on port ${PORT}`)))
+  .catch(err => { console.error('Fatal: DB init failed:', err.message); process.exit(1) })
