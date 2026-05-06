@@ -47,11 +47,14 @@ const dbConfig = socketPath
   : { host: process.env.DATABASE_HOST || 'auth-db1729.hstgr.io' }
 console.log('DB connect via:', socketPath || dbConfig.host)
 
+// Hostinger escapes '#' as '\#' in env vars — unescape for the real value
+const dbPassword = (process.env.DATABASE_PASSWORD || '').replace(/\\#/g, '#')
+
 const db = mysql.createPool({
   ...dbConfig,
   database:           process.env.DATABASE_NAME,
   user:               process.env.DATABASE_USER,
-  password:           process.env.DATABASE_PASSWORD,
+  password:           dbPassword,
   waitForConnections: true,
   connectionLimit:    10,
 })
