@@ -184,9 +184,25 @@ function decodeCar(row) {
   return { ...row, price: Number(row.price), features: parseJson(row.features, []), gallery: parseJson(row.gallery, []) }
 }
 
-function carFields(body) {
+function toJsonField(val) {
+  if (!val) return null
+  if (Array.isArray(val)) return JSON.stringify(val)
+  if (typeof val === 'string') {
+    try { JSON.parse(val); return val } catch { return JSON.stringify(val.split(',').map(s => s.trim()).filter(Boolean)) }
+  }
+  return JSON.stringify(val)
+}
+
+function makeSlug(body) {
+  const base = [body.brand, body.model, body.year]
+    .filter(Boolean).join('-')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return base + '-' + Math.random().toString(36).slice(2, 7)
+}
+
+function carFields(body, isInsert = false) {
   const bool = k => (body[k] ? 1 : 0)
-  return {
+  const fields = {
     brand:                       body.brand                    || null,
     model:                       body.model                    || null,
     version:                     body.version                  || null,
@@ -212,14 +228,16 @@ function carFields(body) {
     delivery_available_portugal: bool('delivery_available_portugal'),
     short_description:           body.short_description        || null,
     full_description:            body.full_description         || null,
-    equipment:                   body.equipment                || null,
-    features:                    body.features  ? JSON.stringify(body.features)  : null,
-    gallery:                     body.gallery   ? JSON.stringify(body.gallery)   : null,
+    equipment:                   toJsonField(body.equipment),
+    features:                    toJsonField(body.features),
+    gallery:                     toJsonField(body.gallery),
     main_image:                  body.main_image               || null,
     meta_title:                  body.meta_title               || null,
     meta_description:            body.meta_description         || null,
     updated_at:                  new Date(),
   }
+  if (isInsert) fields.slug = body.slug || makeSlug(body)
+  return fields
 }
 
 // ── POST /api/auth.php — login ────────────────────────────────────
@@ -275,7 +293,7 @@ app.get('/api/cars.php', async (req, res) => {
 app.post('/api/cars.php', async (req, res) => {
   try {
     if (!requireAuth(req, res)) return
-    const [result] = await db.query('INSERT INTO cars SET ?', [carFields(req.body)])
+    const [result] = await db.query('INSERT INTO cars SET ?', [carFields(req.body, true)])
     res.json({ success: true, id: result.insertId })
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
@@ -374,12 +392,6 @@ app.post('/api/quiz.php', async (req, res) => {
     } catch { /* ignore */ }
   }
   res.json({ success: true, message: 'Quiz submitted successfully. We will be in touch soon!' })
-})
-
-// ── GET /api/schema.php — temp diagnostic ────────────────────────
-app.get('/api/schema.php', async (_req, res) => {
-  const [[r]] = await db.query('SHOW CREATE TABLE cars')
-  res.json({ sql: r['Create Table'] })
 })
 
 // ── GET /api/health.php ───────────────────────────────────────────
