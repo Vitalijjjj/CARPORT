@@ -74,15 +74,6 @@ async function initDb() {
       UNIQUE KEY admin_users_email_unique (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
-  // Drop cars table if it was created by an older schema missing JSON columns
-  const [galleryCols] = await db.query(
-    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='cars' AND COLUMN_NAME='gallery'"
-  )
-  if (galleryCols.length === 0) {
-    await db.query('DROP TABLE IF EXISTS cars')
-    console.log('Dropped stale cars table (missing gallery column)')
-  }
-
   await db.query(`
     CREATE TABLE IF NOT EXISTS cars (
       id                          INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -125,6 +116,17 @@ async function initDb() {
       KEY cars_price_idx  (price)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+  // Schema migration: add columns that may be missing from older table versions
+  for (const sql of [
+    "ALTER TABLE cars ADD COLUMN features JSON DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN gallery JSON DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN main_image VARCHAR(500) DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN meta_title VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN meta_description TEXT DEFAULT NULL",
+  ]) {
+    try { await db.query(sql) } catch (e) { if (e.code !== 'ER_DUP_FIELDNAME') throw e }
+  }
+
   await db.query(`
     CREATE TABLE IF NOT EXISTS leads (
       id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
