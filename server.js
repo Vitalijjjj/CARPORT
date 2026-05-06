@@ -356,19 +356,37 @@ app.post('/api/quiz.php', async (req, res) => {
   res.json({ success: true, message: 'Quiz submitted successfully. We will be in touch soon!' })
 })
 
+// ── POST /api/setup.php — one-time admin reset (token-protected) ──
+app.post('/api/setup.php', async (req, res) => {
+  const { token, email, password } = req.body
+  if (token !== 'carrai-setup-2026') return res.status(403).json({ error: 'Forbidden' })
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' })
+  try {
+    const hash = await bcrypt.hash(password, 12)
+    const [existing] = await db.query('SELECT id FROM admin_users WHERE email = ?', [email])
+    if (existing.length > 0) {
+      await db.query('UPDATE admin_users SET password_hash = ? WHERE email = ?', [hash, email])
+    } else {
+      await db.query('INSERT INTO admin_users (email, password_hash, name) VALUES (?, ?, ?)', [email, hash, 'Admin'])
+    }
+    res.json({ success: true, message: `Admin ${email} set` })
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
 // ── GET /api/health.php ───────────────────────────────────────────
 app.get('/api/health.php', async (_req, res) => {
   const connInfo = socketPath ? ('socket:' + socketPath) : ('tcp:' + (dbConfig.host || '?'))
   const socketCheck = SOCKET_PATHS.reduce((acc, p) => {
     try { statSync(p); acc[p] = 'exists' } catch (e) { acc[p] = e.code }; return acc
   }, {})
-  const envKeys = Object.keys(process.env).filter(k => /mysql|db|database|socket/i.test(k))
+  const envKeys = Object.keys(process.env).filter(k => /mysql|db|database|socket|admin|jwt/i.test(k))
   const envSnap = Object.fromEntries(envKeys.map(k => [k, process.env[k]]))
   try {
     await db.query('SELECT 1')
-    res.json({ success: true, db: 'connected', conn: connInfo, sockets: socketCheck, env: envSnap })
+    const [[{ adminCount }]] = await db.query('SELECT COUNT(*) as adminCount FROM admin_users')
+    res.json({ success: true, db: 'connected', conn: connInfo, adminCount, env: envSnap })
   } catch (err) {
-    res.json({ success: false, db: 'error: ' + err.message, conn: connInfo, sockets: socketCheck, env: envSnap })
+    res.json({ success: false, db: 'error: ' + err.message, conn: connInfo, env: envSnap })
   }
 })
 
