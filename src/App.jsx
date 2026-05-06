@@ -40,9 +40,9 @@ const heroData = [
 ]
 
 const heroImages = [
-  'assets/hero-car.jpg',
-  'assets/velox-horizon.jpg',
-  'assets/luxora-zenith.jpg',
+  'assets/car-bmw-i4.jpg',
+  'assets/car-bmw-x5.jpg',
+  'assets/car-mercedes-eqe.jpg',
 ]
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -698,7 +698,7 @@ export default function App() {
           </div>
           <div className="vt-grid">
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/hero-car.jpg')" }}>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-bmw-i4.jpg')" }}>
                 <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                     <path d="M5 4l15 8-15 8V4z"/>
@@ -721,7 +721,7 @@ export default function App() {
             </div>
 
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/luxora-zenith.jpg')" }}>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-mercedes-glc.jpg')" }}>
                 <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                     <path d="M5 4l15 8-15 8V4z"/>
@@ -744,7 +744,7 @@ export default function App() {
             </div>
 
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/velox-horizon.jpg')" }}>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-bmw-x5.jpg')" }}>
                 <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                     <path d="M5 4l15 8-15 8V4z"/>

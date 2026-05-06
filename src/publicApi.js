@@ -7,7 +7,7 @@
 
 import { OLIMP_CARS } from './cars-data'
 
-const IS_MOCK  = import.meta.env.VITE_MOCK_ADMIN === 'true'
+const IS_MOCK  = import.meta.env.VITE_MOCK_PUBLIC === 'true'
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 function normalizeBrand(brand) {
