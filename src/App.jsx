@@ -282,55 +282,54 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  /* ── HERO ANIMATION (fires once on page load) ────────────────────── */
+  /* ── HERO ANIMATION ──────────────────────────────────────────────── */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // gsap.from() keeps elements visible by default — if animation fails,
-      // content stays visible rather than being permanently hidden
-      gsap.from(
-        ['.hero-eyebrow-line', '.hero-body-left h1', '.hero-body-desc',
-         '.hero-trust-chips', '.hero-specs .spec', '.hero-cta-row', '.hero-car-card'],
-        { opacity: 0, y: 20, duration: 0.50, stagger: 0.07, ease: 'power3.out', delay: 0.05 }
-      )
-      gsap.from('.hero-side-nav',  { opacity: 0, x: 16, duration: 0.55, ease: 'power3.out', delay: 0.15 })
-      gsap.from('.hero-arrow-btn', { opacity: 0, scale: 0.85, duration: 0.40, stagger: 0.08, ease: 'power3.out', delay: 0.30 })
+      gsap.from('.hero-eyebrow-line',  { opacity: 0, y: 16, duration: 0.55, ease: 'power3.out', delay: 0.10 })
+      gsap.from('.hero-body-left h1',  { opacity: 0, y: 28, duration: 0.75, ease: 'power3.out', delay: 0.20 })
+      gsap.from('.hero-body-desc',     { opacity: 0, y: 16, duration: 0.55, ease: 'power3.out', delay: 0.35 })
+      gsap.from('.hero-specs .spec',   { opacity: 0, y: 14, duration: 0.45, stagger: 0.08, ease: 'power3.out', delay: 0.40 })
+      gsap.from('.hero-cta-row',       { opacity: 0, y: 16, duration: 0.50, ease: 'power3.out', delay: 0.55 })
+      gsap.from('.hero-trust-chips',   { opacity: 0, y: 12, duration: 0.45, ease: 'power3.out', delay: 0.65 })
+      gsap.from('.hero-car-card',      { opacity: 0, y: 24, duration: 0.65, ease: 'power3.out', delay: 0.25 })
+      gsap.from('.hero-side-nav',      { opacity: 0, x: 20, duration: 0.60, ease: 'power3.out', delay: 0.30 })
+      gsap.from('.hero-arrow-btn',     { opacity: 0, scale: 0.88, duration: 0.40, stagger: 0.10, ease: 'back.out(1.4)', delay: 0.50 })
     })
     return () => ctx.revert()
   }, [])
 
-  /* ── SCROLL REVEALS ──────────────────────────────────────────────── */
+  /* ── SCROLL REVEALS (CSS transitions + IntersectionObserver) ─────── */
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const groups = [
+      ['.trust-item', '.models-title', '.models-filters', '.wyg-head',
+       '.vt-head', '.faq-head', '.final-cta-inner', '.quiz-left', '.quiz-box'],
+      ['.wyg-cell', '.vt-card', '.faq-item', '.loc-inner > *',
+       '.footer-row', '.footer-meta', '.footer-logo'],
+    ]
 
-      function reveal(targets, vars, trigger, start = 'top 98%') {
-        ScrollTrigger.create({
-          trigger, start, once: true,
-          onEnter: () => gsap.from(targets, { opacity: 0, y: 20, duration: 0.40, ease: 'power2.out', ...vars }),
-        })
-      }
-
-      reveal('.trust-item',            { stagger: 0.05 },             '.trust-bar')
-      reveal('.models-title',          {},                             '.models')
-      reveal('.models-filters',        { delay: 0.06 },               '.models')
-      reveal('.quiz-left',             { x: -24 },              '.quiz-section')
-      reveal('.quiz-box',              { x:  24, delay: 0.06 }, '.quiz-section')
-      reveal('.wyg-head',              {},                             '.what-you-get')
-      reveal('.wyg-cell',              { stagger: 0.05, delay: 0.08 },'.what-you-get')
-      reveal('.vt-head',               {},                             '.video-testi')
-      reveal('.vt-card',               { stagger: 0.07, delay: 0.06 },'.video-testi')
-      reveal('.loc-inner > *',         { stagger: 0.08 },             '.location')
-      reveal('.faq-head',              {},                             '.faq')
-      reveal('.faq-item',              { stagger: 0.04, delay: 0.06 },'.faq')
-      reveal('.final-cta-inner',       {},                             '.final-cta')
-      reveal('.footer-top h2.h2',      {},                             '.footer', 'top 99%')
-      reveal('.footer-row',            { delay: 0.08 },               '.footer', 'top 99%')
-      reveal('.footer-meta',           { delay: 0.14 },               '.footer', 'top 99%')
-      reveal('.footer-logo',           { delay: 0.06 },               '.footer', 'top 99%')
-
-      ScrollTrigger.refresh()
+    const all = []
+    groups[0].forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.dataset.anim = '1'
+        all.push(el)
+      })
+    })
+    groups[1].forEach(sel => {
+      document.querySelectorAll(sel).forEach((el, i) => {
+        el.dataset.anim = '1'
+        if (i > 0) el.dataset.animDelay = Math.min(i, 5)
+        all.push(el)
+      })
     })
 
-    return () => ctx.revert()
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('anim-in'); io.unobserve(e.target) }
+      })
+    }, { threshold: 0.05 })
+
+    all.forEach(el => io.observe(el))
+    return () => io.disconnect()
   }, [])
 
   /* ── CAR CARDS (re-animates on filter change) ─────────────────────── */

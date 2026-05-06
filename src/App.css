@@ -840,3 +840,17 @@ section[id]{scroll-margin-top:80px}
   /* ── Hero detail strip ────────────────────────────────────────── */
   .hero-cta-row { flex-direction: column; }
 }
+
+/* ── Scroll reveal animations ───────────────────────────────────────── */
+[data-anim] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.50s cubic-bezier(0.22,1,0.36,1),
+              transform 0.50s cubic-bezier(0.22,1,0.36,1);
+}
+[data-anim].anim-in              { opacity: 1; transform: none; }
+[data-anim-delay="1"].anim-in    { transition-delay: 0.07s; }
+[data-anim-delay="2"].anim-in    { transition-delay: 0.14s; }
+[data-anim-delay="3"].anim-in    { transition-delay: 0.21s; }
+[data-anim-delay="4"].anim-in    { transition-delay: 0.28s; }
+[data-anim-delay="5"].anim-in    { transition-delay: 0.35s; }
