@@ -185,7 +185,7 @@ function parseJson(val, fallback) {
 }
 
 function decodeCar(row) {
-  return { ...row, price: Number(row.price), features: parseJson(row.features, []), gallery: parseJson(row.gallery, []) }
+  return { ...row, price: Number(row.price), equipment: parseJson(row.equipment, []), features: parseJson(row.features, []), gallery: parseJson(row.gallery, []) }
 }
 
 function toJsonField(val) {

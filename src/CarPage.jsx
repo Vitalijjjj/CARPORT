@@ -5,38 +5,12 @@ import Modal from './Modal'
 import Navbar from './Navbar'
 import './CarPage.css'
 
-const ICON_SEAT    = `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8h12c2 0 3 1 3 3v9H9v-9c0-2 1-3 3-3Z"/><path d="M9 20v8h18v-8"/><path d="M7 28h22"/></svg>`
-const ICON_GEARBOX = `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/><circle cx="30" cy="12" r="2.5"/><circle cx="10" cy="28" r="2.5"/><circle cx="30" cy="28" r="2.5"/><path d="M10 14.5v11M20 14.5v6M30 14.5v11"/></svg>`
-const ICON_LUGGAGE = `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><rect x="11" y="12" width="18" height="20" rx="2"/><path d="M16 12V8h8v4"/><path d="M11 18h18M11 26h18"/></svg>`
-
-const TICK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>`
-
-const TERMS = [
-  {
-    title: 'Insurance and Coverage',
-    panels: [
-      ['Basic insurance', 'All vehicles include basic insurance covering third-party liability.'],
-      ['Additional coverage', 'Optional coverage includes Collision Damage Waiver (CDW) from $15 per day and Personal Accident Insurance (PAI), available at purchase of rental.'],
-      ['Excess Fees', 'In the event of an accident, the customer is responsible for the excess fee up to their selected coverage tier.'],
-    ],
-  },
-  {
-    title: 'Rental Requirements',
-    panels: [
-      ['Age', 'Renters must be at least 21 years old. A young-driver surcharge applies to drivers under 25.'],
-      ['Documents', 'Valid driver\'s licence (held for at least 1 year), government ID, and a credit card in the renter\'s name.'],
-      ['Security deposit', 'A refundable deposit is pre-authorised on your card at pickup; released within 7 days after return.'],
-    ],
-  },
-  {
-    title: 'Cancellation Policy',
-    panels: [
-      ['Free cancellation', 'Free cancellation up to 48 hours before your scheduled pickup.'],
-      ['Late cancellation', 'Cancellations within 48 hours are charged one full rental day.'],
-      ['No-show', 'No-show bookings are charged the full reservation total.'],
-    ],
-  },
-]
+const ICON_CALENDAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`
+const ICON_SPEED    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 12 8.5 8.5"/><circle cx="12" cy="12" r="9"/><path d="M16.5 7.5a7 7 0 0 1 1.5 4.5"/></svg>`
+const ICON_MILEAGE  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>`
+const ICON_BOLT     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H12l-1 9 8.5-11H12l1-9z"/></svg>`
+const ICON_GEARBOX  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="7" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="18" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><path d="M6 9v6M12 9v3M18 9v6"/></svg>`
+const ICON_ROAD     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21 9 3M19 21 15 3M9 9h6M8 15h8"/></svg>`
 
 function imgUrl(src) {
   if (!src) return ''
@@ -44,29 +18,89 @@ function imgUrl(src) {
   return `/${src}`
 }
 
-export default function CarPage() {
-  const { id }     = useParams()
-  const navigate   = useNavigate()
+function fuelLabel(ft) {
+  if (!ft) return ''
+  if (ft === 'electric') return 'Electric'
+  if (ft === 'plug-in hybrid' || ft === 'hybrid') return 'Plug-in Hybrid'
+  return ft.charAt(0).toUpperCase() + ft.slice(1)
+}
 
-  const [car,       setCar]       = useState(null)
-  const [similar,   setSimilar]   = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [activeTab, setActiveTab] = useState(0)
-  const [modal,     setModal]     = useState(false)
+function ImageSlider({ images }) {
+  const [idx, setIdx] = useState(0)
+  const [touchX, setTouchX] = useState(null)
+
+  const prev = () => setIdx(i => (i - 1 + images.length) % images.length)
+  const next = () => setIdx(i => (i + 1) % images.length)
+
+  if (!images.length) {
+    return (
+      <div className="slider-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="m21 15-5-5L5 21"/>
+        </svg>
+        <span>Photos coming soon</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="img-slider">
+      <div
+        className="slider-main"
+        onTouchStart={e => setTouchX(e.touches[0].clientX)}
+        onTouchEnd={e => {
+          if (touchX === null) return
+          const d = touchX - e.changedTouches[0].clientX
+          if (Math.abs(d) > 50) d > 0 ? next() : prev()
+          setTouchX(null)
+        }}
+      >
+        <img key={idx} src={images[idx]} alt="" className="slider-img" />
+        {images.length > 1 && (
+          <>
+            <button className="sl-btn sl-prev" onClick={prev} aria-label="Previous">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 5-7 7 7 7"/></svg>
+            </button>
+            <button className="sl-btn sl-next" onClick={next} aria-label="Next">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+            <div className="sl-counter">{idx + 1} / {images.length}</div>
+          </>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="slider-thumbs">
+          {images.slice(0, 8).map((img, i) => (
+            <button key={i} className={`sl-thumb${i === idx ? ' active' : ''}`} onClick={() => setIdx(i)}>
+              <img src={img} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function CarPage() {
+  const { id }   = useParams()
+  const navigate = useNavigate()
+
+  const [car,     setCar]     = useState(null)
+  const [similar, setSimilar] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [modal,   setModal]   = useState(false)
 
   useEffect(() => {
     setLoading(true)
     setCar(null)
     setSimilar([])
-
     fetchPublicCar(id)
       .then(data => {
         setCar(data)
-        // Fetch all cars for the "similar" section
         return fetchPublicCars().then(all => {
           const others = all.filter(c => c.id !== data.id)
-          const shuffled = [...others].sort(() => Math.random() - 0.5)
-          setSimilar(shuffled.slice(0, 2))
+          setSimilar([...others].sort(() => Math.random() - 0.5).slice(0, 2))
         })
       })
       .catch(() => navigate('/cars', { replace: true }))
@@ -77,8 +111,8 @@ export default function CarPage() {
     return (
       <div className="page">
         <Navbar onCta={() => {}} />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 12, color: '#888' }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ animation: 'cat-spin 0.8s linear infinite' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:12, color:'#888' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ animation:'cat-spin 0.8s linear infinite' }}>
             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
           </svg>
           Loading…
@@ -87,51 +121,87 @@ export default function CarPage() {
     )
   }
 
-  const mainImg = imgUrl(car.img)
-  const term    = TERMS[activeTab]
+  const allImages   = [car.img, ...car.gallery].filter(Boolean).map(imgUrl)
+  const equipment   = car.equipment?.length ? car.equipment : car.features
+  const isAvailable = car.status !== 'reserved' && car.status !== 'sold'
+  const isEv        = car.fuelType === 'electric' || car.fuelType?.includes('hybrid')
+
+  const specs = [
+    { icon: ICON_CALENDAR, label: 'Year',      value: car.year },
+    { icon: ICON_BOLT,     label: 'Fuel',      value: fuelLabel(car.fuelType) },
+    { icon: ICON_MILEAGE,  label: 'Mileage',   value: car.mileage },
+    { icon: ICON_SPEED,    label: 'Power',      value: car.hp },
+    car.range     ? { icon: ICON_BOLT,    label: 'EV Range',  value: car.range }     : null,
+    car.drivetrain? { icon: ICON_ROAD,    label: 'Drive',     value: car.drivetrain } : null,
+    { icon: ICON_GEARBOX,  label: 'Gearbox',   value: car.gearbox },
+  ].filter(s => s && s.value)
 
   return (
     <div className="page">
-
-      {/* NAV */}
       <Navbar onCta={() => setModal(true)} />
 
-      {/* BREADCRUMB */}
       <div className="wrap">
         <div className="crumb">
           <Link to="/">Home</Link> / <Link to="/cars">Catalog</Link> / <span>{car.name}</span>
         </div>
       </div>
 
-      {/* TOP */}
+      {/* ── TOP ── */}
       <section className="top">
         <div className="wrap">
           <div className="top-grid">
-            <div
-              className="big-image"
-              style={{ backgroundImage: mainImg ? `url('${mainImg}')` : 'none' }}
-            />
 
+            {/* Slider */}
+            <ImageSlider images={allImages} />
+
+            {/* Info */}
             <div className="info">
-              <div className="year">{car.drivetrain} · {car.year}</div>
-              <h1>{car.name}</h1>
-              <div className="tagline">{car.tagline}</div>
-              <div className="urgency-badge">
-                <span className="urgency-dot" />
-                2 people are viewing this car right now
-              </div>
-              <p className="desc">{car.description}</p>
 
+              {/* Status + fuel badges */}
+              <div className="badge-row">
+                <span className={`status-badge ${isAvailable ? 'status-ok' : 'status-rsv'}`}>
+                  <span className="sdot" />
+                  {isAvailable ? 'Available' : 'Reserved'}
+                </span>
+                {isEv && (
+                  <span className="fuel-badge">⚡ {fuelLabel(car.fuelType)}</span>
+                )}
+              </div>
+
+              <h1>{car.name}</h1>
+              {car.tagline && <div className="tagline">{car.tagline}</div>}
+
+              {/* Specs */}
+              <div className="specs-grid">
+                {specs.map(s => (
+                  <div key={s.label} className="spec-item">
+                    <span className="spec-ic" dangerouslySetInnerHTML={{ __html: s.icon }} />
+                    <div>
+                      <span className="spec-label">{s.label}</span>
+                      <span className="spec-value">{s.value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Price */}
               <div className="price-row">
                 <span className="big">€ {car.price?.toLocaleString('de-DE')}</span>
               </div>
 
+              {/* Benefit badges */}
+              {(car.financing || car.warranty) && (
+                <div className="benefit-row">
+                  {car.financing && <span className="benefit">✓ Financing available</span>}
+                  {car.warranty  && <span className="benefit">✓ Warranty included</span>}
+                </div>
+              )}
+
+              {/* CTA */}
               <div className="cta-row">
                 <button className="btn btn-primary" onClick={() => setModal(true)}>
                   Request info
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="m9 5 7 7-7 7"/>
-                  </svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
                 </button>
                 <div className="book-by">
                   <span className="k">Or by call</span>
@@ -139,150 +209,79 @@ export default function CarPage() {
                 </div>
               </div>
 
-              <div className="quickstats">
-                <div className="qstat">
-                  <span className="ic">
-                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 8h12c2 0 3 1 3 3v9H9v-9c0-2 1-3 3-3Z"/>
-                      <path d="M9 20v8h18v-8"/>
-                      <path d="M7 28h22"/>
-                    </svg>
-                  </span>
-                  <div><span className="k">Seats</span><span className="v">{car.seats}</span></div>
-                </div>
-                <div className="qstat">
-                  <span className="ic">
-                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <circle cx="10" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="30" cy="12" r="2"/>
-                      <circle cx="10" cy="28" r="2"/><circle cx="30" cy="28" r="2"/>
-                      <path d="M10 14v12M20 14v4M30 14v12"/>
-                    </svg>
-                  </span>
-                  <div><span className="k">Gearbox</span><span className="v">{car.gearbox}</span></div>
-                </div>
-                <div className="qstat">
-                  <span className="ic">
-                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <circle cx="20" cy="20" r="13"/>
-                      <path d="M20 12v8l6 3"/>
-                    </svg>
-                  </span>
-                  <div><span className="k">Year</span><span className="v">{car.year}</span></div>
-                </div>
-                <div className="qstat">
-                  <span className="ic">
-                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <path d="M8 28 L20 12 L32 28"/>
-                      <path d="M14 22 h12"/>
-                    </svg>
-                  </span>
-                  <div><span className="k">Power</span><span className="v">{car.hp}</span></div>
-                </div>
-              </div>
-
-              <div className="features-head">
-                <h3>Vehicle features</h3>
-              </div>
-              <div className="features">
-                {car.features.map((f, i) => (
-                  <div key={i} className="feat">
-                    <span className="tick" dangerouslySetInnerHTML={{ __html: TICK }} />
-                    {f}
-                  </div>
-                ))}
+              {/* Urgency */}
+              <div className="urgency-badge">
+                <span className="urgency-dot" />
+                2 people are viewing this car right now
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* GALLERY */}
-      {car.gallery.length > 0 && (
-        <section className="gallery">
-          <div className="wrap">
-            <h2>Vehicle gallery</h2>
-            <div className="gallery-grid">
-              {car.gallery.slice(0, 5).map((g, i) => (
-                <div
-                  key={i}
-                  className="gphoto"
-                  style={{ backgroundImage: `url('${imgUrl(g)}')` }}
-                />
+      {/* ── DESCRIPTION ── */}
+      {car.description && (
+        <section className="about-sec">
+          <div className="wrap about-wrap">
+            <div>
+              <h2>About this car</h2>
+              <p className="about-text">{car.description}</p>
+            </div>
+            {/* Mini specs sidebar */}
+            <div className="about-sidebar">
+              {specs.map(s => (
+                <div key={s.label} className="sb-row">
+                  <span className="sb-label">{s.label}</span>
+                  <span className="sb-value">{s.value}</span>
+                </div>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* POST-GALLERY CTA */}
-      <div className="wrap">
-        <div className="post-gallery-cta">
-          <div>
-            <p className="pgc-title">Like what you see?</p>
-            <p className="pgc-sub">Reserve this car — our manager will confirm your dates within 15 minutes.</p>
-          </div>
-          <button className="btn btn-primary" onClick={() => setModal(true)}>
-            Request info
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m9 5 7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* TERMS */}
-      <div className="wrap">
-        <section className="terms">
-          <h2>Terms and Conditions</h2>
-          <div className="terms-grid">
-            <div className="terms-tabs">
-              {TERMS.map((t, i) => (
-                <button
-                  key={i}
-                  className={`terms-tab${activeTab === i ? ' active' : ''}`}
-                  onClick={() => setActiveTab(i)}
-                >
-                  {t.title}
-                </button>
-              ))}
-            </div>
-            <div className="terms-panel">
-              {term.panels.map(([h, p], i) => (
-                <div key={i}>
-                  <h4>{h}</h4>
-                  <p>{p}</p>
+      {/* ── EQUIPMENT ── */}
+      {equipment.length > 0 && (
+        <section className="equip-sec">
+          <div className="wrap">
+            <h2>Equipment &amp; Features</h2>
+            <div className="equip-grid">
+              {equipment.map((f, i) => (
+                <div key={i} className="eq-item">
+                  <span className="eq-tick">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10"/></svg>
+                  </span>
+                  {f}
                 </div>
               ))}
             </div>
           </div>
         </section>
-      </div>
+      )}
 
-      {/* POST-TERMS CTA */}
+      {/* ── POST CTA ── */}
       <div className="wrap">
-        <div className="post-terms-cta">
-          <p>Questions about the terms or pricing?</p>
-          <button className="btn btn-ghost" onClick={() => setModal(true)}>Talk to a manager →</button>
+        <div className="post-gallery-cta">
+          <div>
+            <p className="pgc-title">Interested in this car?</p>
+            <p className="pgc-sub">Leave a request — our manager will contact you within 15 minutes.</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setModal(true)}>
+            Request info
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
 
-      {/* FEEDBACK */}
+      {/* ── REVIEWS ── */}
       <section className="feedback">
         <div className="wrap">
           <div className="feedback-grid">
             <div>
               <h2>Feedback from<br/>satisfied customers</h2>
               <div className="fb-arrows">
-                <button className="fb-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                    <path d="m15 5-7 7 7 7"/>
-                  </svg>
-                </button>
-                <button className="fb-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                    <path d="m9 5 7 7-7 7"/>
-                  </svg>
-                </button>
+                <button className="fb-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="m15 5-7 7 7 7"/></svg></button>
+                <button className="fb-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="m9 5 7 7-7 7"/></svg></button>
               </div>
             </div>
             <div className="fb-cards">
@@ -291,7 +290,7 @@ export default function CarPage() {
                 <div className="fb-title">Perfect car for my business trip!</div>
                 <p className="fb-text">I needed a reliable car for my client meetings, and this vehicle exceeded my expectations. The booking process was seamless, and the car was in excellent condition. Highly recommended!</p>
                 <div className="fb-author">
-                  <div className="fb-avatar" style={{ backgroundImage: "url('/assets/customer-2.jpg')" }} />
+                  <div className="fb-avatar" style={{ backgroundImage:"url('/assets/customer-2.jpg')" }} />
                   <div className="name">Mark Stevens</div>
                 </div>
               </div>
@@ -300,7 +299,7 @@ export default function CarPage() {
                 <div className="fb-title">Comfortable and great value!</div>
                 <p className="fb-text">I purchased a car through TurboEagle and the service was excellent. Transparent process, full history provided, and delivery to Porto was on time. Definitely coming back.</p>
                 <div className="fb-author">
-                  <div className="fb-avatar" style={{ backgroundImage: "url('/assets/customer-1.jpg')" }} />
+                  <div className="fb-avatar" style={{ backgroundImage:"url('/assets/customer-1.jpg')" }} />
                   <div className="name">Emma Johnson</div>
                 </div>
               </div>
@@ -309,7 +308,7 @@ export default function CarPage() {
         </div>
       </section>
 
-      {/* SIMILAR */}
+      {/* ── SIMILAR ── */}
       {similar.length > 0 && (
         <section className="similar">
           <div className="wrap">
@@ -330,15 +329,15 @@ export default function CarPage() {
                       </div>
                       <div className="stats">
                         <div className="mstat">
-                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_SEAT }} />
-                          <div><span className="k">Seats</span><span className="v">{c.seats}</span></div>
+                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_CALENDAR }} />
+                          <div><span className="k">Year</span><span className="v">{c.year}</span></div>
                         </div>
                         <div className="mstat">
                           <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
                           <div><span className="k">Gearbox</span><span className="v">{c.gearbox}</span></div>
                         </div>
                         <div className="mstat">
-                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_LUGGAGE }} />
+                          <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_MILEAGE }} />
                           <div><span className="k">Mileage</span><span className="v">{c.mileage}</span></div>
                         </div>
                       </div>
@@ -351,7 +350,7 @@ export default function CarPage() {
         </section>
       )}
 
-      {/* FOOTER */}
+      {/* ── FOOTER ── */}
       <footer className="car-footer">
         <div className="footer-inner">
           <div className="footer-top">
@@ -375,27 +374,17 @@ export default function CarPage() {
                 </div>
                 <div className="footer-cta">
                   <span>Find your next BMW or Mercedes!</span>
-                  <Link className="btn" style={{ background: '#fff', color: 'var(--ink)' }} to="/cars">
+                  <Link className="btn" style={{ background:'#fff', color:'var(--ink)' }} to="/cars">
                     View Catalog
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="m9 5 7 7-7 7"/>
-                    </svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
                   </Link>
                 </div>
               </div>
               <div className="footer-meta">
-                <div style={{ opacity: 0 }} aria-hidden="true" />
+                <div style={{ opacity:0 }} aria-hidden="true" />
                 <div className="footer-socials">
-                  <a href="#">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                      <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>
-                    </svg>
-                  </a>
-                  <a href="#">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 3l7 9-7 9h2.5L11 13.8 16.5 21H21l-7.3-9.4L20.5 3H18l-5.7 7L7 3H3z"/>
-                    </svg>
-                  </a>
+                  <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
+                  <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7 9-7 9h2.5L11 13.8 16.5 21H21l-7.3-9.4L20.5 3H18l-5.7 7L7 3H3z"/></svg></a>
                 </div>
               </div>
             </div>
@@ -403,22 +392,16 @@ export default function CarPage() {
         </div>
       </footer>
 
-      {/* MOBILE STICKY CTA */}
+      {/* ── MOBILE STICKY ── */}
       <div className="car-sticky-cta">
-        <div className="car-sticky-price">
-          € {car.price?.toLocaleString('de-DE')}
-        </div>
+        <div className="car-sticky-price">€ {car.price?.toLocaleString('de-DE')}</div>
         <button className="car-sticky-btn" onClick={() => setModal(true)}>
           Request info
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m9 5 7 7-7 7"/>
-          </svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
         </button>
       </div>
 
-      {/* MODAL */}
       {modal && <Modal onClose={() => setModal(false)} carName={car.name} />}
-
     </div>
   )
 }

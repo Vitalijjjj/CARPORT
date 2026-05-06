@@ -46,6 +46,7 @@ function normalizeCar(raw) {
     gallery:     Array.isArray(raw.gallery)  ? raw.gallery  : [],
     features:    Array.isArray(raw.features) ? raw.features : [],
     range:       raw.electric_range ? `${raw.electric_range} km` : '',
+    equipment:   Array.isArray(raw.equipment) ? raw.equipment : [],
   }
 }
 
