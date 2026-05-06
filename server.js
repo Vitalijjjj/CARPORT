@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs'
 import cors from 'cors'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import { existsSync, mkdirSync, renameSync } from 'fs'
+import { existsSync, mkdirSync, renameSync, statSync } from 'fs'
 import { execSync } from 'child_process'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -33,14 +33,22 @@ app.use(express.json({ limit: '13mb' }))
 app.use(express.urlencoded({ extended: true, limit: '13mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
-// Hostinger Node.js and MySQL share the same host (195.35.59.66).
-// Use the env-provided host (127.0.0.1) for local TCP; fall back to
-// the public hostname if the env var is absent.
-const dbHost = process.env.DATABASE_HOST || 'auth-db1729.hstgr.io'
-console.log('DB connect via:', dbHost)
+// Hostinger Node.js and MySQL are on the same machine.
+// MySQL grants 'user'@'localhost' (Unix socket), not 'user'@'127.0.0.1' (TCP).
+// Use socketPath so MySQL sees the connection as localhost.
+const SOCKET_PATHS = [
+  '/var/run/mysqld/mysqld.sock',
+  '/tmp/mysql.sock',
+  '/var/lib/mysql/mysql.sock',
+]
+const socketPath = SOCKET_PATHS.find(p => { try { statSync(p); return true } catch { return false } })
+const dbConfig = socketPath
+  ? { socketPath }
+  : { host: process.env.DATABASE_HOST || 'auth-db1729.hstgr.io' }
+console.log('DB connect via:', socketPath || dbConfig.host)
 
 const db = mysql.createPool({
-  host:               dbHost,
+  ...dbConfig,
   database:           process.env.DATABASE_NAME,
   user:               process.env.DATABASE_USER,
   password:           process.env.DATABASE_PASSWORD,
