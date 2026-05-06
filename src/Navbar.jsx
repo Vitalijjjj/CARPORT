@@ -33,17 +33,7 @@ export default function Navbar({ onCta, onSearch }) {
               </svg>
             </button>
             <Link className="nav-logo" to="/">
-              {/* Inline SVG so currentColor inherits correctly */}
-              <svg className="nav-logo-mark" viewBox="0 0 110 88" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
-                <rect x="5"  y="2"  width="100" height="9"/>
-                <rect x="5"  y="18" width="100" height="9"/>
-                <rect x="5"  y="2"  width="9"   height="52"/>
-                <rect x="96" y="2"  width="9"   height="25"/>
-                <rect x="55" y="18" width="50"  height="9"/>
-                <rect x="55" y="34" width="50"  height="9"/>
-                <path d="M5,54 L55,84 L105,54" stroke="currentColor" strokeWidth="9.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
-              <span className="nav-logo-word">TURBOEAGLE</span>
+              <img src="/assets/logo-turboeagle.png" alt="TURBOEAGLE" className="nav-logo-img" />
             </Link>
           </div>
 

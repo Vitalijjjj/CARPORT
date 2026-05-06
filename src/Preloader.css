@@ -26,92 +26,21 @@
   user-select: none;
 }
 
-/* ── Mark (SVG badge) ── */
-.pl-mark {
-  width: 96px;
+/* ── Logo ── */
+.pl-logo {
+  animation: plFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.1s;
+}
+.pl-logo-img {
+  width: 300px;
   height: auto;
-  margin-bottom: 28px;
-  color: #fff;
+  display: block;
+  filter: invert(1);
 }
 
-.pl-mark svg { overflow: visible; }
-
-/* Each rect bar: slide in horizontally from left, staggered */
-.pl-bar {
-  transform-origin: left center;
-  opacity: 0;
-  animation: plBarH 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.pl-bar-v {
-  transform-origin: top center;
-  opacity: 0;
-  animation: plBarV 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.pl-bar-vr {
-  transform-origin: top center;
-  opacity: 0;
-  animation: plBarV 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.pl-bar-1  { animation-delay: 0.00s; }
-.pl-bar-2  { animation-delay: 0.10s; }
-.pl-bar-3  { animation-delay: 0.20s; }
-.pl-bar-4  { animation-delay: 0.18s; }
-.pl-bar-5  { animation-delay: 0.28s; }
-.pl-bar-v  { animation-delay: 0.12s; }
-.pl-bar-vr { animation-delay: 0.08s; }
-
-@keyframes plBarH {
-  from { transform: scaleX(0); opacity: 1; }
-  to   { transform: scaleX(1); opacity: 1; }
-}
-@keyframes plBarV {
-  from { transform: scaleY(0); opacity: 1; }
-  to   { transform: scaleY(1); opacity: 1; }
-}
-
-/* Chevron draw-in */
-.pl-chevron {
-  stroke-dasharray: 210;
-  stroke-dashoffset: 210;
-  animation: plDraw 0.60s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: 0.38s;
-}
-@keyframes plDraw {
-  to { stroke-dashoffset: 0; }
-}
-
-/* ── Wordmark ── */
-.pl-wordmark {
-  font-family: var(--display), 'Orbitron', sans-serif;
-  font-weight: 700;
-  font-size: 38px;
-  letter-spacing: 0.13em;
-  color: #fff;
-  overflow: hidden;
-  clip-path: inset(0 100% 0 0);
-  animation: plReveal 0.70s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: 0.58s;
-  white-space: nowrap;
-}
-@keyframes plReveal {
-  to { clip-path: inset(0 0% 0 0); }
-}
-
-/* ── Subtitle ── */
-.pl-sub {
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.38);
-  margin-top: 10px;
-  opacity: 0;
-  transform: translateY(6px);
-  animation: plFadeUp 0.50s ease forwards;
-  animation-delay: 1.00s;
-}
 @keyframes plFadeUp {
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Progress bar ── */
@@ -137,7 +66,7 @@
   100% { width: 100%; }
 }
 
-/* ── Ambient glow behind mark ── */
+/* ── Ambient glow behind logo ── */
 .pl-glow {
   position: absolute;
   width: 300px;
