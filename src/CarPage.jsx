@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { fetchPublicCar, fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
+import Footer from './Footer'
 import './CarPage.css'
 
 const ICON_CALENDAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`
@@ -351,46 +352,7 @@ export default function CarPage() {
       )}
 
       {/* ── FOOTER ── */}
-      <footer className="car-footer">
-        <div className="footer-inner">
-          <div className="footer-top">
-            <h2>Drive Your Dreams with<br/>TurboEagle!</h2>
-            <div className="footer-info">
-              <div className="footer-row">
-                <div className="footer-col">
-                  <Link to="/">Home</Link>
-                  <Link to="/#about">About</Link>
-                  <Link to="/cars">Catalog</Link>
-                  <Link to="/#contact">Contact</Link>
-                </div>
-                <div className="footer-col">
-                  <a href="#">Instagram</a>
-                  <a href="#">Facebook</a>
-                </div>
-                <div className="footer-col">
-                  <a href="mailto:info@turboeagle.pt">info@turboeagle.pt</a>
-                  <a href="tel:+351000000000">+351 000 000 000</a>
-                  <a href="#">Portugal</a>
-                </div>
-                <div className="footer-cta">
-                  <span>Find your next BMW or Mercedes!</span>
-                  <Link className="btn" style={{ background:'#fff', color:'var(--ink)' }} to="/cars">
-                    View Catalog
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
-                  </Link>
-                </div>
-              </div>
-              <div className="footer-meta">
-                <div style={{ opacity:0 }} aria-hidden="true" />
-                <div className="footer-socials">
-                  <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
-                  <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7 9-7 9h2.5L11 13.8 16.5 21H21l-7.3-9.4L20.5 3H18l-5.7 7L7 3H3z"/></svg></a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer onCta={() => setModal(true)} />
 
       {/* ── MOBILE STICKY ── */}
       <div className="car-sticky-cta">
