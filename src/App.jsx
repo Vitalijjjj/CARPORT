@@ -3,6 +3,25 @@ import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { OLIMP_CARS } from './cars-data'
+import { fetchPublicCars } from './publicApi'
+
+// Map DB car schema → CarCard format
+function normalizeDbCar(c) {
+  return {
+    id:       c.id,
+    img:      c.main_image || '',
+    warranty: !!c.warranty_available,
+    financing: !!c.financing_available,
+    name:     [c.brand, c.model, c.version].filter(Boolean).join(' '),
+    tagline:  c.short_description || `${c.year} · ${c.fuel_type}`,
+    price:    Number(c.price),
+    seats:    c.power ? `${c.power} HP` : '—',
+    year:     c.year,
+    range:    c.electric_range ? `${c.electric_range} km` : (c.mileage ? `${Number(c.mileage).toLocaleString('de-DE')} km` : '—'),
+    brand:    (c.brand || '').toLowerCase(),
+    fuelType: c.fuel_type || '',
+  }
+}
 import Modal from './Modal'
 import Quiz from './Quiz'
 import Navbar from './Navbar'
@@ -170,7 +189,7 @@ function CarCard({ car }) {
         <div className="stats">
           <div className="mstat">
             <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_SEAT }} />
-            <div><span className="k">Seats</span><span className="v">{car.seats}</span></div>
+            <div><span className="k">Power</span><span className="v">{car.seats}</span></div>
           </div>
           <div className="mstat">
             <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
@@ -201,14 +220,23 @@ export default function App() {
   const [stickyVis,   setStickyVis]   = useState(false)
   const [openFaq,     setOpenFaq]     = useState(null)
   const [swipeHinted, setSwipeHinted] = useState(false)
+  const [dbCars,   setDbCars]     = useState(null) // null = loading
+
+  useEffect(() => {
+    fetchPublicCars()
+      .then(data => setDbCars(data.length > 0 ? data.map(normalizeDbCar) : null))
+      .catch(() => setDbCars(null))
+  }, [])
+
+  const catalogCars = dbCars ?? OLIMP_CARS
 
   const cardCtxRef   = useRef(null)
   const touchStartX  = useRef(null)
 
   const searchResults = srch.query.trim().length > 1
-    ? OLIMP_CARS.filter(c =>
-        [c.name, c.tagline, c.category, c.engine, c.hp].some(
-          f => String(f).toLowerCase().includes(srch.query.toLowerCase())
+    ? catalogCars.filter(c =>
+        [c.name, c.tagline, c.brand, c.year].some(
+          f => String(f ?? '').toLowerCase().includes(srch.query.toLowerCase())
         )
       )
     : []
@@ -423,10 +451,10 @@ export default function App() {
   }, [filter])
 
   /* ── Derived state ───────────────────────────────────────────────── */
-  const visibleCars = OLIMP_CARS.filter(c => {
+  const visibleCars = catalogCars.filter(c => {
     if (filter === 'all')       return true
     if (filter === 'bmw')       return c.brand === 'bmw'
-    if (filter === 'mercedes')  return c.brand === 'mercedes'
+    if (filter === 'mercedes')  return (c.brand || '').includes('mercedes')
     if (filter === 'electric')  return c.fuelType === 'electric'
     if (filter === 'hybrid')    return c.fuelType === 'hybrid'
     if (filter === 'financing') return c.financing
