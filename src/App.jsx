@@ -304,7 +304,7 @@ export default function App() {
     const groups = [
       ['.trust-item', '.models-title', '.models-filters', '.wyg-head',
        '.vt-head', '.faq-head', '.final-cta-inner', '.quiz-left', '.quiz-box'],
-      ['.wyg-cell', '.vt-card', '.faq-item', '.loc-inner > *',
+      ['.wyg-cell', '.vt-card', '.loc-inner > *',
        '.footer-row', '.footer-meta', '.footer-logo'],
     ]
 
