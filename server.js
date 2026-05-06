@@ -1,3 +1,6 @@
+import dns from 'dns'
+dns.setDefaultResultOrder('ipv4first') // Force IPv4 so MySQL sees our IPv4 address (not IPv6)
+
 import express from 'express'
 import mysql from 'mysql2/promise'
 import multer from 'multer'
