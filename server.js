@@ -74,6 +74,15 @@ async function initDb() {
       UNIQUE KEY admin_users_email_unique (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+  // Drop cars table if it was created by an older schema missing JSON columns
+  const [galleryCols] = await db.query(
+    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='cars' AND COLUMN_NAME='gallery'"
+  )
+  if (galleryCols.length === 0) {
+    await db.query('DROP TABLE IF EXISTS cars')
+    console.log('Dropped stale cars table (missing gallery column)')
+  }
+
   await db.query(`
     CREATE TABLE IF NOT EXISTS cars (
       id                          INT UNSIGNED NOT NULL AUTO_INCREMENT,
