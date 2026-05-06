@@ -334,6 +334,15 @@ app.post('/api/upload.php', upload.single('image'), async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
+// ── GET /api/leads.php — admin only ──────────────────────────────
+app.get('/api/leads.php', async (req, res) => {
+  if (!requireAuth(req, res)) return
+  try {
+    const [rows] = await db.query('SELECT * FROM leads ORDER BY created_at DESC LIMIT 500')
+    res.json(rows)
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
 // ── POST /api/leads.php ───────────────────────────────────────────
 app.post('/api/leads.php', async (req, res) => {
   const { name, phone, email, message, source, car_id } = req.body
