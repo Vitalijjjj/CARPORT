@@ -99,6 +99,16 @@
   display: flex;
   flex-direction: column;
   padding: 24px 20px 40px;
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity   0.28s ease;
+}
+.mobile-menu--open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: all;
 }
 .mobile-menu-head {
   display: flex;
@@ -168,6 +178,8 @@
 
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* keep header always visible on mobile — don't hide on scroll */
+  .nav--hidden { transform: none; }
   .nav-inner {
     display: flex;
     justify-content: space-between;

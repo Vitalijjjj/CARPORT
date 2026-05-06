@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
@@ -109,6 +109,7 @@ function BrandSelect({ value, onChange }) {
 const STATUS_LABELS = { in_stock: 'In Stock', reserved: 'Reserved', incoming: 'Incoming' }
 
 function CatalogCard({ car, onRequest }) {
+  const navigate   = useNavigate()
   const brandLabel = BRAND_META[car.brand]?.label ?? car.brand
   const fuelLabel  = car.fuelType === 'electric' ? 'Electric' : 'Hybrid'
   const imgSrc     = car.img
@@ -116,7 +117,7 @@ function CatalogCard({ car, onRequest }) {
     : ''
 
   return (
-    <article className="cc">
+    <article className="cc" onClick={() => navigate(`/car/${car.id}`)} style={{ cursor: 'pointer' }}>
       <div className="cc-img-wrap">
         {imgSrc
           ? <div className="cc-img" style={{ backgroundImage: `url('${imgSrc}')` }} />
@@ -163,8 +164,8 @@ function CatalogCard({ car, onRequest }) {
             </div>
           </div>
           <div className="cc-actions">
-            <button className="cc-btn-request" onClick={onRequest}>Request</button>
-            <Link className="cc-btn-view" to={`/car/${car.id}`}>
+            <button className="cc-btn-request" onClick={e => { e.stopPropagation(); onRequest() }}>Request</button>
+            <Link className="cc-btn-view" to={`/car/${car.id}`} onClick={e => e.stopPropagation()}>
               View
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m9 5 7 7-7 7"/>

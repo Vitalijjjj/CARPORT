@@ -67,8 +67,7 @@ export default function Navbar({ onCta, onSearch }) {
       </nav>
 
       {/* Mobile menu */}
-      {menuOpen && (
-        <div className="mobile-menu">
+      <div className={`mobile-menu${menuOpen ? ' mobile-menu--open' : ''}`}>
           <div className="mobile-menu-head">
             <Link className="mobile-menu-logo" to="/" onClick={close}>TURBOEAGLE</Link>
             <button className="mobile-menu-close" aria-label="Close" onClick={close}>
@@ -93,8 +92,7 @@ export default function Navbar({ onCta, onSearch }) {
               <path d="m9 5 7 7-7 7"/>
             </svg>
           </button>
-        </div>
-      )}
+      </div>
     </>
   )
 }

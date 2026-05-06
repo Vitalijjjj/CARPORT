@@ -923,7 +923,7 @@ export default function App() {
       <div className={`sticky-cta${stickyVis ? ' sticky-vis' : ''}`}>
         {scrollPhase === 'top' ? (
           <>
-            <a href="#models" className="sticky-btn sticky-btn-sec">View Cars</a>
+            <Link to="/cars" className="sticky-btn sticky-btn-sec">Catalog</Link>
             <button className="sticky-btn sticky-btn-pri" onClick={() => setModal(true)}>
               Find My Car
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
