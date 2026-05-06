@@ -285,27 +285,16 @@ export default function App() {
   /* ── HERO ANIMATION (fires once on page load) ────────────────────── */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set(
+      // gsap.from() keeps elements visible by default — if animation fails,
+      // content stays visible rather than being permanently hidden
+      gsap.from(
         ['.hero-eyebrow-line', '.hero-body-left h1', '.hero-body-desc',
-         '.hero-trust-chips', '.hero-specs .spec', '.hero-cta-row',
-         '.hero-car-card'],
-        { opacity: 0, y: 24 }
+         '.hero-trust-chips', '.hero-specs .spec', '.hero-cta-row', '.hero-car-card'],
+        { opacity: 0, y: 20, duration: 0.50, stagger: 0.07, ease: 'power3.out', delay: 0.05 }
       )
-      gsap.set('.hero-side-nav',    { opacity: 0, x: 16 })
-      gsap.set('.hero-arrow-btn', { opacity: 0, scale: 0.85 })
-
-      gsap.timeline({ defaults: { ease: 'power3.out' } })
-        .to('.hero-eyebrow-line',    { opacity: 1, y: 0, duration: 0.55              }, 0.10)
-        .to('.hero-body-left h1',    { opacity: 1, y: 0, duration: 0.85              }, 0.22)
-        .to('.hero-body-desc',       { opacity: 1, y: 0, duration: 0.65              }, 0.42)
-        .to('.hero-specs .spec',     { opacity: 1, y: 0, duration: 0.60, stagger: 0.1 }, 0.50)
-        .to('.hero-cta-row',         { opacity: 1, y: 0, duration: 0.60              }, 0.65)
-        .to('.hero-trust-chips',     { opacity: 1, y: 0, duration: 0.55              }, 0.75)
-        .to('.hero-car-card',        { opacity: 1, y: 0, duration: 0.65              }, 0.40)
-        .to('.hero-side-nav',        { opacity: 1, x: 0, duration: 0.70              }, 0.30)
-        .to('.hero-arrow-btn',       { opacity: 1, scale: 1, duration: 0.45, stagger: 0.10 }, 0.60)
+      gsap.from('.hero-side-nav',  { opacity: 0, x: 16, duration: 0.55, ease: 'power3.out', delay: 0.15 })
+      gsap.from('.hero-arrow-btn', { opacity: 0, scale: 0.85, duration: 0.40, stagger: 0.08, ease: 'power3.out', delay: 0.30 })
     })
-
     return () => ctx.revert()
   }, [])
 
@@ -314,18 +303,17 @@ export default function App() {
     const ctx = gsap.context(() => {
 
       function reveal(targets, vars, trigger, start = 'top 98%') {
-        gsap.set(targets, { opacity: 0, y: vars.y ?? 20 })
         ScrollTrigger.create({
           trigger, start, once: true,
-          onEnter: () => gsap.to(targets, { opacity: 1, y: 0, duration: 0.40, ease: 'power2.out', ...vars }),
+          onEnter: () => gsap.from(targets, { opacity: 0, y: 20, duration: 0.40, ease: 'power2.out', ...vars }),
         })
       }
 
       reveal('.trust-item',            { stagger: 0.05 },             '.trust-bar')
       reveal('.models-title',          {},                             '.models')
       reveal('.models-filters',        { delay: 0.06 },               '.models')
-      reveal('.quiz-left',             { x: -24, y: 0 },              '.quiz-section')
-      reveal('.quiz-box',              { x:  24, y: 0, delay: 0.06 }, '.quiz-section')
+      reveal('.quiz-left',             { x: -24 },              '.quiz-section')
+      reveal('.quiz-box',              { x:  24, delay: 0.06 }, '.quiz-section')
       reveal('.wyg-head',              {},                             '.what-you-get')
       reveal('.wyg-cell',              { stagger: 0.05, delay: 0.08 },'.what-you-get')
       reveal('.vt-head',               {},                             '.video-testi')
@@ -355,8 +343,7 @@ export default function App() {
       if (!cards.length) return
 
       cardCtxRef.current = gsap.context(() => {
-        gsap.set(cards, { opacity: 0, y: 20 })
-        gsap.to(cards, { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' })
+        gsap.from(cards, { opacity: 0, y: 20, duration: 0.35, stagger: 0.05, ease: 'power2.out' })
       })
     })
 
