@@ -13,7 +13,9 @@ export default function AdminGuard({ children }) {
   }
 
   try {
-    const [payloadB64] = token.split('.')
+    // JWT is header.payload.signature — payload is index 1 (not 0)
+    // base64url → base64 before atob
+    const payloadB64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
     const payload = JSON.parse(atob(payloadB64))
 
     // exp is in seconds (Unix timestamp)
