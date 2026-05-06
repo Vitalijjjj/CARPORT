@@ -348,6 +348,15 @@ app.use(express.static(join(__dirname, 'dist')))
 app.get('*', (_req, res) => res.sendFile(join(__dirname, 'dist', 'index.html')))
 
 // ── Start ─────────────────────────────────────────────────────────
-initDb()
-  .then(() => app.listen(PORT, () => console.log(`✓ Server running on port ${PORT}`)))
-  .catch(err => { console.error('Fatal: DB init failed:', err.message); process.exit(1) })
+// Start serving immediately; retry DB init until it succeeds.
+app.listen(PORT, () => console.log(`✓ Server running on port ${PORT}`))
+
+async function initDbWithRetry(delayMs = 10000) {
+  try {
+    await initDb()
+  } catch (err) {
+    console.error('DB init failed, retrying in', delayMs / 1000, 's:', err.message)
+    setTimeout(() => initDbWithRetry(delayMs), delayMs)
+  }
+}
+initDbWithRetry()
