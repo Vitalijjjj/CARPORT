@@ -142,14 +142,18 @@ async function initDb() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
 
-  // Create first admin if none exist
+  // Create first admin if none exist; if ADMIN_PASS is set, always sync the password
   const [existing] = await db.query('SELECT id FROM admin_users LIMIT 1')
+  const email = process.env.ADMIN_EMAIL || 'admin@carrai.com'
+  const pass  = (process.env.ADMIN_PASS || '').replace(/\\#/g, '#') || 'Admin123!'
   if (existing.length === 0) {
-    const email = process.env.ADMIN_EMAIL || 'admin@carrai.com'
-    const pass  = process.env.ADMIN_PASS  || 'Admin123!'
-    const hash  = await bcrypt.hash(pass, 12)
+    const hash = await bcrypt.hash(pass, 12)
     await db.query('INSERT INTO admin_users (email, password_hash, name) VALUES (?, ?, ?)', [email, hash, 'Admin'])
     console.log(`✓ Admin created: ${email}`)
+  } else if (process.env.ADMIN_PASS) {
+    const hash = await bcrypt.hash(pass, 12)
+    await db.query('UPDATE admin_users SET email = ?, password_hash = ? WHERE id = ?', [email, hash, existing[0].id])
+    console.log(`✓ Admin password synced: ${email}`)
   }
   console.log('✓ Database ready')
 }
