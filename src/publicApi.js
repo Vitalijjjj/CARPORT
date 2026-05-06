@@ -23,7 +23,7 @@ function normalizeCar(raw) {
   return {
     id:          String(raw.id),
     brand:       normalizeBrand(raw.brand),
-    name:        [raw.model, raw.version].filter(Boolean).join(' '),
+    name:        [raw.brand, raw.model, raw.version].filter(Boolean).join(' '),
     tagline:     raw.short_description ?? '',
     description: raw.full_description  || raw.short_description || '',
     year:        raw.year,

@@ -5,23 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { OLIMP_CARS } from './cars-data'
 import { fetchPublicCars } from './publicApi'
 
-// Map DB car schema → CarCard format
-function normalizeDbCar(c) {
-  return {
-    id:       c.id,
-    img:      c.main_image || '',
-    warranty: !!c.warranty_available,
-    financing: !!c.financing_available,
-    name:     [c.brand, c.model, c.version].filter(Boolean).join(' '),
-    tagline:  c.short_description || `${c.year} · ${c.fuel_type}`,
-    price:    Number(c.price),
-    seats:    c.power ? `${c.power} HP` : '—',
-    year:     c.year,
-    range:    c.electric_range ? `${c.electric_range} km` : (c.mileage ? `${Number(c.mileage).toLocaleString('de-DE')} km` : '—'),
-    brand:    (c.brand || '').toLowerCase(),
-    fuelType: c.fuel_type || '',
-  }
-}
 import Modal from './Modal'
 import Quiz from './Quiz'
 import Navbar from './Navbar'
@@ -189,7 +172,7 @@ function CarCard({ car }) {
         <div className="stats">
           <div className="mstat">
             <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_SEAT }} />
-            <div><span className="k">Power</span><span className="v">{car.seats}</span></div>
+            <div><span className="k">Power</span><span className="v">{car.hp || car.seats || '—'}</span></div>
           </div>
           <div className="mstat">
             <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
@@ -224,7 +207,7 @@ export default function App() {
 
   useEffect(() => {
     fetchPublicCars()
-      .then(data => setDbCars(data.length > 0 ? data.map(normalizeDbCar) : null))
+      .then(data => setDbCars(data.length > 0 ? data : null))
       .catch(() => setDbCars(null))
   }, [])
 
