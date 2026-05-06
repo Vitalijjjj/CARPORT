@@ -355,11 +355,17 @@ app.post('/api/quiz.php', async (req, res) => {
 
 // ── GET /api/health.php ───────────────────────────────────────────
 app.get('/api/health.php', async (_req, res) => {
+  const connInfo = socketPath ? ('socket:' + socketPath) : ('tcp:' + (dbConfig.host || '?'))
+  const socketCheck = SOCKET_PATHS.reduce((acc, p) => {
+    try { statSync(p); acc[p] = 'exists' } catch (e) { acc[p] = e.code }; return acc
+  }, {})
+  const envKeys = Object.keys(process.env).filter(k => /mysql|db|database|socket/i.test(k))
+  const envSnap = Object.fromEntries(envKeys.map(k => [k, process.env[k]]))
   try {
     await db.query('SELECT 1')
-    res.json({ success: true, message: 'API is working', db: 'connected', time: new Date().toISOString() })
+    res.json({ success: true, db: 'connected', conn: connInfo, sockets: socketCheck, env: envSnap })
   } catch (err) {
-    res.json({ success: false, message: 'API is working', db: 'error: ' + err.message })
+    res.json({ success: false, db: 'error: ' + err.message, conn: connInfo, sockets: socketCheck, env: envSnap })
   }
 })
 
