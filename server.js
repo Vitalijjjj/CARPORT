@@ -7,10 +7,22 @@ import cors from 'cors'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync, mkdirSync, renameSync } from 'fs'
+import { execSync } from 'child_process'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app  = express()
 const PORT = process.env.PORT || 3000
+
+// Build React frontend if dist/ doesn't exist (Hostinger doesn't run npm run build)
+if (!existsSync(join(__dirname, 'dist', 'index.html'))) {
+  console.log('Building React frontend...')
+  try {
+    execSync('npm run build', { stdio: 'inherit', cwd: __dirname })
+    console.log('✓ Frontend built')
+  } catch (e) {
+    console.error('Frontend build failed:', e.message)
+  }
+}
 
 // ── Middleware ────────────────────────────────────────────────────
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }))
