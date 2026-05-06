@@ -1,6 +1,7 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import Preloader from './Preloader.jsx'
 
 // Public pages
 import App        from './App.jsx'
@@ -42,35 +43,43 @@ function SiteWidgets() {
   )
 }
 
+function Root() {
+  const [ready, setReady] = useState(false)
+  return (
+    <>
+      {!ready && <Preloader onDone={() => setReady(true)} />}
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          {/* ── Public routes ───────────────────────────────────── */}
+          <Route path="/"        element={<App />} />
+          <Route path="/cars"    element={<CatalogPage />} />
+          <Route path="/car/:id" element={<CarPage />} />
+
+          {/* ── Admin routes ────────────────────────────────────── */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminGuard>
+                <AdminLayout />
+              </AdminGuard>
+            }
+          >
+            <Route index                   element={<AdminDashboardPage />} />
+            <Route path="cars"             element={<AdminCarsListPage />} />
+            <Route path="cars/create"      element={<AdminCarFormPage />} />
+            <Route path="cars/:id/edit"    element={<AdminCarFormPage />} />
+          </Route>
+        </Routes>
+        <SiteWidgets />
+      </BrowserRouter>
+    </>
+  )
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <ScrollToTop />
-
-      <Routes>
-        {/* ── Public routes ─────────────────────────────────────── */}
-        <Route path="/"         element={<App />} />
-        <Route path="/cars"     element={<CatalogPage />} />
-        <Route path="/car/:id"  element={<CarPage />} />
-
-        {/* ── Admin routes ──────────────────────────────────────── */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminGuard>
-              <AdminLayout />
-            </AdminGuard>
-          }
-        >
-          <Route index            element={<AdminDashboardPage />} />
-          <Route path="cars"      element={<AdminCarsListPage />} />
-          <Route path="cars/create"    element={<AdminCarFormPage />} />
-          <Route path="cars/:id/edit"  element={<AdminCarFormPage />} />
-        </Route>
-      </Routes>
-
-      <SiteWidgets />
-    </BrowserRouter>
+    <Root />
   </StrictMode>,
 )

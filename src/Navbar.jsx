@@ -34,15 +34,10 @@ export default function Navbar({ onCta, onSearch }) {
             </button>
             <Link className="nav-logo" to="/">
               <img
-                src="/assets/logo-turboeagle.png"
+                src="/assets/logo-turboeagle.svg"
                 alt="TURBOEAGLE"
                 className="nav-logo-img"
-                onError={e => {
-                  e.currentTarget.style.display = 'none'
-                  e.currentTarget.nextElementSibling.style.display = 'block'
-                }}
               />
-              <span className="nav-logo-text">TURBOEAGLE</span>
             </Link>
           </div>
 

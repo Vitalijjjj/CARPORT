@@ -1,0 +1,166 @@
+/* ── PRELOADER ─────────────────────────────────────────────────────── */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #030303;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: transform 0.60s cubic-bezier(0.90, 0.00, 1.00, 1.00);
+  will-change: transform;
+}
+
+.preloader.pl-exit {
+  transform: translateY(-100%);
+}
+
+/* ── Content ── */
+.pl-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  user-select: none;
+}
+
+/* ── Mark (SVG badge) ── */
+.pl-mark {
+  width: 96px;
+  height: auto;
+  margin-bottom: 28px;
+  color: #fff;
+}
+
+.pl-mark svg { overflow: visible; }
+
+/* Each rect bar: slide in horizontally from left, staggered */
+.pl-bar {
+  transform-origin: left center;
+  opacity: 0;
+  animation: plBarH 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.pl-bar-v {
+  transform-origin: top center;
+  opacity: 0;
+  animation: plBarV 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.pl-bar-vr {
+  transform-origin: top center;
+  opacity: 0;
+  animation: plBarV 0.50s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.pl-bar-1  { animation-delay: 0.00s; }
+.pl-bar-2  { animation-delay: 0.10s; }
+.pl-bar-3  { animation-delay: 0.20s; }
+.pl-bar-4  { animation-delay: 0.18s; }
+.pl-bar-5  { animation-delay: 0.28s; }
+.pl-bar-v  { animation-delay: 0.12s; }
+.pl-bar-vr { animation-delay: 0.08s; }
+
+@keyframes plBarH {
+  from { transform: scaleX(0); opacity: 1; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+@keyframes plBarV {
+  from { transform: scaleY(0); opacity: 1; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+/* Chevron draw-in */
+.pl-chevron {
+  stroke-dasharray: 210;
+  stroke-dashoffset: 210;
+  animation: plDraw 0.60s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.38s;
+}
+@keyframes plDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Wordmark ── */
+.pl-wordmark {
+  font-family: var(--display), 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  letter-spacing: 0.13em;
+  color: #fff;
+  overflow: hidden;
+  clip-path: inset(0 100% 0 0);
+  animation: plReveal 0.70s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.58s;
+  white-space: nowrap;
+}
+@keyframes plReveal {
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+/* ── Subtitle ── */
+.pl-sub {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: plFadeUp 0.50s ease forwards;
+  animation-delay: 1.00s;
+}
+@keyframes plFadeUp {
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Progress bar ── */
+.pl-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.pl-progress-fill {
+  height: 100%;
+  background: var(--accent, #006be6);
+  width: 0%;
+  animation: plProgress 1.80s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.20s;
+}
+@keyframes plProgress {
+  0%   { width: 0%; }
+  60%  { width: 75%; }
+  100% { width: 100%; }
+}
+
+/* ── Ambient glow behind mark ── */
+.pl-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(0, 107, 230, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: plGlowPulse 2.5s ease-in-out infinite;
+}
+@keyframes plGlowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+/* ── Scan line effect ── */
+.pl-scan {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.012) 2px,
+    rgba(255, 255, 255, 0.012) 4px
+  );
+  pointer-events: none;
+}

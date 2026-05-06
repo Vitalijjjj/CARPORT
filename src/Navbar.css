@@ -37,8 +37,7 @@
   text-decoration: none;
   color: var(--ink);
 }
-.nav-logo-img  { height: 38px; width: auto; display: block; }
-.nav-logo-text { display: none; font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: 0.12em; color: var(--ink); }
+.nav-logo-img  { height: 38px; width: auto; display: block; color: var(--ink); }
 
 .nav-links {
   display: flex;
