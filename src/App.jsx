@@ -313,99 +313,31 @@ export default function App() {
   useEffect(() => {
     const ctx = gsap.context(() => {
 
-      // ── Trust bar ────────────────────────────────────────────────────
-      gsap.set('.trust-item', { opacity: 0, y: 16 })
-      ScrollTrigger.create({
-        trigger: '.trust-bar', start: 'top 88%', once: true,
-        onEnter: () => {
-          gsap.to('.trust-item', { opacity: 1, y: 0, duration: 0.55, stagger: 0.07, ease: 'power2.out' })
-        },
-      })
+      function reveal(targets, vars, trigger, start = 'top 98%') {
+        gsap.set(targets, { opacity: 0, y: vars.y ?? 20 })
+        ScrollTrigger.create({
+          trigger, start, once: true,
+          onEnter: () => gsap.to(targets, { opacity: 1, y: 0, duration: 0.40, ease: 'power2.out', ...vars }),
+        })
+      }
 
-      // ── Models title + filters ────────────────────────────────────────
-      gsap.set('.models-title, .models-filters', { opacity: 0, y: 24 })
-      ScrollTrigger.create({
-        trigger: '.models', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.models-title',   { opacity: 1, y: 0, duration: 0.70, ease: 'power2.out' })
-          gsap.to('.models-filters', { opacity: 1, y: 0, duration: 0.70, ease: 'power2.out', delay: 0.10 })
-        },
-      })
-
-      // ── Quiz section ──────────────────────────────────────────────────
-      gsap.set('.quiz-left', { opacity: 0, x: -32 })
-      gsap.set('.quiz-box',  { opacity: 0, x:  32 })
-      ScrollTrigger.create({
-        trigger: '.quiz-section', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.quiz-left', { opacity: 1, x: 0, duration: 0.80, ease: 'power2.out' })
-          gsap.to('.quiz-box',  { opacity: 1, x: 0, duration: 0.80, ease: 'power2.out', delay: 0.10 })
-        },
-      })
-
-      // ── What you get ─────────────────────────────────────────────────
-      gsap.set('.wyg-head', { opacity: 0, y: 24 })
-      gsap.set('.wyg-cell', { opacity: 0, y: 36, scale: 0.96 })
-      ScrollTrigger.create({
-        trigger: '.what-you-get', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.wyg-head', { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' })
-          gsap.to('.wyg-cell', { opacity: 1, y: 0, scale: 1, duration: 0.70, stagger: 0.08, ease: 'power2.out', delay: 0.12 })
-        },
-      })
-
-      // ── Video testimonials ────────────────────────────────────────────
-      gsap.set('.vt-head', { opacity: 0, y: 24 })
-      gsap.set('.vt-card', { opacity: 0, y: 32 })
-      ScrollTrigger.create({
-        trigger: '.video-testi', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.vt-head', { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' })
-          gsap.to('.vt-card', { opacity: 1, y: 0, duration: 0.70, stagger: 0.12, ease: 'power2.out', delay: 0.12 })
-        },
-      })
-
-      // ── Location ─────────────────────────────────────────────────────
-      gsap.set('.loc-inner > *', { opacity: 0, y: 24 })
-      ScrollTrigger.create({
-        trigger: '.location', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.loc-inner > *', { opacity: 1, y: 0, duration: 0.70, stagger: 0.14, ease: 'power2.out' })
-        },
-      })
-
-      // ── FAQ ───────────────────────────────────────────────────────────
-      gsap.set('.faq-head', { opacity: 0, y: 24 })
-      gsap.set('.faq-item', { opacity: 0, y: 16 })
-      ScrollTrigger.create({
-        trigger: '.faq', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.faq-head', { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' })
-          gsap.to('.faq-item', { opacity: 1, y: 0, duration: 0.55, stagger: 0.07, ease: 'power2.out', delay: 0.10 })
-        },
-      })
-
-      // ── Final CTA ─────────────────────────────────────────────────────
-      gsap.set('.final-cta-inner', { opacity: 0, y: 24 })
-      ScrollTrigger.create({
-        trigger: '.final-cta', start: 'top 80%', once: true,
-        onEnter: () => {
-          gsap.to('.final-cta-inner', { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out' })
-        },
-      })
-
-      // ── Footer ───────────────────────────────────────────────────────
-      gsap.set('.footer-top h2.h2, .footer-row, .footer-meta', { opacity: 0, y: 20 })
-      gsap.set('.footer-logo', { opacity: 0 })
-      ScrollTrigger.create({
-        trigger: '.footer', start: 'top 85%', once: true,
-        onEnter: () => {
-          gsap.to('.footer-top h2.h2', { opacity: 1, y: 0, duration: 0.80, ease: 'power2.out' })
-          gsap.to('.footer-row',       { opacity: 1, y: 0, duration: 0.75, ease: 'power2.out', delay: 0.12 })
-          gsap.to('.footer-meta',      { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out', delay: 0.22 })
-          gsap.to('.footer-logo',      { opacity: 1,       duration: 0.90, ease: 'power3.out', delay: 0.10 })
-        },
-      })
+      reveal('.trust-item',            { stagger: 0.05 },             '.trust-bar')
+      reveal('.models-title',          {},                             '.models')
+      reveal('.models-filters',        { delay: 0.06 },               '.models')
+      reveal('.quiz-left',             { x: -24, y: 0 },              '.quiz-section')
+      reveal('.quiz-box',              { x:  24, y: 0, delay: 0.06 }, '.quiz-section')
+      reveal('.wyg-head',              {},                             '.what-you-get')
+      reveal('.wyg-cell',              { stagger: 0.05, delay: 0.08 },'.what-you-get')
+      reveal('.vt-head',               {},                             '.video-testi')
+      reveal('.vt-card',               { stagger: 0.07, delay: 0.06 },'.video-testi')
+      reveal('.loc-inner > *',         { stagger: 0.08 },             '.location')
+      reveal('.faq-head',              {},                             '.faq')
+      reveal('.faq-item',              { stagger: 0.04, delay: 0.06 },'.faq')
+      reveal('.final-cta-inner',       {},                             '.final-cta')
+      reveal('.footer-top h2.h2',      {},                             '.footer', 'top 99%')
+      reveal('.footer-row',            { delay: 0.08 },               '.footer', 'top 99%')
+      reveal('.footer-meta',           { delay: 0.14 },               '.footer', 'top 99%')
+      reveal('.footer-logo',           { delay: 0.06 },               '.footer', 'top 99%')
 
       ScrollTrigger.refresh()
     })
@@ -423,10 +355,8 @@ export default function App() {
       if (!cards.length) return
 
       cardCtxRef.current = gsap.context(() => {
-        gsap.set(cards, { opacity: 0, y: 30 })
-        gsap.set(shots, { scale: 1.03 })
-        gsap.to(cards, { opacity: 1, y: 0,   duration: 0.70, stagger: 0.08, ease: 'power2.out', delay: 0.05 })
-        gsap.to(shots, { scale: 1,            duration: 0.85, stagger: 0.08, ease: 'power2.out', delay: 0.05 })
+        gsap.set(cards, { opacity: 0, y: 20 })
+        gsap.to(cards, { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' })
       })
     })
 
