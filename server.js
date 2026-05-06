@@ -376,6 +376,12 @@ app.post('/api/quiz.php', async (req, res) => {
   res.json({ success: true, message: 'Quiz submitted successfully. We will be in touch soon!' })
 })
 
+// ── GET /api/schema.php — temp diagnostic ────────────────────────
+app.get('/api/schema.php', async (_req, res) => {
+  const [[r]] = await db.query('SHOW CREATE TABLE cars')
+  res.json({ sql: r['Create Table'] })
+})
+
 // ── GET /api/health.php ───────────────────────────────────────────
 app.get('/api/health.php', async (_req, res) => {
   try {
