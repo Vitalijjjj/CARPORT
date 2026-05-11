@@ -105,7 +105,7 @@ async function initDb() {
       equipment                   TEXT DEFAULT NULL,
       features                    JSON DEFAULT NULL,
       gallery                     JSON DEFAULT NULL,
-      main_image                  VARCHAR(500) DEFAULT NULL,
+      main_image                  MEDIUMTEXT DEFAULT NULL,
       meta_title                  VARCHAR(200) DEFAULT NULL,
       meta_description            TEXT DEFAULT NULL,
       created_at                  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -131,6 +131,12 @@ async function initDb() {
     "ALTER TABLE cars ADD COLUMN equipment_uk TEXT DEFAULT NULL",
   ]) {
     try { await db.query(sql) } catch (e) { if (e.code !== 'ER_DUP_FIELDNAME') throw e }
+  }
+  // Widen main_image to hold base64 data URLs
+  for (const sql of [
+    "ALTER TABLE cars MODIFY COLUMN main_image MEDIUMTEXT DEFAULT NULL",
+  ]) {
+    try { await db.query(sql) } catch (e) { /* ignore if already correct type */ }
   }
 
   await db.query(`

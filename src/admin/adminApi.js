@@ -184,18 +184,25 @@ export async function apiDeleteCar(id) {
 export async function apiUploadImage(file) {
   if (IS_MOCK) {
     await new Promise(r => setTimeout(r, 600))
-    // Return a local blob URL for preview during mock testing
     const url = URL.createObjectURL(file)
     return { url, filename: file.name }
   }
 
-  const formData = new FormData()
-  formData.append('image', file)
-
-  const res = await fetch(`${API_BASE}/upload.php`, {
-    method:  'POST',
-    headers: getAuthHeaders(true),
-    body:    formData,
+  // Resize client-side and return as base64 data URL — no filesystem dependency
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX_W = 1400
+      let w = img.width, h = img.height
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      resolve({ url: canvas.toDataURL('image/jpeg', 0.82), filename: file.name })
+    }
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')) }
+    img.src = objectUrl
   })
-  return handleResponse(res)
 }
