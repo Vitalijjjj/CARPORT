@@ -23,7 +23,7 @@ export default function Preloader({ onDone }) {
 
         {/* ── Logo ── */}
         <div className="pl-logo">
-          <img src="/assets/logo-turboeagle.png" alt="TURBOEAGLE" className="pl-logo-img" />
+          <img src="/assets/logo-turboeagle.svg" alt="TURBOEAGLE" className="pl-logo-img" />
         </div>
 
       </div>

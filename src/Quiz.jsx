@@ -1,66 +1,17 @@
 import { useState } from 'react'
+import { useLang } from './lang/LangContext'
 import './Quiz.css'
 
-const STEPS = [
-  {
-    id: 'brand',
-    question: 'Which brand are you interested in?',
-    options: [
-      { label: 'BMW',            value: 'bmw' },
-      { label: 'Mercedes-Benz', value: 'mercedes' },
-      { label: 'Both',          value: 'both' },
-      { label: 'Not sure yet',  value: 'unsure' },
-    ],
-  },
-  {
-    id: 'type',
-    question: 'What type of vehicle are you looking for?',
-    options: [
-      { label: 'Electric',       value: 'electric' },
-      { label: 'Hybrid',         value: 'hybrid' },
-      { label: 'Plug-in Hybrid', value: 'phev' },
-      { label: 'Not sure yet',   value: 'unsure' },
-    ],
-  },
-  {
-    id: 'budget',
-    question: 'What is your approximate budget?',
-    options: [
-      { label: 'Up to €30,000',     value: 'under30' },
-      { label: '€30,000 – €45,000', value: '30to45' },
-      { label: '€45,000 – €65,000', value: '45to65' },
-      { label: '€65,000+',          value: 'over65' },
-    ],
-  },
-  {
-    id: 'financing',
-    question: 'Are you interested in financing?',
-    options: [
-      { label: 'Yes',                               value: 'yes' },
-      { label: 'No',                                value: 'no' },
-      { label: 'Maybe — I want to compare options', value: 'maybe' },
-    ],
-  },
-  {
-    id: 'timing',
-    question: 'When are you planning to buy?',
-    options: [
-      { label: 'As soon as possible', value: 'asap' },
-      { label: 'Within 30 days',      value: '30days' },
-      { label: 'Within 2–3 months',   value: '2to3months' },
-      { label: 'Just researching',    value: 'researching' },
-    ],
-  },
-]
-
-const FEATURES = [
-  'BMW & Mercedes-Benz in stock',
-  'Electric & Hybrid, selected for Portugal',
-  'Warranty and financing available',
-  'Import from Germany, end-to-end',
+const STEP_VALUES = [
+  ['bmw', 'mercedes', 'both', 'unsure'],
+  ['electric', 'hybrid', 'phev', 'unsure'],
+  ['under30', '30to45', '45to65', 'over65'],
+  ['yes', 'no', 'maybe'],
+  ['asap', '30days', '2to3months', 'researching'],
 ]
 
 export default function Quiz() {
+  const { t } = useLang()
   const [step, setStep]       = useState(0)
   const [answers, setAnswers] = useState({})
   const [name, setName]       = useState('')
@@ -68,10 +19,16 @@ export default function Quiz() {
   const [errors, setErrors]   = useState({})
   const [sent, setSent]       = useState(false)
 
-  const totalSteps  = STEPS.length
+  const steps = t.quiz.steps.map((s, i) => ({
+    id: ['brand','type','budget','financing','timing'][i],
+    question: s.question,
+    options: s.options.map((label, j) => ({ label, value: STEP_VALUES[i][j] })),
+  }))
+
+  const totalSteps  = steps.length
   const isIntro     = step === 0
   const isForm      = step > totalSteps
-  const currentStep = STEPS[step - 1]
+  const currentStep = steps[step - 1]
 
   function pickOption(id, value) {
     setAnswers(prev => ({ ...prev, [id]: value }))
@@ -94,14 +51,9 @@ export default function Quiz() {
 
           {/* ── Left: always-visible context panel ── */}
           <div className="quiz-left">
-            <span className="quiz-eyebrow">Car Finder</span>
-            <h2 className="quiz-heading">Find Your Perfect<br/>Car in 3 Minutes</h2>
-            <p className="quiz-left-desc">
-              Answer a few quick questions and our team prepares a personalised offer — matching your brand, budget and needs.
-            </p>
-            <ul className="quiz-features">
-              {FEATURES.map(f => <li key={f}>{f}</li>)}
-            </ul>
+            <span className="quiz-eyebrow">{t.quiz.eyebrow}</span>
+            <h2 className="quiz-heading">{t.quiz.h2}</h2>
+            <p className="quiz-left-desc">{t.quiz.sub}</p>
             <div className="quiz-left-stats">
               <div className="quiz-stat-item">
                 <span className="quiz-stat-n">500+</span>
@@ -131,8 +83,8 @@ export default function Quiz() {
                       <path d="m5 12 5 5 9-10"/>
                     </svg>
                   </div>
-                  <h3>Request received!</h3>
-                  <p>Our team will review your preferences and contact you with suitable options.</p>
+                  <h3>{t.quiz.sentTitle}</h3>
+                  <p>{t.quiz.sentSub}</p>
                 </div>
 
               ) : isIntro ? (
@@ -163,7 +115,7 @@ export default function Quiz() {
                     <div className="quiz-field">
                       <input
                         type="text"
-                        placeholder="Your name"
+                        placeholder={t.quiz.namePlaceholder}
                         value={name}
                         onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })) }}
                         autoComplete="name"
@@ -173,7 +125,7 @@ export default function Quiz() {
                     <div className="quiz-field">
                       <input
                         type="tel"
-                        placeholder="+351 000 000 000"
+                        placeholder={t.quiz.phonePlaceholder}
                         value={phone}
                         onChange={e => { setPhone(e.target.value); setErrors(p => ({ ...p, phone: '' })) }}
                         autoComplete="tel"
@@ -181,7 +133,7 @@ export default function Quiz() {
                       {errors.phone && <span className="quiz-err">{errors.phone}</span>}
                     </div>
                     <button type="submit" className="quiz-submit-btn">
-                      Get My Car Offer
+                      {t.quiz.submit}
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="m9 5 7 7-7 7"/>
                       </svg>
@@ -195,7 +147,7 @@ export default function Quiz() {
                   <div className="quiz-progress-wrap">
                     <div className="quiz-progress-bar" style={{ width: `${(step / totalSteps) * 100}%` }} />
                   </div>
-                  <div className="quiz-step-label">Step {step} of {totalSteps}</div>
+                  <div className="quiz-step-label">{t.quiz.step} {step} {t.quiz.of} {totalSteps}</div>
                   <h3 className="quiz-q">{currentStep.question}</h3>
                   <div className="quiz-options">
                     {currentStep.options.map(opt => (
@@ -205,7 +157,7 @@ export default function Quiz() {
                     ))}
                   </div>
                   {step > 1 && (
-                    <button className="quiz-back" onClick={() => setStep(s => s - 1)}>← Back</button>
+                    <button className="quiz-back" onClick={() => setStep(s => s - 1)}>← {t.quiz.back}</button>
                   )}
                 </div>
               )}

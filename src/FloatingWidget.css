@@ -175,22 +175,27 @@
 
 .fw-alts {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-top: 12px;
 }
 .fw-alt {
-  flex: 1;
-  text-align: center;
-  padding: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
   font-family: var(--sans);
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
   text-decoration: none;
-  transition: opacity .2s;
+  transition: opacity .2s, filter .2s;
 }
-.fw-alt:hover { opacity: 0.85; }
-.fw-ig { background: #c13584; color: #fff; }
+.fw-alt svg { flex-shrink: 0; }
+.fw-alt:hover { filter: brightness(1.1); }
+.fw-wa { background: #25d366; color: #fff; }
+.fw-ig { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
 .fw-fb { background: #1877f2; color: #fff; }
 
 /* ── Sent ── */

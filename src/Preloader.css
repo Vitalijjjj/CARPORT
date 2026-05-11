@@ -32,10 +32,9 @@
   animation-delay: 0.1s;
 }
 .pl-logo-img {
-  width: 300px;
+  width: 340px;
   height: auto;
   display: block;
-  filter: invert(1);
 }
 
 @keyframes plFadeUp {

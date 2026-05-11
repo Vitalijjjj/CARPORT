@@ -45,8 +45,12 @@ function normalizeCar(raw) {
     img:         raw.main_image ?? '',
     gallery:     Array.isArray(raw.gallery)  ? raw.gallery  : [],
     features:    Array.isArray(raw.features) ? raw.features : [],
-    range:       raw.electric_range ? `${raw.electric_range} km` : '',
-    equipment:   Array.isArray(raw.equipment) ? raw.equipment : [],
+    range:               raw.electric_range ? `${raw.electric_range} km` : '',
+    equipment:           Array.isArray(raw.equipment)    ? raw.equipment    : [],
+    equipment_en:        Array.isArray(raw.equipment_en) ? raw.equipment_en : [],
+    equipment_uk:        Array.isArray(raw.equipment_uk) ? raw.equipment_uk : [],
+    full_description_en: raw.full_description_en ?? '',
+    full_description_uk: raw.full_description_uk ?? '',
   }
 }
 

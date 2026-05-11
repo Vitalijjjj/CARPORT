@@ -57,8 +57,14 @@ const EMPTY_FORM = {
   service_history_available:   false,
   delivery_available_portugal: false,
   short_description:           '',
+  short_description_en:        '',
+  short_description_uk:        '',
   full_description:            '',
+  full_description_en:         '',
+  full_description_uk:         '',
   equipment:                   '',
+  equipment_en:                '',
+  equipment_uk:                '',
   features:                    [],
   gallery:                     [],
   main_image:                  '',
@@ -202,6 +208,7 @@ export default function AdminCarFormPage() {
   const [uploading,    setUploading]    = useState(false)
   const [featureInput, setFeatureInput] = useState('')
   const [toast,        setToast]        = useState(null)
+  const [contentLang,  setContentLang]  = useState('pt')
 
   // ── Load existing car when editing ──────────────────────────────
   useEffect(() => {
@@ -219,12 +226,19 @@ export default function AdminCarFormPage() {
           battery_capacity: car.battery_capacity != null ? String(car.battery_capacity) : '',
           battery_health:   car.battery_health   != null ? String(car.battery_health)   : '',
           electric_range:   car.electric_range   != null ? String(car.electric_range)   : '',
+          equipment:        Array.isArray(car.equipment) ? car.equipment.join('\n') : (car.equipment ?? ''),
           features:         Array.isArray(car.features) ? car.features : [],
           gallery:          Array.isArray(car.gallery)  ? car.gallery  : [],
-          main_image:       car.main_image  ?? '',
-          warranty_term:    car.warranty_term ?? '',
-          meta_title:       car.meta_title ?? '',
-          meta_description: car.meta_description ?? '',
+          main_image:            car.main_image         ?? '',
+          warranty_term:         car.warranty_term      ?? '',
+          meta_title:            car.meta_title         ?? '',
+          meta_description:      car.meta_description   ?? '',
+          short_description_en:  car.short_description_en ?? '',
+          short_description_uk:  car.short_description_uk ?? '',
+          full_description_en:   car.full_description_en  ?? '',
+          full_description_uk:   car.full_description_uk  ?? '',
+          equipment_en:          Array.isArray(car.equipment_en) ? car.equipment_en.join('\n') : (car.equipment_en ?? ''),
+          equipment_uk:          Array.isArray(car.equipment_uk) ? car.equipment_uk.join('\n') : (car.equipment_uk ?? ''),
         })
         setLoading(false)
       })
@@ -713,37 +727,111 @@ export default function AdminCarFormPage() {
             SECTION 6 — Descriptions
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Section title="Descriptions">
+          <div className="af-lang-tabs">
+            {['pt', 'en', 'uk'].map(l => (
+              <button key={l} type="button" className={`af-lang-tab${contentLang === l ? ' active' : ''}`} onClick={() => setContentLang(l)}>
+                {l === 'pt' ? 'PT (main)' : l === 'en' ? 'EN' : 'UA'}
+              </button>
+            ))}
+          </div>
           <div className="af-grid af-grid-1">
 
-            <Field
-              label="Short Description"
-              required
-              error={errors.short_description}
-              hint={`${form.short_description.length}/250 characters — shown in catalog cards and previews`}
-            >
-              <textarea
-                className={`af-input af-textarea${errors.short_description ? ' af-input--error' : ''}`}
-                value={form.short_description}
-                onChange={set('short_description')}
-                maxLength={250}
-                rows={3}
-                placeholder="Brief summary shown in listing cards and search previews…"
-              />
-            </Field>
+            {contentLang === 'pt' && (
+              <>
+                <Field
+                  label="Short Description"
+                  required
+                  error={errors.short_description}
+                  hint={`${form.short_description.length}/250 characters — shown in catalog cards and previews`}
+                >
+                  <textarea
+                    className={`af-input af-textarea${errors.short_description ? ' af-input--error' : ''}`}
+                    value={form.short_description}
+                    onChange={set('short_description')}
+                    maxLength={250}
+                    rows={3}
+                    placeholder="Brief summary shown in listing cards and search previews…"
+                  />
+                </Field>
+                <Field
+                  label="Full Description"
+                  error={errors.full_description}
+                  hint="Displayed on the car detail page — supports plain text"
+                >
+                  <textarea
+                    className="af-input af-textarea af-textarea--tall"
+                    value={form.full_description}
+                    onChange={set('full_description')}
+                    rows={8}
+                    placeholder="Full car description with all relevant details, history and highlights…"
+                  />
+                </Field>
+              </>
+            )}
 
-            <Field
-              label="Full Description"
-              error={errors.full_description}
-              hint="Displayed on the car detail page — supports plain text"
-            >
-              <textarea
-                className="af-input af-textarea af-textarea--tall"
-                value={form.full_description}
-                onChange={set('full_description')}
-                rows={8}
-                placeholder="Full car description with all relevant details, history and highlights…"
-              />
-            </Field>
+            {contentLang === 'en' && (
+              <>
+                <Field
+                  label="Short Description (English)"
+                  error={errors.short_description_en}
+                  hint={`${form.short_description_en.length}/250 characters`}
+                >
+                  <textarea
+                    className="af-input af-textarea"
+                    value={form.short_description_en}
+                    onChange={set('short_description_en')}
+                    maxLength={250}
+                    rows={3}
+                    placeholder="English version of the short description…"
+                  />
+                </Field>
+                <Field
+                  label="Full Description (English)"
+                  error={errors.full_description_en}
+                  hint="Displayed when site language is set to English"
+                >
+                  <textarea
+                    className="af-input af-textarea af-textarea--tall"
+                    value={form.full_description_en}
+                    onChange={set('full_description_en')}
+                    rows={8}
+                    placeholder="English version of the full description…"
+                  />
+                </Field>
+              </>
+            )}
+
+            {contentLang === 'uk' && (
+              <>
+                <Field
+                  label="Short Description (Ukrainian)"
+                  error={errors.short_description_uk}
+                  hint={`${form.short_description_uk.length}/250 characters`}
+                >
+                  <textarea
+                    className="af-input af-textarea"
+                    value={form.short_description_uk}
+                    onChange={set('short_description_uk')}
+                    maxLength={250}
+                    rows={3}
+                    placeholder="Ukrainian version of the short description…"
+                  />
+                </Field>
+                <Field
+                  label="Full Description (Ukrainian)"
+                  error={errors.full_description_uk}
+                  hint="Displayed when site language is set to Ukrainian"
+                >
+                  <textarea
+                    className="af-input af-textarea af-textarea--tall"
+                    value={form.full_description_uk}
+                    onChange={set('full_description_uk')}
+                    rows={8}
+                    placeholder="Ukrainian version of the full description…"
+                  />
+                </Field>
+              </>
+            )}
 
           </div>
         </Section>
@@ -752,27 +840,59 @@ export default function AdminCarFormPage() {
             SECTION 7 — Equipment & Feature Tags
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Section title="Equipment &amp; Feature Tags">
+          <div className="af-lang-tabs">
+            {['pt', 'en', 'uk'].map(l => (
+              <button key={l} type="button" className={`af-lang-tab${contentLang === l ? ' active' : ''}`} onClick={() => setContentLang(l)}>
+                {l === 'pt' ? 'PT (main)' : l === 'en' ? 'EN' : 'UA'}
+              </button>
+            ))}
+          </div>
           <div className="af-grid af-grid-1">
 
-            <Field
-              label="Equipment List"
-              hint="Full OEM equipment — one item per line"
-            >
-              <textarea
-                className="af-input af-textarea"
-                value={form.equipment}
-                onChange={set('equipment')}
-                rows={7}
-                placeholder={
-                  'Heated front and rear seats\n' +
-                  'Panoramic glass roof\n' +
-                  'Wireless charging pad\n' +
-                  'Harman Kardon surround sound\n' +
-                  'Head-up display\n' +
-                  'Adaptive cruise control with stop & go'
-                }
-              />
-            </Field>
+            {contentLang === 'pt' && (
+              <Field
+                label="Equipment List"
+                hint="Full OEM equipment — one item per line"
+              >
+                <textarea
+                  className="af-input af-textarea"
+                  value={form.equipment}
+                  onChange={set('equipment')}
+                  rows={7}
+                  placeholder={'Heated front and rear seats\nPanoramic glass roof\nWireless charging pad\nHarman Kardon surround sound\nHead-up display\nAdaptive cruise control with stop & go'}
+                />
+              </Field>
+            )}
+
+            {contentLang === 'en' && (
+              <Field
+                label="Equipment List (English)"
+                hint="English translation of equipment — one item per line"
+              >
+                <textarea
+                  className="af-input af-textarea"
+                  value={form.equipment_en}
+                  onChange={set('equipment_en')}
+                  rows={7}
+                  placeholder={'Heated front and rear seats\nPanoramic glass roof\nWireless charging pad\nHarman Kardon surround sound\nHead-up display\nAdaptive cruise control with stop & go'}
+                />
+              </Field>
+            )}
+
+            {contentLang === 'uk' && (
+              <Field
+                label="Equipment List (Ukrainian)"
+                hint="Ukrainian translation of equipment — one item per line"
+              >
+                <textarea
+                  className="af-input af-textarea"
+                  value={form.equipment_uk}
+                  onChange={set('equipment_uk')}
+                  rows={7}
+                  placeholder={'Підігрів передніх і задніх сидінь\nПанорамний скляний дах\nБездротова зарядка\nAharman Kardon об\'ємний звук\nHead-up дисплей\nАдаптивний круїз-контроль'}
+                />
+              </Field>
+            )}
 
             <Field
               label="Feature Tags"

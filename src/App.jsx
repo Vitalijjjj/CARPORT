@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { OLIMP_CARS } from './cars-data'
 import { fetchPublicCars } from './publicApi'
+import { useLang } from './lang/LangContext'
 
 import Modal from './Modal'
 import Quiz from './Quiz'
@@ -194,6 +195,7 @@ function CarCard({ car }) {
 /* ------------------------------------------------------------------ */
 
 export default function App() {
+  const { t } = useLang()
   const [heroIdx,  setHeroIdxRaw] = useState(0)
   const [filter,   setFilter]     = useState('all')
   const [tweaks,   setTweaks]     = useState({ ...TWEAK_DEFAULTS })
@@ -429,29 +431,29 @@ export default function App() {
             }}
           >
             <div className="hero-body-left">
-              <div className="hero-eyebrow-line">Premium Electric & Hybrid · Portugal</div>
-              <h1>Electric & Hybrid BMW<br/>and Mercedes-Benz,<br/>Selected for Portugal</h1>
-              <p className="hero-body-desc">Vehicles in stock or imported from Germany — with warranty, financing and delivery support.</p>
+              <div className="hero-eyebrow-line">{t.hero.eyebrow}</div>
+              <h1>{t.hero.h1.split('\n').map((l,i,a) => <span key={i}>{l}{i<a.length-1&&<br/>}</span>)}</h1>
+              <p className="hero-body-desc">{t.hero.desc}</p>
               <div className="hero-specs">
-                <div className="spec"><div className="small">Range</div><div className="v">{hero.range}</div></div>
-                <div className="spec"><div className="small">Power</div><div className="v">{hero.hp}</div></div>
-                <div className="spec"><div className="small">Year</div><div className="v">{hero.year}</div></div>
+                <div className="spec"><div className="small">{t.hero.specRange}</div><div className="v">{hero.range}</div></div>
+                <div className="spec"><div className="small">{t.hero.specPower}</div><div className="v">{hero.hp}</div></div>
+                <div className="spec"><div className="small">{t.hero.specYear}</div><div className="v">{hero.year}</div></div>
               </div>
               <div className="hero-cta-row">
                 <button className="btn btn-primary" onClick={() => setModal(true)}>
-                  View Available Cars
+                  {t.hero.cta1}
                   <BtnArrow />
                 </button>
                 <button className="btn hero-btn-ghost" onClick={() => setModal(true)}>
-                  Get a Personal Offer
+                  {t.hero.cta2}
                 </button>
               </div>
               <div className="hero-trust-chips">
-                <span>Cars in stock</span>
-                <span>Import from Germany</span>
-                <span>Warranty</span>
-                <span>Financing</span>
-                <span>Delivery across Portugal</span>
+                <span>{t.hero.chip1}</span>
+                <span>{t.hero.chip2}</span>
+                <span>{t.hero.chip3}</span>
+                <span>{t.hero.chip4}</span>
+                <span>{t.hero.chip5}</span>
               </div>
             </div>
 
@@ -490,18 +492,18 @@ export default function App() {
             </div>
             <div className="trust-sep" />
             <div className="trust-item">
-              <span className="trust-num">Warranty</span>
-              Options available
+              <span className="trust-num">{t.trust.warranty}</span>
+              {t.trust.warrantyDesc}
             </div>
             <div className="trust-sep" />
             <div className="trust-item">
-              <span className="trust-num">Financing</span>
-              Available
+              <span className="trust-num">{t.trust.financing}</span>
+              {t.trust.financingDesc}
             </div>
             <div className="trust-sep" />
             <div className="trust-item">
-              <span className="trust-num">Portugal</span>
-              Delivery
+              <span className="trust-num">{t.trust.portugal}</span>
+              {t.trust.portugalDesc}
             </div>
           </div>
         </div>
@@ -511,9 +513,9 @@ export default function App() {
       <section className="models" id="models">
         <div className="wrap">
           <div className="models-title">
-            <span className="eyebrow">Available Now</span>
-            <h2 className="h2" style={{ marginTop: '12px' }}>Selected Cars in Stock</h2>
-            <p className="models-desc">Carefully selected BMW and Mercedes-Benz electric and hybrid vehicles. Every car is chosen for its condition, configuration, market value and long-term ownership potential.</p>
+            <span className="eyebrow">{t.models.eyebrow}</span>
+            <h2 className="h2" style={{ marginTop: '12px' }}>{t.models.h2}</h2>
+            <p className="models-desc">{t.models.desc}</p>
           </div>
           <div className="models-filters-wrap" onScroll={() => setSwipeHinted(true)}>
             <div className="models-filters">
@@ -535,7 +537,7 @@ export default function App() {
                   <path d="M17 13a2 2 0 1 1 4 0v2a6 6 0 0 1-6 6H9a6 6 0 0 1-5.2-3L2 14"/>
                   <path d="M5 14a2 2 0 0 1 4 0"/>
                 </svg>
-                <span>Scroll to see more</span>
+                <span>{t.models.swipeHint}</span>
               </div>
             )}
           </div>
@@ -543,9 +545,9 @@ export default function App() {
             {visibleCars.length === 0
               ? (
                 <div className="models-empty">
-                  <p>No cars match this filter — but we can source one for you.</p>
+                  <p>{t.models.emptyText}</p>
                   <button className="btn btn-primary" style={{ margin: '16px auto 0', display: 'flex' }} onClick={() => setModal(true)}>
-                    Request Import from Germany
+                    {t.models.emptyCta}
                     <BtnArrow />
                   </button>
                 </div>
@@ -556,16 +558,16 @@ export default function App() {
                   {i === 3 && visibleCars.length > 4 && (
                     <div className="catalog-stripe" id="import">
                       <div className="cs-content">
-                        <strong className="cs-heading">Looking for a specific BMW or Mercedes?</strong>
-                        <span className="cs-text">If the right car is not currently in stock, we can source, inspect and import it from Germany with full documentation support.</span>
+                        <strong className="cs-heading">{t.stripe.heading}</strong>
+                        <span className="cs-text">{t.stripe.text}</span>
                       </div>
                       <div className="cs-btns">
                         <button className="btn btn-primary cs-btn" onClick={() => setModal(true)}>
-                          Request Import from Germany
+                          {t.stripe.cta1}
                           <BtnArrow />
                         </button>
                         <button className="btn cs-btn-sec" onClick={() => setModal(true)}>
-                          Get a Personal Offer
+                          {t.stripe.cta2}
                         </button>
                       </div>
                     </div>
@@ -584,104 +586,32 @@ export default function App() {
       <section className="what-you-get" id="financing">
         <div className="wrap">
           <div className="wyg-head">
-            <span className="eyebrow">What You Get</span>
-            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>What You Get with Every Purchase</h2>
-            <p className="wyg-sub">From vehicle selection to financing, documents and delivery, TURBOEAGLE supports the full process with transparency and attention to detail.</p>
+            <span className="eyebrow">{t.wyg.eyebrow}</span>
+            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>{t.wyg.h2}</h2>
+            <p className="wyg-sub">{t.wyg.sub}</p>
           </div>
           <div className="wyg-grid wyg-grid-3">
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 8h24l4 8H8l4-8Z"/><rect x="8" y="16" width="32" height="24" rx="2"/>
-                  <path d="M20 28h8M24 24v8"/>
-                </svg>
+            {[
+              <svg key={0} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 8h24l4 8H8l4-8Z"/><rect x="8" y="16" width="32" height="24" rx="2"/><path d="M20 28h8M24 24v8"/></svg>,
+              <svg key={1} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M24 4 6 10v14c0 11 8 19 18 22 10-3 18-11 18-22V10L24 4Z"/><path d="m16 24 6 6 12-12"/></svg>,
+              <svg key={2} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="6" y="14" width="36" height="24" rx="2"/><path d="M6 22h36M14 30h6"/></svg>,
+              <svg key={3} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 20h24l-6-6M40 28H16l6 6"/></svg>,
+              <svg key={4} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="24" cy="20" r="10"/><path d="M8 42c0-8.8 7.2-16 16-16s16 7.2 16 16"/><path d="M30 16l4 4-8 8"/></svg>,
+              <svg key={5} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="24" cy="24" r="10"/><path d="M24 14v4M24 30v4M14 24h4M30 24h4"/></svg>,
+              <svg key={6} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="8" y="10" width="32" height="28" rx="2"/><path d="M16 20h16M16 27h10"/></svg>,
+              <svg key={7} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="10" y="8" width="28" height="34" rx="2"/><path d="M16 18h16M16 25h16M16 32h10"/><path d="M32 36l4 4 6-6" strokeWidth="2"/></svg>,
+              <svg key={8} viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 32c6 0 10-4 18-4s12 4 18 4"/><path d="M10 24l4-8h20l4 8"/><rect x="8" y="32" width="32" height="8" rx="2"/></svg>,
+            ].map((icon, i) => (
+              <div key={i} className="wyg-cell">
+                <div className="wyg-icon">{icon}</div>
+                <h3>{t.wyg.cells[i].h}</h3>
+                <p>{t.wyg.cells[i].p}</p>
               </div>
-              <h3>Exclusive Stock</h3>
-              <p>Premium BMW and Mercedes-Benz electric and hybrid vehicles selected for condition, configuration and value.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M24 4 6 10v14c0 11 8 19 18 22 10-3 18-11 18-22V10L24 4Z"/>
-                  <path d="m16 24 6 6 12-12"/>
-                </svg>
-              </div>
-              <h3>Warranty Support</h3>
-              <p>Selected vehicles come with warranty options, giving you more confidence after purchase.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="6" y="14" width="36" height="24" rx="2"/>
-                  <path d="M6 22h36M14 30h6"/>
-                </svg>
-              </div>
-              <h3>Fast Financing</h3>
-              <p>We help you understand available financing options and move through the process quickly and clearly.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M8 20h24l-6-6M40 28H16l6 6"/>
-                </svg>
-              </div>
-              <h3>Trade-In Available</h3>
-              <p>Use your current car as part of the payment and make the transition to your next vehicle easier.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="24" cy="20" r="10"/><path d="M8 42c0-8.8 7.2-16 16-16s16 7.2 16 16"/>
-                  <path d="M30 16l4 4-8 8"/>
-                </svg>
-              </div>
-              <h3>Import from Germany</h3>
-              <p>If the right vehicle is not in stock, we can source it in Germany and manage the process from selection to delivery.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="24" cy="24" r="10"/><path d="M24 14v4M24 30v4M14 24h4M30 24h4"/>
-                </svg>
-              </div>
-              <h3>On-Site Inspection</h3>
-              <p>A qualified specialist can inspect the vehicle before purchase to reduce risk and confirm its real condition.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="8" y="10" width="32" height="28" rx="2"/>
-                  <path d="M16 20h16M16 27h10"/>
-                </svg>
-              </div>
-              <h3>Transparent Costs</h3>
-              <p>We explain the financial side clearly, so you understand the full picture before making a decision.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="10" y="8" width="28" height="34" rx="2"/>
-                  <path d="M16 18h16M16 25h16M16 32h10"/>
-                  <path d="M32 36l4 4 6-6" strokeWidth="2"/>
-                </svg>
-              </div>
-              <h3>Documents Handled</h3>
-              <p>We support the documentation process required to bring and register the vehicle in Portugal.</p>
-            </div>
-            <div className="wyg-cell">
-              <div className="wyg-icon">
-                <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M6 32c6 0 10-4 18-4s12 4 18 4"/>
-                  <path d="M10 24l4-8h20l4 8"/><rect x="8" y="32" width="32" height="8" rx="2"/>
-                </svg>
-              </div>
-              <h3>Portugal Delivery</h3>
-              <p>Safe and convenient delivery can be arranged across Portugal depending on the vehicle and location.</p>
-            </div>
+            ))}
           </div>
           <div style={{ textAlign: 'center', marginTop: '48px' }}>
             <button className="btn btn-primary" onClick={() => setModal(true)}>
-              Get a Consultation
+              {t.wyg.cta}
               <BtnArrow />
             </button>
           </div>
@@ -692,51 +622,41 @@ export default function App() {
       <section className="video-testi" id="reviews">
         <div className="wrap">
           <div className="vt-head">
-            <span className="eyebrow">Client Stories</span>
-            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>Real Clients. Real Experiences.</h2>
-            <p className="vt-sub">From available stock to imported vehicles and financing support, see how clients found their electric or hybrid BMW and Mercedes-Benz with TURBOEAGLE.</p>
+            <span className="eyebrow">{t.reviews.eyebrow}</span>
+            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>{t.reviews.h2}</h2>
+            <p className="vt-sub">{t.reviews.sub}</p>
           </div>
           <div className="vt-grid">
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-bmw-i4.jpg')" }}>
-                <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                    <path d="M5 4l15 8-15 8V4z"/>
-                  </svg>
-                </button>
-                <div className="vt-badge">BMW i4 · Portugal</div>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/review-1.jpg')" }}>
+                <div className="vt-badge">Mercedes-Benz · Lisboa</div>
               </div>
               <div className="vt-info">
                 <div className="vt-stars">★★★★★</div>
-                <div className="vt-title">BMW i4 Delivered in Portugal</div>
-                <p className="vt-quote">The client wanted a premium electric car with strong range, warranty support and financing options. We helped find the right BMW i4 and guided the process until delivery.</p>
+                <div className="vt-title">{t.reviews.r1title}</div>
+                <p className="vt-quote">{t.reviews.r1quote}</p>
                 <div className="vt-author">
-                  <div className="vt-avatar-placeholder">C</div>
+                  <div className="vt-avatar-placeholder">R</div>
                   <div>
-                    <div className="vt-name">TURBOEAGLE Client</div>
-                    <div className="vt-loc">Lisbon, Portugal</div>
+                    <div className="vt-name">R. &amp; A. M.</div>
+                    <div className="vt-loc">Lisboa, Portugal</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-mercedes-glc.jpg')" }}>
-                <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                    <path d="M5 4l15 8-15 8V4z"/>
-                  </svg>
-                </button>
-                <div className="vt-badge">Mercedes-Benz · Financing</div>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/review-2.jpg')" }}>
+                <div className="vt-badge">BMW · Porto</div>
               </div>
               <div className="vt-info">
                 <div className="vt-stars">★★★★★</div>
-                <div className="vt-title">Mercedes-Benz Hybrid with Financing</div>
-                <p className="vt-quote">A client needed a comfortable hybrid Mercedes-Benz with clear financing conditions. We prepared options and helped move the process forward quickly.</p>
+                <div className="vt-title">{t.reviews.r2title}</div>
+                <p className="vt-quote">{t.reviews.r2quote}</p>
                 <div className="vt-author">
-                  <div className="vt-avatar-placeholder">B</div>
+                  <div className="vt-avatar-placeholder">D</div>
                   <div>
-                    <div className="vt-name">Business Client</div>
+                    <div className="vt-name">D. F.</div>
                     <div className="vt-loc">Porto, Portugal</div>
                   </div>
                 </div>
@@ -744,32 +664,45 @@ export default function App() {
             </div>
 
             <div className="vt-card">
-              <div className="vt-thumb" style={{ backgroundImage: "url('assets/car-bmw-x5.jpg')" }}>
-                <button className="vt-play" aria-label="Play video" onClick={() => setModal(true)}>
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                    <path d="M5 4l15 8-15 8V4z"/>
-                  </svg>
-                </button>
-                <div className="vt-badge">Import · Germany</div>
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/review-3.jpg')" }}>
+                <div className="vt-badge">BMW 3 · Setúbal</div>
               </div>
               <div className="vt-info">
                 <div className="vt-stars">★★★★★</div>
-                <div className="vt-title">Imported from Germany</div>
-                <p className="vt-quote">The right car was not available locally, so we helped source it in Germany, supported the inspection and managed the documentation process.</p>
+                <div className="vt-title">{t.reviews.r3title}</div>
+                <p className="vt-quote">{t.reviews.r3quote}</p>
                 <div className="vt-author">
-                  <div className="vt-avatar-placeholder">P</div>
+                  <div className="vt-avatar-placeholder">M</div>
                   <div>
-                    <div className="vt-name">Private Buyer</div>
-                    <div className="vt-loc">Faro, Portugal</div>
+                    <div className="vt-name">M. &amp; J. P.</div>
+                    <div className="vt-loc">Setúbal, Portugal</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="vt-card">
+              <div className="vt-thumb" style={{ backgroundImage: "url('assets/review-4.jpg')" }}>
+                <div className="vt-badge">Mercedes-Benz · Cascais</div>
+              </div>
+              <div className="vt-info">
+                <div className="vt-stars">★★★★★</div>
+                <div className="vt-title">{t.reviews.r4title}</div>
+                <p className="vt-quote">{t.reviews.r4quote}</p>
+                <div className="vt-author">
+                  <div className="vt-avatar-placeholder">S</div>
+                  <div>
+                    <div className="vt-name">S. C.</div>
+                    <div className="vt-loc">Cascais, Portugal</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div className="vt-cta">
-            <p>Want a similar result?</p>
+            <p>{t.reviews.ctaLabel}</p>
             <button className="btn btn-primary" onClick={() => setModal(true)}>
-              Get Your Offer
+              {t.reviews.cta}
               <BtnArrow />
             </button>
           </div>
@@ -781,9 +714,9 @@ export default function App() {
         <div className="wrap">
           <div className="loc-inner">
             <div className="loc-info">
-              <span className="eyebrow">Visit Us</span>
-              <h2 className="h2" style={{ marginTop: '12px' }}>Visit Our Showroom</h2>
-              <p className="loc-sub">Visit our location in Portugal to view available vehicles, discuss financing, evaluate trade-in options or start a custom import request.</p>
+              <span className="eyebrow">{t.location.eyebrow}</span>
+              <h2 className="h2" style={{ marginTop: '12px' }}>{t.location.h2}</h2>
+              <p className="loc-sub">{t.location.sub}</p>
               <div className="loc-details">
                 <div className="loc-row">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" style={{ flexShrink: 0 }}>
@@ -815,11 +748,11 @@ export default function App() {
               </div>
               <div className="loc-actions">
                 <button className="btn btn-primary" onClick={() => setModal(true)}>
-                  Book a Visit
+                  {t.location.cta1}
                   <BtnArrow />
                 </button>
                 <a href="https://maps.app.goo.gl/LKGjrHVtnkbQkmzv5?g_st=iw" target="_blank" rel="noopener noreferrer" className="btn btn-dark">
-                  Get Directions
+                  {t.location.cta2}
                 </a>
               </div>
             </div>
@@ -843,11 +776,11 @@ export default function App() {
       <section className="faq" id="faq">
         <div className="wrap">
           <div className="faq-head">
-            <span className="eyebrow">FAQ</span>
-            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>Frequently Asked Questions</h2>
+            <span className="eyebrow">{t.faq.eyebrow}</span>
+            <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>{t.faq.h2}</h2>
           </div>
           <div className="faq-cols">
-            {[FAQ_ITEMS.slice(0, 5), FAQ_ITEMS.slice(5)].map((col, ci) => (
+            {[t.faq.items.slice(0, 5), t.faq.items.slice(5)].map((col, ci) => (
               <div key={ci} className="faq-list">
                 {col.map((item, li) => {
                   const idx = ci * 5 + li
@@ -875,9 +808,9 @@ export default function App() {
             ))}
           </div>
           <div style={{ textAlign: 'center', marginTop: '48px' }}>
-            <p style={{ color: 'var(--muted)', marginBottom: '16px', fontSize: '15px' }}>Still have questions?</p>
+            <p style={{ color: 'var(--muted)', marginBottom: '16px', fontSize: '15px' }}>{t.faq.stillQ}</p>
             <button className="btn btn-primary" onClick={() => setModal(true)}>
-              Talk to Our Team
+              {t.faq.cta}
               <BtnArrow />
             </button>
           </div>
@@ -888,28 +821,26 @@ export default function App() {
       <section className="final-cta">
         <div className="wrap">
           <div className="final-cta-inner">
-            <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.6)' }}>Get Started</span>
+            <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.6)' }}>{t.finalCta.eyebrow}</span>
             <h2 className="h2 h2-center" style={{ marginTop: '12px', color: '#fff' }}>
-              Ready to Find the Right<br/>BMW or Mercedes?
+              {t.finalCta.h2.split('\n').map((l,i,a) => <span key={i}>{l}{i<a.length-1&&<br/>}</span>)}
             </h2>
-            <p className="final-cta-sub">
-              Tell us what you are looking for and we will help you find the best available option — from our stock or through a custom import from Germany.
-            </p>
+            <p className="final-cta-sub">{t.finalCta.sub}</p>
             <div className="final-cta-points">
-              <span>Stock vehicles</span>
-              <span>Custom import</span>
-              <span>Financing support</span>
-              <span>Trade-in available</span>
-              <span>Warranty options</span>
-              <span>Portugal delivery</span>
+              <span>{t.finalCta.p1}</span>
+              <span>{t.finalCta.p2}</span>
+              <span>{t.finalCta.p3}</span>
+              <span>{t.finalCta.p4}</span>
+              <span>{t.finalCta.p5}</span>
+              <span>{t.finalCta.p6}</span>
             </div>
             <div className="final-cta-btns">
               <button className="btn btn-primary final-cta-main" onClick={() => setModal(true)}>
-                Get a Personal Offer
+                {t.finalCta.cta1}
                 <BtnArrow />
               </button>
               <a href="#models" className="final-cta-sec">
-                View Available Cars
+                {t.finalCta.cta2}
               </a>
             </div>
           </div>
@@ -923,9 +854,9 @@ export default function App() {
       <div className={`sticky-cta${stickyVis ? ' sticky-vis' : ''}`}>
         {scrollPhase === 'top' ? (
           <>
-            <Link to="/cars" className="sticky-btn sticky-btn-sec">Catalog</Link>
+            <Link to="/cars" className="sticky-btn sticky-btn-sec">{t.sticky.catalog}</Link>
             <button className="sticky-btn sticky-btn-pri" onClick={() => setModal(true)}>
-              Find My Car
+              {t.sticky.findMyCar}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m9 5 7 7-7 7"/>
               </svg>
@@ -933,9 +864,9 @@ export default function App() {
           </>
         ) : (
           <>
-            <a href="tel:+351000000000" className="sticky-btn sticky-btn-sec">Call us</a>
+            <a href="tel:+351000000000" className="sticky-btn sticky-btn-sec">{t.sticky.callUs}</a>
             <button className="sticky-btn sticky-btn-pri" onClick={() => setModal(true)}>
-              Find My Car
+              {t.sticky.findMyCar}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m9 5 7 7-7 7"/>
               </svg>
@@ -963,7 +894,7 @@ export default function App() {
             <input
               type="search"
               autoFocus
-              placeholder="Search cars by name, brand, category…"
+              placeholder={t.search.placeholder}
               value={srch.query}
               onChange={e => setSrch(p => ({ ...p, query: e.target.value }))}
             />
@@ -975,7 +906,7 @@ export default function App() {
           </div>
           <div className="search-results" onClick={e => e.stopPropagation()}>
             {srch.query.trim().length > 1 && searchResults.length === 0 && (
-              <div className="search-empty">No cars found for "{srch.query}"</div>
+              <div className="search-empty">{t.search.empty} "{srch.query}"</div>
             )}
             {searchResults.map(c => (
               <Link

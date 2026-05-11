@@ -1,0 +1,198 @@
+const pt = {
+  // Nav
+  nav: {
+    catalog: 'Catálogo', cars: 'Carros', import: 'Importação',
+    financing: 'Financiamento', tradeIn: 'Retoma', reviews: 'Avaliações',
+    location: 'Localização', faq: 'FAQ', getOffer: 'Pedir Oferta',
+  },
+  // Hero
+  hero: {
+    eyebrow: 'Elétrico & Híbrido Premium · Portugal',
+    h1: 'BMW e Mercedes-Benz\nElétrico & Híbrido,\nSelecionados para Portugal',
+    desc: 'Veículos em stock ou importados da Alemanha — com garantia, financiamento e entrega.',
+    cta1: 'Ver Carros Disponíveis', cta2: 'Pedir Oferta Pessoal',
+    chip1: 'Carros em stock', chip2: 'Importação da Alemanha',
+    chip3: 'Garantia', chip4: 'Financiamento', chip5: 'Entrega em Portugal',
+    specRange: 'Autonomia', specPower: 'Potência', specYear: 'Ano',
+  },
+  // Trust bar
+  trust: {
+    warranty: 'Garantia', warrantyDesc: 'Opções disponíveis',
+    financing: 'Financiamento', financingDesc: 'Disponível',
+    portugal: 'Portugal', portugalDesc: 'Entrega',
+  },
+  // Models section
+  models: {
+    eyebrow: 'Disponíveis Agora',
+    h2: 'Carros Selecionados em Stock',
+    desc: 'Veículos elétricos e híbridos BMW e Mercedes-Benz cuidadosamente selecionados. Cada carro é escolhido pela sua condição, configuração, valor de mercado e potencial a longo prazo.',
+    filterAll: 'Todos', swipeHint: 'Deslize para ver mais',
+    emptyText: 'Nenhum carro corresponde a este filtro — mas podemos encontrar um para si.',
+    emptyCta: 'Pedir Importação da Alemanha',
+  },
+  // Catalog stripe (mid-list banner)
+  stripe: {
+    heading: 'À procura de um BMW ou Mercedes específico?',
+    text: 'Se o carro certo não está em stock, podemos encontrar, inspecionar e importar da Alemanha com suporte completo de documentação.',
+    cta1: 'Pedir Importação da Alemanha', cta2: 'Pedir Oferta Pessoal',
+  },
+  // What you get
+  wyg: {
+    eyebrow: 'O Que Recebe',
+    h2: 'O Que Recebe em Cada Compra',
+    sub: 'Da seleção do veículo ao financiamento, documentação e entrega, a TURBOEAGLE apoia todo o processo com transparência e atenção ao detalhe.',
+    cta: 'Pedir Consulta',
+    cells: [
+      { h: 'Stock Exclusivo', p: 'Veículos elétricos e híbridos BMW e Mercedes-Benz selecionados pela condição, configuração e valor.' },
+      { h: 'Suporte de Garantia', p: 'Veículos selecionados vêm com opções de garantia, dando mais confiança após a compra.' },
+      { h: 'Financiamento Rápido', p: 'Ajudamos a compreender as opções de financiamento disponíveis e a avançar de forma rápida e clara.' },
+      { h: 'Retoma Disponível', p: 'Use o seu carro atual como parte do pagamento e facilite a transição para o próximo veículo.' },
+      { h: 'Importação da Alemanha', p: 'Se o veículo certo não estiver em stock, podemos encontrá-lo na Alemanha e gerir todo o processo.' },
+      { h: 'Inspeção no Local', p: 'Um especialista pode inspecionar o veículo antes da compra para reduzir o risco e confirmar o estado real.' },
+      { h: 'Custos Transparentes', p: 'Explicamos a parte financeira com clareza para que compreenda o quadro completo antes de decidir.' },
+      { h: 'Documentação Tratada', p: 'Apoiamos o processo de documentação necessário para trazer e registar o veículo em Portugal.' },
+      { h: 'Entrega em Portugal', p: 'Entrega segura e conveniente pode ser organizada em todo o Portugal conforme o veículo e a localização.' },
+    ],
+  },
+  // Reviews
+  reviews: {
+    eyebrow: 'Histórias de Clientes', h2: 'Clientes Reais. Experiências Reais.',
+    sub: 'De stock disponível a veículos importados e apoio ao financiamento, veja como os clientes encontraram o seu BMW ou Mercedes-Benz elétrico ou híbrido com a TURBOEAGLE.',
+    ctaLabel: 'Quer um resultado semelhante?', cta: 'Pedir a Sua Oferta',
+    r1title: 'Mercedes-Benz entregue em Lisboa',
+    r1quote: 'Ficámos muito satisfeitos com todo o processo. A equipa guiou-nos em cada etapa e o carro superou as nossas expectativas. Entrega impecável ao pôr do sol!',
+    r2title: 'BMW encontrado e entregue no Porto',
+    r2quote: 'Processo rápido e completamente transparente. Conseguiram encontrar exatamente o BMW que procurava. Recomendo sem hesitar a qualquer pessoa.',
+    r3title: 'BMW 3 Series — casal feliz em Setúbal',
+    r3quote: 'Atendimento excelente do início ao fim. Entregaram o BMW dos nossos sonhos dentro do prazo prometido. A equipa está sempre disponível para ajudar.',
+    r4title: 'Mercedes-Benz em Cascais — entrega no próprio dia',
+    r4quote: 'Equipa profissional e muito transparente. Encontraram o Mercedes perfeito para mim e todo o processo foi simples e sem surpresas. Muito obrigada!',
+  },
+  // Location
+  location: {
+    eyebrow: 'Visite-Nos', h2: 'Visite o Nosso Showroom',
+    sub: 'Visite-nos em Portugal para ver os veículos disponíveis, discutir financiamento, avaliar opções de retoma ou iniciar um pedido de importação personalizada.',
+    cta1: 'Marcar Visita', cta2: 'Obter Direções',
+  },
+  // FAQ
+  faq: {
+    eyebrow: 'FAQ', h2: 'Perguntas Frequentes',
+    stillQ: 'Ainda tem dúvidas?', cta: 'Falar com a Nossa Equipa',
+    items: [
+      { q: 'Verificam o estado da bateria dos veículos elétricos?', a: 'Sim. O estado da bateria é um dos pontos-chave que os clientes perguntam ao comprar um veículo elétrico ou híbrido. Quando disponível, fornecemos informação sobre o estado da bateria e explicamos o que significa para o uso real.' },
+      { q: 'Os carros vêm com garantia?', a: 'Veículos selecionados vêm com opções de garantia. O prazo exato depende do carro específico, estado e condições de compra. A informação de garantia é apresentada na página do veículo ou durante a consulta.' },
+      { q: 'Os carros têm documentos de histórico de serviço?', a: 'Sempre que disponível, fornecemos registos de manutenção e informação do histórico de serviço. Isto ajuda o comprador a perceber como o veículo foi mantido.' },
+      { q: 'Posso financiar um carro?', a: 'Sim. O financiamento está disponível para veículos selecionados. A nossa equipa pode ajudar a entender as opções disponíveis e preparar um pedido de financiamento.' },
+      { q: 'Posso usar o meu carro atual como retoma?', a: 'Sim. A retoma está disponível. Pode enviar-nos informação sobre o seu carro atual e ajudaremos a estimar como pode ser usado na próxima compra.' },
+      { q: 'Podem importar um carro da Alemanha?', a: 'Sim. Oferecemos um serviço completo de importação da Alemanha, incluindo pesquisa de veículos, inspeção, transparência financeira, logística e documentação.' },
+      { q: 'Fazem entrega em todo o Portugal?', a: 'Sim. A entrega em Portugal pode ser organizada consoante o veículo e a localização.' },
+      { q: 'Quanto tempo demora o processo de importação?', a: 'O prazo depende do veículo específico, inspeção, processo de compra, logística e documentação. Após compreender o pedido, podemos dar uma estimativa mais precisa.' },
+      { q: 'Posso reservar um carro pelo website?', a: 'Pode enviar um pedido para um veículo específico diretamente da sua página. A nossa equipa contactará para confirmar disponibilidade e próximos passos.' },
+      { q: 'Como funciona o processo de compra?', a: 'O processo começa com uma consulta para perceber as suas necessidades. Depois, recomendamos veículos disponíveis em stock ou através de importação. Apoiamos em todas as etapas, desde a seleção até à entrega.' },
+    ],
+  },
+  // Final CTA
+  finalCta: {
+    eyebrow: 'Começar',
+    h2: 'Pronto para Encontrar o BMW\nou Mercedes Certo?',
+    sub: 'Diga-nos o que procura e ajudaremos a encontrar a melhor opção disponível — do nosso stock ou através de uma importação personalizada da Alemanha.',
+    p1: 'Veículos em stock', p2: 'Importação personalizada', p3: 'Apoio ao financiamento',
+    p4: 'Retoma disponível', p5: 'Opções de garantia', p6: 'Entrega em Portugal',
+    cta1: 'Pedir Oferta Pessoal', cta2: 'Ver Carros Disponíveis',
+  },
+  // Sticky CTA
+  sticky: { catalog: 'Catálogo', callUs: 'Ligar', findMyCar: 'Encontrar o Meu Carro' },
+  // Catalog page
+  catalog: {
+    h1: 'Catálogo de Carros', results: 'carros', sortNewest: 'Mais recentes',
+    sortPriceAsc: 'Preço: crescente', sortPriceDesc: 'Preço: decrescente',
+    sortMileage: 'Menos km',
+    filtersTitle: 'Filtros', brand: 'Marca', fuelType: 'Combustível',
+    price: 'Preço', year: 'Ano', mileage: 'Quilometragem',
+    availability: 'Disponibilidade', options: 'Opções',
+    allBrands: 'Todas as marcas', clearAll: 'Limpar tudo', all: 'Todos',
+    allFuelTypes: 'Todos', allStatus: 'Todos',
+    inStock: 'Em Stock', financing: 'Financiamento', warranty: 'Garantia', tradeIn: 'Retoma',
+    upTo: 'até', from: 'desde',
+    noResults: 'Nenhum carro encontrado.',
+    request: 'Pedir', view: 'Ver',
+  },
+  // Car detail page
+  car: {
+    available: 'Disponível', reserved: 'Reservado', incoming: 'A Chegar', sold: 'Vendido',
+    electric: 'Elétrico', hybrid: 'Híbrido', petrol: 'Gasolina', diesel: 'Diesel',
+    requestOffer: 'Pedir Oferta', contactWhatsApp: 'WhatsApp',
+    year: 'ANO', fuel: 'COMBUSTÍVEL', mileage: 'QUILOMETRAGEM', power: 'POTÊNCIA',
+    evRange: 'AUTONOMIA EV', drive: 'TRAÇÃO', gearbox: 'CAIXA', battery: 'BATERIA',
+    engine: 'MOTOR', batteryHealth: 'SAÚDE BATERIA', exterior: 'COR EXTERIOR', interior: 'COR INTERIOR',
+    orByCall: 'Ou por chamada', requestInfo: 'Pedir Informação',
+    aboutTitle: 'Sobre este carro', equipTitle: 'Equipamento e Funcionalidades',
+    interestedTitle: 'Interessado neste carro?',
+    interestedSub: 'Deixe um pedido — o nosso gestor contactará em 15 minutos.',
+    viewingNow: 'pessoas estão a ver este carro agora',
+    tabAbout: 'Descrição', tabEquip: 'Equipamento', tabFinancing: 'Financiamento', tabDelivery: 'Entrega',
+    financingAvailable: 'Financiamento disponível', warrantyAvailable: 'Garantia disponível',
+    tradeInAvailable: 'Retoma disponível', deliveryAvailable: 'Entrega em Portugal',
+    similarTitle: 'Veículos Semelhantes',
+    automatic: 'Automático', manual: 'Manual',
+  },
+  // Widget / Modal / LeadPopup
+  widget: {
+    needHelp: 'Precisa de ajuda?', onlineNow: 'Online agora',
+    intro: 'Olá! Posso ajudá-lo a encontrar o BMW ou Mercedes-Benz certo em stock ou através de importação da Alemanha.',
+    namePlaceholder: 'O seu nome', phonePlaceholder: '+351 000 000 000',
+    submitCta: 'Pedir consulta', sent: 'Recebido! Entraremos em contacto em 15 min.',
+  },
+  modal: {
+    title: 'Pedir uma Consulta',
+    sub: 'Deixe o seu contacto e a nossa equipa entrará em contacto brevemente.',
+    namePlaceholder: 'O seu nome', phonePlaceholder: '+351 000 000 000',
+    messagePlaceholder: 'Que tipo de carro procura?',
+    submit: 'Pedir Consulta', sending: 'A enviar…', sent: 'Pedido enviado!',
+    sentSub: 'Entraremos em contacto brevemente.',
+    orVia: 'Ou contacte através de',
+  },
+  leadPopup: {
+    eyebrow: 'Oferta Especial',
+    title: 'Encontre o Seu Próximo Carro',
+    sub: 'Diga-nos o que procura e apresentaremos as melhores opções disponíveis em stock ou através de importação.',
+    namePlaceholder: 'O seu nome', phonePlaceholder: '+351 000 000 000',
+    submit: 'Ver Opções Disponíveis', disclaimer: 'Sem spam. Uma chamada. Sem compromisso.',
+  },
+  // Footer
+  footer: {
+    desc: 'TURBOEAGLE — Comércio de Automóveis. Ajudamos clientes em Portugal a comprar veículos elétricos e híbridos BMW e Mercedes-Benz selecionados — em stock ou importados da Alemanha.',
+    navLabel: 'Navegação', servicesLabel: 'Serviços', contactLabel: 'Contacto',
+    home: 'Início', cars: 'Carros', importGermany: 'Importação da Alemanha',
+    financingLink: 'Financiamento', reviewsLink: 'Avaliações', locationLink: 'Localização',
+    availableCars: 'Carros Disponíveis', customImport: 'Importação Personalizada',
+    financing: 'Financiamento', tradeIn: 'Retoma',
+    warrantySupport: 'Apoio de Garantia', portugalDelivery: 'Entrega em Portugal',
+    getOffer: 'Pedir Oferta',
+    copyright: '© TURBOEAGLE — Comércio de Automóveis. Todos os direitos reservados.',
+    privacy: 'Política de Privacidade', terms: 'Termos e Condições', cookies: 'Política de Cookies',
+  },
+  // Quiz
+  quiz: {
+    eyebrow: 'Retoma', h2: 'Qual é o Seu Próximo Carro?',
+    sub: 'Responda a algumas perguntas rápidas e ajudaremos a encontrar as melhores opções para si.',
+    step: 'Passo', of: 'de',
+    sentTitle: 'Pedido recebido!',
+    sentSub: 'A nossa equipa irá rever as suas preferências e contactar com opções adequadas.',
+    namePlaceholder: 'O seu nome', phonePlaceholder: '+351 000 000 000',
+    submit: 'Ver Resultados', back: 'Anterior',
+    steps: [
+      { question: 'Qual marca lhe interessa?', options: ['BMW', 'Mercedes-Benz', 'Ambas', 'Ainda não sei'] },
+      { question: 'Que tipo de veículo procura?', options: ['Elétrico', 'Híbrido', 'Híbrido Plug-in', 'Ainda não sei'] },
+      { question: 'Qual é o seu orçamento aproximado?', options: ['Até €30.000', '€30.000 – €45.000', '€45.000 – €65.000', '€65.000+'] },
+      { question: 'Tem interesse em financiamento?', options: ['Sim', 'Não', 'Talvez — quero comparar opções'] },
+      { question: 'Quando planeia comprar?', options: ['O mais rápido possível', 'Dentro de 30 dias', 'Dentro de 2–3 meses', 'Ainda estou a avaliar'] },
+    ],
+  },
+  search: {
+    placeholder: 'Pesquisar carros por nome, marca, categoria…',
+    empty: 'Nenhum carro encontrado para',
+  },
+}
+
+export default pt

@@ -4,6 +4,7 @@ import { fetchPublicCar, fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import { useLang } from './lang/LangContext'
 import './CarPage.css'
 
 const ICON_CALENDAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`
@@ -19,11 +20,16 @@ function imgUrl(src) {
   return `/${src}`
 }
 
-function fuelLabel(ft) {
-  if (!ft) return ''
-  if (ft === 'electric') return 'Electric'
-  if (ft === 'plug-in hybrid' || ft === 'hybrid') return 'Plug-in Hybrid'
-  return ft.charAt(0).toUpperCase() + ft.slice(1)
+function useFuelLabel() {
+  const { t } = useLang()
+  return (ft) => {
+    if (!ft) return ''
+    if (ft === 'electric') return t.car.electric
+    if (ft === 'plug-in hybrid' || ft === 'hybrid') return t.car.hybrid
+    if (ft === 'petrol') return t.car.petrol
+    if (ft === 'diesel') return t.car.diesel
+    return ft.charAt(0).toUpperCase() + ft.slice(1)
+  }
 }
 
 function ImageSlider({ images }) {
@@ -84,8 +90,10 @@ function ImageSlider({ images }) {
 }
 
 export default function CarPage() {
-  const { id }   = useParams()
-  const navigate = useNavigate()
+  const { id }     = useParams()
+  const navigate   = useNavigate()
+  const { t, lang } = useLang()
+  const fuelLabel  = useFuelLabel()
 
   const [car,     setCar]     = useState(null)
   const [similar, setSimilar] = useState([])
@@ -123,18 +131,23 @@ export default function CarPage() {
   }
 
   const allImages   = [car.img, ...car.gallery].filter(Boolean).map(imgUrl)
-  const equipment   = car.equipment?.length ? car.equipment : car.features
+  const description = (lang === 'en' && car.full_description_en) ? car.full_description_en
+                    : (lang === 'uk' && car.full_description_uk) ? car.full_description_uk
+                    : car.description
+  const equipment   = (lang === 'en' && car.equipment_en?.length) ? car.equipment_en
+                    : (lang === 'uk' && car.equipment_uk?.length) ? car.equipment_uk
+                    : (car.equipment?.length ? car.equipment : car.features)
   const isAvailable = car.status !== 'reserved' && car.status !== 'sold'
   const isEv        = car.fuelType === 'electric' || car.fuelType?.includes('hybrid')
 
   const specs = [
-    { icon: ICON_CALENDAR, label: 'Year',      value: car.year },
-    { icon: ICON_BOLT,     label: 'Fuel',      value: fuelLabel(car.fuelType) },
-    { icon: ICON_MILEAGE,  label: 'Mileage',   value: car.mileage },
-    { icon: ICON_SPEED,    label: 'Power',      value: car.hp },
-    car.range     ? { icon: ICON_BOLT,    label: 'EV Range',  value: car.range }     : null,
-    car.drivetrain? { icon: ICON_ROAD,    label: 'Drive',     value: car.drivetrain } : null,
-    { icon: ICON_GEARBOX,  label: 'Gearbox',   value: car.gearbox },
+    { icon: ICON_CALENDAR, label: t.car.year,    value: car.year },
+    { icon: ICON_BOLT,     label: t.car.fuel,    value: fuelLabel(car.fuelType) },
+    { icon: ICON_MILEAGE,  label: t.car.mileage, value: car.mileage },
+    { icon: ICON_SPEED,    label: t.car.power,   value: car.hp },
+    car.range      ? { icon: ICON_BOLT,   label: t.car.evRange, value: car.range }      : null,
+    car.drivetrain ? { icon: ICON_ROAD,   label: t.car.drive,   value: car.drivetrain } : null,
+    { icon: ICON_GEARBOX,  label: t.car.gearbox, value: car.gearbox },
   ].filter(s => s && s.value)
 
   return (
@@ -162,7 +175,7 @@ export default function CarPage() {
               <div className="badge-row">
                 <span className={`status-badge ${isAvailable ? 'status-ok' : 'status-rsv'}`}>
                   <span className="sdot" />
-                  {isAvailable ? 'Available' : 'Reserved'}
+                  {isAvailable ? t.car.available : t.car.reserved}
                 </span>
                 {isEv && (
                   <span className="fuel-badge">⚡ {fuelLabel(car.fuelType)}</span>
@@ -193,19 +206,19 @@ export default function CarPage() {
               {/* Benefit badges */}
               {(car.financing || car.warranty) && (
                 <div className="benefit-row">
-                  {car.financing && <span className="benefit">✓ Financing available</span>}
-                  {car.warranty  && <span className="benefit">✓ Warranty included</span>}
+                  {car.financing && <span className="benefit">✓ {t.car.financingAvailable}</span>}
+                  {car.warranty  && <span className="benefit">✓ {t.car.warrantyAvailable}</span>}
                 </div>
               )}
 
               {/* CTA */}
               <div className="cta-row">
                 <button className="btn btn-primary" onClick={() => setModal(true)}>
-                  Request info
+                  {t.car.requestInfo}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
                 </button>
                 <div className="book-by">
-                  <span className="k">Or by call</span>
+                  <span className="k">{t.car.orByCall}</span>
                   <a href="tel:+351000000000" className="v phone-link">+351 000 000 000</a>
                 </div>
               </div>
@@ -213,7 +226,7 @@ export default function CarPage() {
               {/* Urgency */}
               <div className="urgency-badge">
                 <span className="urgency-dot" />
-                2 people are viewing this car right now
+                2 {t.car.viewingNow}
               </div>
             </div>
           </div>
@@ -221,12 +234,12 @@ export default function CarPage() {
       </section>
 
       {/* ── DESCRIPTION ── */}
-      {car.description && (
+      {description && (
         <section className="about-sec">
           <div className="wrap about-wrap">
             <div>
-              <h2>About this car</h2>
-              <p className="about-text">{car.description}</p>
+              <h2>{t.car.aboutTitle}</h2>
+              <p className="about-text">{description}</p>
             </div>
             {/* Mini specs sidebar */}
             <div className="about-sidebar">
@@ -245,7 +258,7 @@ export default function CarPage() {
       {equipment.length > 0 && (
         <section className="equip-sec">
           <div className="wrap">
-            <h2>Equipment &amp; Features</h2>
+            <h2>{t.car.equipTitle}</h2>
             <div className="equip-grid">
               {equipment.map((f, i) => (
                 <div key={i} className="eq-item">
@@ -264,11 +277,11 @@ export default function CarPage() {
       <div className="wrap">
         <div className="post-gallery-cta">
           <div>
-            <p className="pgc-title">Interested in this car?</p>
-            <p className="pgc-sub">Leave a request — our manager will contact you within 15 minutes.</p>
+            <p className="pgc-title">{t.car.interestedTitle}</p>
+            <p className="pgc-sub">{t.car.interestedSub}</p>
           </div>
           <button className="btn btn-primary" onClick={() => setModal(true)}>
-            Request info
+            {t.car.requestInfo}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
           </button>
         </div>
@@ -313,7 +326,7 @@ export default function CarPage() {
       {similar.length > 0 && (
         <section className="similar">
           <div className="wrap">
-            <h2>You may also like</h2>
+            <h2>{t.car.similarTitle}</h2>
             <div className="similar-grid">
               {similar.map(c => {
                 const cImg = imgUrl(c.img)
@@ -331,15 +344,15 @@ export default function CarPage() {
                       <div className="stats">
                         <div className="mstat">
                           <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_CALENDAR }} />
-                          <div><span className="k">Year</span><span className="v">{c.year}</span></div>
+                          <div><span className="k">{t.car.year}</span><span className="v">{c.year}</span></div>
                         </div>
                         <div className="mstat">
                           <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_GEARBOX }} />
-                          <div><span className="k">Gearbox</span><span className="v">{c.gearbox}</span></div>
+                          <div><span className="k">{t.car.gearbox}</span><span className="v">{c.gearbox}</span></div>
                         </div>
                         <div className="mstat">
                           <span className="mstat-icon" dangerouslySetInnerHTML={{ __html: ICON_MILEAGE }} />
-                          <div><span className="k">Mileage</span><span className="v">{c.mileage}</span></div>
+                          <div><span className="k">{t.car.mileage}</span><span className="v">{c.mileage}</span></div>
                         </div>
                       </div>
                     </div>
@@ -358,7 +371,7 @@ export default function CarPage() {
       <div className="car-sticky-cta">
         <div className="car-sticky-price">€ {car.price?.toLocaleString('de-DE')}</div>
         <button className="car-sticky-btn" onClick={() => setModal(true)}>
-          Request info
+          {t.car.requestInfo}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
         </button>
       </div>

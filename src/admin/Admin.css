@@ -1115,3 +1115,33 @@ select.af-input { cursor: pointer; }
 @keyframes admin-spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Language content tabs ───────────────────────────────────────── */
+.af-lang-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.af-lang-tab {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.af-lang-tab:hover { color: #1e293b; }
+.af-lang-tab.active {
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+}

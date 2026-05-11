@@ -1,0 +1,73 @@
+.lang-sw {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(10,15,20,0.06);
+  border-radius: 20px;
+  padding: 3px;
+}
+
+.lang-sw-btn {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity .15s, background .15s, color .15s;
+  line-height: 1;
+}
+
+.lang-sw-btn--active {
+  background: var(--ink);
+  color: #fff;
+  opacity: 1;
+}
+
+.lang-sw-btn:hover:not(.lang-sw-btn--active) {
+  opacity: 0.85;
+}
+
+/* Dropdown (mobile navbar) — hidden on desktop */
+.lang-sw-select {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .lang-sw { background: transparent; padding: 0; }
+  .lang-sw-btn { display: none; }
+  .lang-sw-select {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 5px 26px 5px 10px;
+    border-radius: 16px;
+    border: none;
+    background: rgba(10,15,20,0.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+    color: var(--ink);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    line-height: 1;
+  }
+}
+
+/* Inside mobile menu (dark bg) — always pills, never select */
+.mobile-menu .lang-sw {
+  background: rgba(255,255,255,0.1);
+  padding: 3px;
+}
+.mobile-menu .lang-sw-btn {
+  display: inline-flex;
+  color: #fff;
+}
+.mobile-menu .lang-sw-btn--active {
+  background: #fff;
+  color: var(--ink);
+}
+.mobile-menu .lang-sw-select { display: none; }

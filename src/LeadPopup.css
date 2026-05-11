@@ -126,22 +126,27 @@
 
 .lp-alts {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 16px;
 }
 .lp-alt {
-  flex: 1;
-  text-align: center;
-  padding: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
   border-radius: var(--radius-md);
   font-family: var(--sans);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   text-decoration: none;
-  transition: opacity .2s;
+  transition: filter .2s;
 }
-.lp-alt:hover { opacity: 0.85; }
-.lp-ig { background: #c13584; color: #fff; }
+.lp-alt svg { flex-shrink: 0; }
+.lp-alt:hover { filter: brightness(1.1); }
+.lp-wa { background: #25d366; color: #fff; }
+.lp-ig { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
 .lp-fb { background: #1877f2; color: #fff; }
 
 /* ── Sent ── */

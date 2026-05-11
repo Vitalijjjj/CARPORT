@@ -123,6 +123,12 @@ async function initDb() {
     "ALTER TABLE cars ADD COLUMN main_image VARCHAR(500) DEFAULT NULL",
     "ALTER TABLE cars ADD COLUMN meta_title VARCHAR(200) DEFAULT NULL",
     "ALTER TABLE cars ADD COLUMN meta_description TEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN short_description_en TEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN short_description_uk TEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN full_description_en MEDIUMTEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN full_description_uk MEDIUMTEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN equipment_en TEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN equipment_uk TEXT DEFAULT NULL",
   ]) {
     try { await db.query(sql) } catch (e) { if (e.code !== 'ER_DUP_FIELDNAME') throw e }
   }
@@ -185,7 +191,15 @@ function parseJson(val, fallback) {
 }
 
 function decodeCar(row) {
-  return { ...row, price: Number(row.price), equipment: parseJson(row.equipment, []), features: parseJson(row.features, []), gallery: parseJson(row.gallery, []) }
+  return {
+    ...row,
+    price:         Number(row.price),
+    equipment:     parseJson(row.equipment,    []),
+    equipment_en:  parseJson(row.equipment_en, []),
+    equipment_uk:  parseJson(row.equipment_uk, []),
+    features:      parseJson(row.features,     []),
+    gallery:       parseJson(row.gallery,      []),
+  }
 }
 
 function toJsonField(val) {
@@ -231,8 +245,14 @@ function carFields(body, isInsert = false) {
     service_history_available:   bool('service_history_available'),
     delivery_available_portugal: bool('delivery_available_portugal'),
     short_description:           body.short_description        || null,
+    short_description_en:        body.short_description_en     || null,
+    short_description_uk:        body.short_description_uk     || null,
     full_description:            body.full_description         || null,
+    full_description_en:         body.full_description_en      || null,
+    full_description_uk:         body.full_description_uk      || null,
     equipment:                   toJsonField(body.equipment),
+    equipment_en:                toJsonField(body.equipment_en),
+    equipment_uk:                toJsonField(body.equipment_uk),
     features:                    toJsonField(body.features),
     gallery:                     toJsonField(body.gallery),
     main_image:                  body.main_image               || null,

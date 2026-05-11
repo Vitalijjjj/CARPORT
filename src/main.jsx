@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Preloader from './Preloader.jsx'
+import { LangProvider } from './lang/LangContext.jsx'
 
 // Public pages
 import App        from './App.jsx'
@@ -80,6 +81,8 @@ function Root() {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Root />
+    <LangProvider>
+      <Root />
+    </LangProvider>
   </StrictMode>,
 )

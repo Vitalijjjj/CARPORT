@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
+import { useLang } from './lang/LangContext'
 import './CatalogPage.css'
 
 function fmt(n) { return n.toLocaleString('de-DE') }
@@ -43,6 +44,7 @@ const BRAND_META = {
 function BrandSelect({ value, onChange }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
+  const { t } = useLang()
 
   useEffect(() => {
     if (!open) return
@@ -54,7 +56,7 @@ function BrandSelect({ value, onChange }) {
   }, [open])
 
   const options = [
-    { key: 'all', label: 'All brands', Logo: null },
+    { key: 'all', label: t.catalog.allBrands, Logo: null },
     ...Object.entries(BRAND_META).map(([key, { label, Logo }]) => ({ key, label, Logo })),
   ]
   const selected = options.find(o => o.key === value) ?? options[0]
@@ -106,12 +108,12 @@ function BrandSelect({ value, onChange }) {
 }
 
 /* ─── CatalogCard ───────────────────────────────────────────────── */
-const STATUS_LABELS = { in_stock: 'In Stock', reserved: 'Reserved', incoming: 'Incoming' }
-
 function CatalogCard({ car, onRequest }) {
   const navigate   = useNavigate()
+  const { t }      = useLang()
   const brandLabel = BRAND_META[car.brand]?.label ?? car.brand
-  const fuelLabel  = car.fuelType === 'electric' ? 'Electric' : 'Hybrid'
+  const fuelLabel  = car.fuelType === 'electric' ? t.car.electric : t.car.hybrid
+  const statusLabels = { in_stock: t.car.available, reserved: t.car.reserved, incoming: t.car.incoming }
   const imgSrc     = car.img
     ? (car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
     : ''
@@ -124,7 +126,7 @@ function CatalogCard({ car, onRequest }) {
           : <div className="cc-img cc-img--placeholder" />
         }
         <span className={`cc-status-badge cc-status--${car.status}`}>
-          {STATUS_LABELS[car.status] ?? car.status}
+          {statusLabels[car.status] ?? car.status}
         </span>
         <span className="cc-brand-badge">{brandLabel}</span>
       </div>
@@ -138,19 +140,19 @@ function CatalogCard({ car, onRequest }) {
 
         <div className="cc-specs">
           <div className="cc-spec">
-            <span className="cc-sk">Power</span>
+            <span className="cc-sk">{t.car.power}</span>
             <span className="cc-sv">{car.hp}</span>
           </div>
           <div className="cc-spec">
-            <span className="cc-sk">Mileage</span>
+            <span className="cc-sk">{t.car.mileage}</span>
             <span className="cc-sv">{car.mileage}</span>
           </div>
           <div className="cc-spec">
-            <span className="cc-sk">Drive</span>
+            <span className="cc-sk">{t.car.drive}</span>
             <span className="cc-sv">{car.drivetrain}</span>
           </div>
           <div className="cc-spec">
-            <span className="cc-sk">Engine</span>
+            <span className="cc-sk">{t.car.engine}</span>
             <span className="cc-sv">{car.engine}</span>
           </div>
         </div>
@@ -159,14 +161,14 @@ function CatalogCard({ car, onRequest }) {
           <div className="cc-price-col">
             <span className="cc-price">€ {fmt(car.price)}</span>
             <div className="cc-badges">
-              {car.financing && <span className="cc-badge">Financing</span>}
-              {car.warranty  && <span className="cc-badge">Warranty</span>}
+              {car.financing && <span className="cc-badge">{t.catalog.financing}</span>}
+              {car.warranty  && <span className="cc-badge">{t.catalog.warranty}</span>}
             </div>
           </div>
           <div className="cc-actions">
-            <button className="cc-btn-request" onClick={e => { e.stopPropagation(); onRequest() }}>Request</button>
+            <button className="cc-btn-request" onClick={e => { e.stopPropagation(); onRequest() }}>{t.catalog.request}</button>
             <Link className="cc-btn-view" to={`/car/${car.id}`} onClick={e => e.stopPropagation()}>
-              View
+              {t.catalog.view}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m9 5 7 7-7 7"/>
               </svg>
@@ -180,16 +182,17 @@ function CatalogCard({ car, onRequest }) {
 
 /* ─── Sidebar ───────────────────────────────────────────────────── */
 function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax, yearMin, yearMax, milMax }) {
+  const { t } = useLang()
   return (
     <aside className="cat-sidebar">
       <div className="cat-sb-head">
         <span className="cat-sb-title">
-          Filters
+          {t.catalog.filtersTitle}
           {activeCount > 0 && <em className="cat-sb-count">{activeCount}</em>}
         </span>
         <div className="cat-sb-head-right">
           {activeCount > 0 && (
-            <button className="cat-sb-clear" onClick={reset}>Clear all</button>
+            <button className="cat-sb-clear" onClick={reset}>{t.catalog.clearAll}</button>
           )}
           <button className="cat-sb-x" onClick={onClose} aria-label="Close filters">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -200,21 +203,21 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
       </div>
 
       {/* Brand */}
-      <FilterGroup label="Brand">
+      <FilterGroup label={t.catalog.brand}>
         <BrandSelect value={filters.brand} onChange={v => set('brand', v)} />
       </FilterGroup>
 
       {/* Fuel type */}
-      <FilterGroup label="Fuel Type">
+      <FilterGroup label={t.catalog.fuelType}>
         <Pills
-          options={[['all','All'],['electric','Electric'],['hybrid','Hybrid']]}
+          options={[['all', t.catalog.allFuelTypes], ['electric', t.car.electric], ['hybrid', t.car.hybrid]]}
           value={filters.fuelType}
           onChange={v => set('fuelType', v)}
         />
       </FilterGroup>
 
       {/* Price */}
-      <FilterGroup label={`Price — up to € ${fmt(filters.priceMax)}`}>
+      <FilterGroup label={`${t.catalog.price} — ${t.catalog.upTo} € ${fmt(filters.priceMax)}`}>
         <input
           type="range"
           className="cat-range"
@@ -225,7 +228,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
       </FilterGroup>
 
       {/* Year */}
-      <FilterGroup label={`Year — from ${filters.yearMin}`}>
+      <FilterGroup label={`${t.catalog.year} — ${t.catalog.from} ${filters.yearMin}`}>
         <input
           type="range"
           className="cat-range"
@@ -236,7 +239,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
       </FilterGroup>
 
       {/* Mileage */}
-      <FilterGroup label={`Mileage — up to ${fmt(filters.mileageMax)} km`}>
+      <FilterGroup label={`${t.catalog.mileage} — ${t.catalog.upTo} ${fmt(filters.mileageMax)} km`}>
         <input
           type="range"
           className="cat-range"
@@ -247,18 +250,18 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
       </FilterGroup>
 
       {/* Status */}
-      <FilterGroup label="Availability" defaultOpen={false}>
+      <FilterGroup label={t.catalog.availability} defaultOpen={false}>
         <Pills
-          options={[['all','All'],['in_stock','Available'],['reserved','Reserved']]}
+          options={[['all', t.catalog.allStatus], ['in_stock', t.car.available], ['reserved', t.car.reserved]]}
           value={filters.status}
           onChange={v => set('status', v)}
         />
       </FilterGroup>
 
       {/* Toggles */}
-      <FilterGroup label="Options" defaultOpen={false}>
-        <Toggle label="Financing" checked={filters.financing} onChange={v => set('financing', v)} />
-        <Toggle label="Warranty"  checked={filters.warranty}  onChange={v => set('warranty', v)} />
+      <FilterGroup label={t.catalog.options} defaultOpen={false}>
+        <Toggle label={t.catalog.financing} checked={filters.financing} onChange={v => set('financing', v)} />
+        <Toggle label={t.catalog.warranty}  checked={filters.warranty}  onChange={v => set('warranty', v)} />
       </FilterGroup>
     </aside>
   )
@@ -312,6 +315,7 @@ function Toggle({ label, checked, onChange }) {
 
 /* ─── CatalogPage ───────────────────────────────────────────────── */
 export default function CatalogPage() {
+  const { t } = useLang()
   const [cars,       setCars]       = useState([])
   const [loading,    setLoading]    = useState(true)
   const [filters,    setFilters]    = useState({
@@ -447,18 +451,18 @@ export default function CatalogPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/>
               </svg>
-              Filters
+              {t.catalog.filtersTitle}
               {activeCount > 0 && <span className="cat-filter-badge">{activeCount}</span>}
             </button>
             <span className="cat-count">
-              {loading ? '…' : `${results.length} ${results.length === 1 ? 'car' : 'cars'}`}
+              {loading ? '…' : `${results.length} ${t.catalog.results}`}
             </span>
             <div className="cat-sort-wrap">
               <select className="cat-sort" value={sort} onChange={e => setSort(e.target.value)}>
-                <option value="newest">Newest first</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
-                <option value="mileage_asc">Lowest mileage</option>
+                <option value="newest">{t.catalog.sortNewest}</option>
+                <option value="price_asc">{t.catalog.sortPriceAsc}</option>
+                <option value="price_desc">{t.catalog.sortPriceDesc}</option>
+                <option value="mileage_asc">{t.catalog.sortMileage}</option>
               </select>
             </div>
           </div>
@@ -470,22 +474,22 @@ export default function CatalogPage() {
                 <Chip label={BRAND_META[filters.brand]?.label ?? filters.brand} onRemove={() => set('brand', 'all')} />
               )}
               {filters.fuelType !== 'all' && (
-                <Chip label={filters.fuelType === 'electric' ? 'Electric' : 'Hybrid'} onRemove={() => set('fuelType', 'all')} />
+                <Chip label={filters.fuelType === 'electric' ? t.car.electric : t.car.hybrid} onRemove={() => set('fuelType', 'all')} />
               )}
               {filters.priceMax < PRICE_MAX && (
-                <Chip label={`Up to € ${fmt(filters.priceMax)}`} onRemove={() => set('priceMax', PRICE_MAX)} />
+                <Chip label={`${t.catalog.upTo} € ${fmt(filters.priceMax)}`} onRemove={() => set('priceMax', PRICE_MAX)} />
               )}
               {filters.yearMin > YEAR_MIN && (
-                <Chip label={`From ${filters.yearMin}`} onRemove={() => set('yearMin', YEAR_MIN)} />
+                <Chip label={`${t.catalog.from} ${filters.yearMin}`} onRemove={() => set('yearMin', YEAR_MIN)} />
               )}
               {filters.mileageMax < MIL_MAX && (
-                <Chip label={`Max ${fmt(filters.mileageMax)} km`} onRemove={() => set('mileageMax', MIL_MAX)} />
+                <Chip label={`${t.catalog.upTo} ${fmt(filters.mileageMax)} km`} onRemove={() => set('mileageMax', MIL_MAX)} />
               )}
               {filters.status !== 'all' && (
-                <Chip label={STATUS_LABELS[filters.status] ?? filters.status} onRemove={() => set('status', 'all')} />
+                <Chip label={filters.status === 'in_stock' ? t.car.available : t.car.reserved} onRemove={() => set('status', 'all')} />
               )}
-              {filters.financing && <Chip label="Financing" onRemove={() => set('financing', false)} />}
-              {filters.warranty  && <Chip label="Warranty"  onRemove={() => set('warranty',  false)} />}
+              {filters.financing && <Chip label={t.catalog.financing} onRemove={() => set('financing', false)} />}
+              {filters.warranty  && <Chip label={t.catalog.warranty}  onRemove={() => set('warranty',  false)} />}
             </div>
           )}
 
@@ -502,8 +506,8 @@ export default function CatalogPage() {
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
               </svg>
-              <p>No cars match your current filters.</p>
-              <button onClick={reset}>Clear all filters</button>
+              <p>{t.catalog.noResults}</p>
+              <button onClick={reset}>{t.catalog.clearAll}</button>
             </div>
           ) : (
             <div className="cat-grid">
