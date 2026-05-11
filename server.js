@@ -263,6 +263,7 @@ function carFields(body, isInsert = false) {
     features:                    toJsonField(body.features),
     gallery:                     toJsonField(body.gallery),
     main_image:                  body.main_image               || null,
+    youtube_url:                 body.youtube_url              || null,
     meta_title:                  body.meta_title               || null,
     meta_description:            body.meta_description         || null,
     updated_at:                  new Date(),
