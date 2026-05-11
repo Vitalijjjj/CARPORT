@@ -16,7 +16,7 @@ const ICON_ROAD     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 
 function imgUrl(src) {
   if (!src) return ''
-  if (src.startsWith('/') || src.startsWith('http')) return src
+  if (src.startsWith('data:') || src.startsWith('/') || src.startsWith('http')) return src
   return `/${src}`
 }
 
