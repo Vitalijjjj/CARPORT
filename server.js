@@ -129,6 +129,7 @@ async function initDb() {
     "ALTER TABLE cars ADD COLUMN full_description_uk MEDIUMTEXT DEFAULT NULL",
     "ALTER TABLE cars ADD COLUMN equipment_en TEXT DEFAULT NULL",
     "ALTER TABLE cars ADD COLUMN equipment_uk TEXT DEFAULT NULL",
+    "ALTER TABLE cars ADD COLUMN youtube_url VARCHAR(500) DEFAULT NULL",
   ]) {
     try { await db.query(sql) } catch (e) { if (e.code !== 'ER_DUP_FIELDNAME') throw e }
   }

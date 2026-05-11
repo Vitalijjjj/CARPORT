@@ -68,6 +68,7 @@ const EMPTY_FORM = {
   features:                    [],
   gallery:                     [],
   main_image:                  '',
+  youtube_url:                 '',
   meta_title:                  '',
   meta_description:            '',
 }
@@ -939,6 +940,24 @@ export default function AdminCarFormPage() {
             SECTION 8 — Gallery & Images
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Section title="Gallery &amp; Images">
+
+          <Field label="YouTube Video URL">
+            <input
+              className="af-input"
+              type="url"
+              placeholder="https://youtu.be/... або https://youtube.com/watch?v=..."
+              value={form.youtube_url}
+              onChange={set('youtube_url')}
+            />
+            {form.youtube_url && (() => {
+              const m = form.youtube_url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/)
+              return m ? (
+                <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', maxWidth: 320 }}>
+                  <img src={`https://img.youtube.com/vi/${m[1]}/mqdefault.jpg`} alt="YouTube preview" style={{ width: '100%', display: 'block' }} />
+                </div>
+              ) : <span style={{ fontSize: 12, color: '#ef4444', marginTop: 4, display: 'block' }}>Невалідне посилання YouTube</span>
+            })()}
+          </Field>
 
           <div className="af-gallery-upload-bar">
             <button

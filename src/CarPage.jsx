@@ -20,6 +20,68 @@ function imgUrl(src) {
   return `/${src}`
 }
 
+function ytId(url) {
+  if (!url) return null
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+const ICON_PLAY = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)"/><polygon points="9.5,7 18,12 9.5,17" fill="white"/></svg>`
+
+function Lightbox({ items, startIdx, onClose }) {
+  const [idx, setIdx] = useState(startIdx)
+  const prev = () => setIdx(i => (i - 1 + items.length) % items.length)
+  const next = () => setIdx(i => (i + 1) % items.length)
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight') next()
+      if (e.key === 'ArrowLeft')  prev()
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [idx])
+
+  const cur = items[idx]
+
+  return (
+    <div className="lb-overlay" onClick={onClose}>
+      <div className="lb-inner" onClick={e => e.stopPropagation()}>
+        <button className="lb-close" onClick={onClose} aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        {cur.type === 'video' ? (
+          <iframe
+            className="lb-video"
+            src={`https://www.youtube.com/embed/${cur.id}?autoplay=1`}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+            title="Video"
+          />
+        ) : (
+          <img src={cur.src} alt="" className="lb-img" />
+        )}
+        {items.length > 1 && (
+          <>
+            <button className="lb-btn lb-prev" onClick={prev} aria-label="Previous">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 5-7 7 7 7"/></svg>
+            </button>
+            <button className="lb-btn lb-next" onClick={next} aria-label="Next">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+          </>
+        )}
+        <div className="lb-counter">{idx + 1} / {items.length}</div>
+      </div>
+    </div>
+  )
+}
+
 function useFuelLabel() {
   const { t } = useLang()
   return (ft) => {
@@ -32,14 +94,14 @@ function useFuelLabel() {
   }
 }
 
-function ImageSlider({ images }) {
+function ImageSlider({ items, onOpenLightbox }) {
   const [idx, setIdx] = useState(0)
   const [touchX, setTouchX] = useState(null)
 
-  const prev = () => setIdx(i => (i - 1 + images.length) % images.length)
-  const next = () => setIdx(i => (i + 1) % images.length)
+  const prev = () => setIdx(i => (i - 1 + items.length) % items.length)
+  const next = () => setIdx(i => (i + 1) % items.length)
 
-  if (!images.length) {
+  if (!items.length) {
     return (
       <div className="slider-empty">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
@@ -50,6 +112,8 @@ function ImageSlider({ images }) {
       </div>
     )
   }
+
+  const cur = items[idx]
 
   return (
     <div className="img-slider">
@@ -63,8 +127,28 @@ function ImageSlider({ images }) {
           setTouchX(null)
         }}
       >
-        <img key={idx} src={images[idx]} alt="" className="slider-img" />
-        {images.length > 1 && (
+        {cur.type === 'video' ? (
+          <div className="slider-video-wrap" onClick={() => onOpenLightbox(idx)}>
+            <img
+              src={`https://img.youtube.com/vi/${cur.id}/maxresdefault.jpg`}
+              alt="Video"
+              className="slider-img"
+              onError={e => { e.target.src = `https://img.youtube.com/vi/${cur.id}/hqdefault.jpg` }}
+            />
+            <div className="slider-play-btn">
+              <svg viewBox="0 0 72 72" width="72" height="72"><circle cx="36" cy="36" r="36" fill="rgba(0,0,0,0.55)"/><polygon points="28,20 56,36 28,52" fill="white"/></svg>
+            </div>
+          </div>
+        ) : (
+          <img
+            key={idx}
+            src={cur.src}
+            alt=""
+            className="slider-img slider-img--click"
+            onClick={() => onOpenLightbox(idx)}
+          />
+        )}
+        {items.length > 1 && (
           <>
             <button className="sl-btn sl-prev" onClick={prev} aria-label="Previous">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 5-7 7 7 7"/></svg>
@@ -72,15 +156,22 @@ function ImageSlider({ images }) {
             <button className="sl-btn sl-next" onClick={next} aria-label="Next">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 5 7 7-7 7"/></svg>
             </button>
-            <div className="sl-counter">{idx + 1} / {images.length}</div>
+            <div className="sl-counter">{idx + 1} / {items.length}</div>
           </>
         )}
       </div>
-      {images.length > 1 && (
+      {items.length > 1 && (
         <div className="slider-thumbs">
-          {images.slice(0, 8).map((img, i) => (
+          {items.slice(0, 8).map((item, i) => (
             <button key={i} className={`sl-thumb${i === idx ? ' active' : ''}`} onClick={() => setIdx(i)}>
-              <img src={img} alt="" />
+              {item.type === 'video' ? (
+                <div className="sl-thumb-video">
+                  <img src={`https://img.youtube.com/vi/${item.id}/mqdefault.jpg`} alt="" />
+                  <span className="sl-thumb-play">▶</span>
+                </div>
+              ) : (
+                <img src={item.src} alt="" />
+              )}
             </button>
           ))}
         </div>
@@ -95,10 +186,11 @@ export default function CarPage() {
   const { t, lang } = useLang()
   const fuelLabel  = useFuelLabel()
 
-  const [car,     setCar]     = useState(null)
-  const [similar, setSimilar] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [modal,   setModal]   = useState(false)
+  const [car,       setCar]       = useState(null)
+  const [similar,   setSimilar]   = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [modal,     setModal]     = useState(false)
+  const [lightbox,  setLightbox]  = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -130,7 +222,11 @@ export default function CarPage() {
     )
   }
 
-  const allImages   = [car.img, ...car.gallery].filter(Boolean).map(imgUrl)
+  const videoId   = ytId(car.youtube_url)
+  const allMedia  = [
+    ...(videoId ? [{ type: 'video', id: videoId }] : []),
+    ...[car.img, ...car.gallery].filter(Boolean).map(src => ({ type: 'image', src: imgUrl(src) })),
+  ]
   const description = (lang === 'en' && car.full_description_en) ? car.full_description_en
                     : (lang === 'uk' && car.full_description_uk) ? car.full_description_uk
                     : car.description
@@ -166,7 +262,10 @@ export default function CarPage() {
           <div className="top-grid">
 
             {/* Slider */}
-            <ImageSlider images={allImages} />
+            <ImageSlider items={allMedia} onOpenLightbox={i => setLightbox(i)} />
+            {lightbox !== null && (
+              <Lightbox items={allMedia} startIdx={lightbox} onClose={() => setLightbox(null)} />
+            )}
 
             {/* Info */}
             <div className="info">

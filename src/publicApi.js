@@ -51,6 +51,7 @@ function normalizeCar(raw) {
     equipment_uk:        Array.isArray(raw.equipment_uk) ? raw.equipment_uk : [],
     full_description_en: raw.full_description_en ?? '',
     full_description_uk: raw.full_description_uk ?? '',
+    youtube_url:         raw.youtube_url ?? '',
   }
 }
 
