@@ -3,7 +3,7 @@ import { useLang } from './lang/LangContext'
 
 const IG_URL = 'https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D'
 const FB_URL = 'https://www.facebook.com/share/1D3kQ3XXpu/?mibextid=wwXIfr'
-const WA_URL = 'https://wa.me/351000000000'
+const WA_URL = 'https://wa.me/351928363003'
 
 export default function Footer({ onCta }) {
   const { t } = useLang()
@@ -55,7 +55,7 @@ export default function Footer({ onCta }) {
               </div>
               <div className="footer-col">
                 <span className="footer-col-label">{t.footer.contactLabel}</span>
-                <a href="tel:+351000000000">+351 000 000 000</a>
+                <a href="tel:+351928363003">+351 928 363 003</a>
                 <a href="mailto:info@turboeagle.pt">info@turboeagle.pt</a>
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a>
                 <a href={IG_URL} target="_blank" rel="noopener noreferrer">Instagram</a>

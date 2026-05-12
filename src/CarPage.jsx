@@ -318,7 +318,7 @@ export default function CarPage() {
                 </button>
                 <div className="book-by">
                   <span className="k">{t.car.orByCall}</span>
-                  <a href="tel:+351000000000" className="v phone-link">+351 000 000 000</a>
+                  <a href="tel:+351928363003" className="v phone-link">+351 928 363 003</a>
                 </div>
               </div>
 
