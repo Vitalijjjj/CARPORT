@@ -407,6 +407,7 @@
 .vt-avatar-placeholder{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:400;flex-shrink:0}
 .vt-name{font-size:15px;font-weight:400}
 .vt-loc{font-size:13px;color:var(--muted)}
+.vt-dots{display:none}
 .vt-cta{text-align:center;margin-top:48px}
 .vt-cta p{color:var(--muted);font-size:15px;margin-bottom:16px}
 
@@ -842,6 +843,48 @@ section[id]{scroll-margin-top:80px}
 
   /* ── Hero detail strip ────────────────────────────────────────── */
   .hero-cta-row { flex-direction: column; }
+}
+
+/* ── Reviews slider on small mobile ────────────────────────────────── */
+@media (max-width: 600px) {
+  .vt-grid {
+    display: flex;
+    grid-template-columns: unset;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding: 0 20px 4px;
+    scrollbar-width: none;
+  }
+  .vt-grid::-webkit-scrollbar { display: none; }
+  .vt-card {
+    min-width: calc(100vw - 56px);
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  .vt-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .vt-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    opacity: 0.25;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: opacity .2s, transform .2s, background .2s;
+  }
+  .vt-dot.active {
+    opacity: 1;
+    background: var(--accent);
+    transform: scale(1.35);
+  }
 }
 
 /* ── Scroll reveal animations ───────────────────────────────────────── */

@@ -205,6 +205,7 @@ export default function App() {
   const [scrollPhase, setScrollPhase] = useState('top')
   const [stickyVis,   setStickyVis]   = useState(false)
   const [openFaq,     setOpenFaq]     = useState(null)
+  const [vtIdx,       setVtIdx]       = useState(0)
   const [swipeHinted, setSwipeHinted] = useState(false)
   const [dbCars,   setDbCars]     = useState(null) // null = loading
 
@@ -237,6 +238,7 @@ export default function App() {
 
   const cardCtxRef   = useRef(null)
   const touchStartX  = useRef(null)
+  const vtRef        = useRef(null)
 
   const searchResults = srch.query.trim().length > 1
     ? catalogCars.filter(c =>
@@ -353,6 +355,31 @@ export default function App() {
     all.forEach(el => io.observe(el))
     return () => io.disconnect()
   }, [])
+
+  /* ── REVIEWS SLIDER: track active card via IntersectionObserver ─── */
+  useEffect(() => {
+    const el = vtRef.current
+    if (!el) return
+    const cards = Array.from(el.querySelectorAll('.vt-card'))
+    const io = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting && e.intersectionRatio >= 0.5)
+            setVtIdx(cards.indexOf(e.target))
+        })
+      },
+      { root: el, threshold: 0.5 }
+    )
+    cards.forEach(c => io.observe(c))
+    return () => io.disconnect()
+  }, [])
+
+  function scrollToVt(i) {
+    const el = vtRef.current
+    if (!el) return
+    const card = el.querySelectorAll('.vt-card')[i]
+    if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
+  }
 
   /* ── CAR CARDS (re-animates on filter change) ─────────────────────── */
   useEffect(() => {
@@ -645,7 +672,7 @@ export default function App() {
             <h2 className="h2 h2-center" style={{ marginTop: '12px' }}>{t.reviews.h2}</h2>
             <p className="vt-sub">{t.reviews.sub}</p>
           </div>
-          <div className="vt-grid">
+          <div className="vt-grid" ref={vtRef}>
             <div className="vt-card">
               <div className="vt-thumb" style={{ backgroundImage: "url('assets/review-1.jpg')" }}>
                 <div className="vt-badge">Mercedes-Benz · Lisboa</div>
@@ -717,6 +744,16 @@ export default function App() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="vt-dots">
+            {[0, 1, 2, 3].map(i => (
+              <button
+                key={i}
+                className={`vt-dot${vtIdx === i ? ' active' : ''}`}
+                onClick={() => scrollToVt(i)}
+                aria-label={`Review ${i + 1}`}
+              />
+            ))}
           </div>
           <div className="vt-cta">
             <p>{t.reviews.ctaLabel}</p>
