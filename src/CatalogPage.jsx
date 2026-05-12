@@ -115,7 +115,7 @@ function CatalogCard({ car, onRequest }) {
   const fuelLabel  = car.fuelType === 'electric' ? t.car.electric : t.car.hybrid
   const statusLabels = { in_stock: t.car.available, reserved: t.car.reserved, incoming: t.car.incoming }
   const imgSrc     = car.img
-    ? (car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
+    ? (car.img.startsWith('data:') || car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
     : ''
 
   return (
@@ -556,7 +556,7 @@ export default function CatalogPage() {
                 </button>
                 <a
                   className="cat-import-btn-sec"
-                  href="https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D"
+                  href="https://www.instagram.com/turboeagle.pt?igsh=MWVscmNnNXo5cWUyeQ%3D%3D&utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
