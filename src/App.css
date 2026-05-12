@@ -847,19 +847,27 @@ section[id]{scroll-margin-top:80px}
 
 /* ── Reviews slider on small mobile ────────────────────────────────── */
 @media (max-width: 600px) {
+  /* break out of .wrap padding so slider spans full viewport */
+  .video-testi .wrap { overflow: hidden; }
   .vt-grid {
     display: flex;
     grid-template-columns: unset;
     overflow-x: scroll;
     scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
     -webkit-overflow-scrolling: touch;
     gap: 12px;
+    /* negative margins escape the .wrap padding */
+    margin-left: -20px;
+    margin-right: -20px;
     padding: 0 20px 4px;
     scrollbar-width: none;
   }
   .vt-grid::-webkit-scrollbar { display: none; }
   .vt-card {
-    min-width: calc(100vw - 56px);
+    /* card = viewport − 20px left padding − 28px right peek */
+    min-width: calc(100vw - 48px);
+    max-width: calc(100vw - 48px);
     scroll-snap-align: start;
     flex-shrink: 0;
   }

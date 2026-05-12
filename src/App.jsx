@@ -377,8 +377,7 @@ export default function App() {
   function scrollToVt(i) {
     const el = vtRef.current
     if (!el) return
-    const card = el.querySelectorAll('.vt-card')[i]
-    if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
+    el.querySelectorAll('.vt-card')[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
   }
 
   /* ── CAR CARDS (re-animates on filter change) ─────────────────────── */
