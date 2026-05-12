@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useLang } from './lang/LangContext'
 
-const IG_URL = 'https://www.instagram.com/turboeagle.lda?igsh=MTRxd3l0bjNudDF4Yg%3D%3D'
-const FB_URL = 'https://www.facebook.com/share/1D3kQ3XXpu/?mibextid=wwXIfr'
+const IG_URL = 'https://www.instagram.com/turboeagle.pt?igsh=MWVscmNnNXo5cWUyeQ%3D%3D&utm_source=qr'
+const FB_URL = 'https://www.facebook.com/people/Linhas-Janotas/61570105314857/?mibextid=wwXIfr&rdid=ktOqGF2zeauFpdHm&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1D3kQ3XXpu%2F%3Fmibextid%3DwwXIfr%26ref%3D1'
 const WA_URL = 'https://wa.me/351928363003'
 
 export default function Footer({ onCta }) {

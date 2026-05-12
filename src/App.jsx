@@ -759,7 +759,7 @@ export default function App() {
             <div className="loc-map">
               <iframe
                 title="TURBOEAGLE Showroom"
-                src="https://maps.google.com/maps?q=38.657597,-8.920668&output=embed&hl=pt&z=16"
+                src="https://maps.app.goo.gl/LKGjrHVtnkbQkmzv5?g_st=iw"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
