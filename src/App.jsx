@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment } from 'react'
+import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -216,6 +216,25 @@ export default function App() {
 
   const catalogCars = dbCars ?? OLIMP_CARS
 
+  const heroSlides = useMemo(() => {
+    if (dbCars && dbCars.length > 0) {
+      return dbCars.slice(0, 3).map(car => ({
+        title:     car.name,
+        range:     car.range     || '',
+        hp:        car.hp        || '',
+        year:      String(car.year),
+        price:     `€ ${Number(car.price).toLocaleString('de-DE')}`,
+        id:        String(car.id),
+        bgImage:   car.img
+          ? (car.img.startsWith('data:') || car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
+          : heroImages[0],
+        warranty:  car.warranty,
+        financing: car.financing,
+      }))
+    }
+    return heroData.map((h, i) => ({ ...h, bgImage: heroImages[i], warranty: true, financing: true }))
+  }, [dbCars])
+
   const cardCtxRef   = useRef(null)
   const touchStartX  = useRef(null)
 
@@ -228,7 +247,7 @@ export default function App() {
     : []
 
   function setHero(i) {
-    setHeroIdxRaw((i + heroData.length) % heroData.length)
+    setHeroIdxRaw((i + heroSlides.length) % heroSlides.length)
   }
 
   /* ── Tweaks: apply CSS vars ───────────────────────────────────────── */
@@ -363,7 +382,7 @@ export default function App() {
     if (filter === 'warranty')  return c.warranty
     return true
   })
-  const hero = heroData[heroIdx]
+  const hero = heroSlides[Math.min(heroIdx, heroSlides.length - 1)] ?? heroSlides[0]
 
   return (
     <div className="page" id="page">
@@ -378,19 +397,19 @@ export default function App() {
       <section className="hero" id="top">
         <div className="hero-stage" id="heroStage">
 
-          {heroImages.map((img, i) => (
+          {heroSlides.map((slide, i) => (
             <div key={i} className={`hero-slide${heroIdx === i ? ' active' : ''}`}>
-              <div className="img" style={{ backgroundImage: `url('${img}')` }} />
+              <div className="img" style={{ backgroundImage: `url('${slide.bgImage}')` }} />
             </div>
           ))}
 
           <div className="hero-side-nav">
             <div className="hero-menu">
-              {heroImages.map((img, i) => (
+              {heroSlides.map((slide, i) => (
                 <div
                   key={i}
                   className={`hero-thumb${heroIdx === i ? ' active' : ''}`}
-                  style={{ backgroundImage: `url('${img}')` }}
+                  style={{ backgroundImage: `url('${slide.bgImage}')` }}
                   onClick={() => setHero(i)}
                 />
               ))}
@@ -411,7 +430,7 @@ export default function App() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 5-7 7 7 7"/></svg>
             </button>
             <div className="hero-mob-dots">
-              {heroImages.map((_, i) => (
+              {heroSlides.map((_, i) => (
                 <button key={i} className={`hero-mob-dot${heroIdx === i ? ' active' : ''}`} onClick={() => setHero(i)} aria-label={`Slide ${i + 1}`} />
               ))}
             </div>
@@ -463,8 +482,8 @@ export default function App() {
                 <div className="hero-car-model">{hero.title}</div>
                 <div className="hero-car-price">{hero.price}</div>
                 <div className="hero-car-badges">
-                  <span>Warranty Available</span>
-                  <span>Financing Available</span>
+                  {hero.warranty  && <span>Warranty Available</span>}
+                  {hero.financing && <span>Financing Available</span>}
                   <span>Battery Health Checked</span>
                 </div>
                 <Link className="hero-car-link" to={`/car/${hero.id}`}>
