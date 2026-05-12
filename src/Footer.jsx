@@ -60,7 +60,7 @@ export default function Footer({ onCta }) {
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a>
                 <a href={IG_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
                 <a href={FB_URL} target="_blank" rel="noopener noreferrer">Facebook</a>
-                <span>Portugal</span>
+                <span>CM1024, 2870-549 Montijo</span>
               </div>
             </div>
 

@@ -723,7 +723,7 @@ export default function App() {
                     <path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7Z"/>
                     <circle cx="12" cy="9" r="2.5"/>
                   </svg>
-                  <span>[Add company address], Portugal</span>
+                  <span>CM1024, 2870-549 Montijo, Portugal</span>
                 </div>
                 <div className="loc-row">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" style={{ flexShrink: 0 }}>
@@ -751,7 +751,7 @@ export default function App() {
                   {t.location.cta1}
                   <BtnArrow />
                 </button>
-                <a href="https://maps.app.goo.gl/LKGjrHVtnkbQkmzv5?g_st=iw" target="_blank" rel="noopener noreferrer" className="btn btn-dark">
+                <a href="https://www.google.com/maps/place/TurboEagle/@38.657597,-8.920668,16z/data=!4m6!3m5!1s0xd193f8c2683ee55:0x122b15549a85798!8m2!3d38.6575973!4d-8.9206682!16s%2Fg%2F11z0wxc208?hl=pt&entry=ttu" target="_blank" rel="noopener noreferrer" className="btn btn-dark">
                   {t.location.cta2}
                 </a>
               </div>
@@ -759,7 +759,7 @@ export default function App() {
             <div className="loc-map">
               <iframe
                 title="TURBOEAGLE Showroom"
-                src="https://maps.google.com/maps?q=TURBOEAGLE+Comércio+de+Automóveis+Portugal&output=embed&hl=pt"
+                src="https://maps.google.com/maps?q=38.657597,-8.920668&output=embed&hl=pt&z=16"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
