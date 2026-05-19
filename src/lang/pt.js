@@ -181,6 +181,12 @@ const pt = {
     sentSub: 'A nossa equipa irá rever as suas preferências e contactar com opções adequadas.',
     namePlaceholder: 'O seu nome', phonePlaceholder: '+351 000 000 000',
     submit: 'Ver Resultados', back: 'Anterior',
+    stat1: 'carros encontrados', stat2: 'para encontrar match', stat3: 'consulta',
+    introLabel: '5 perguntas rápidas · Sem conta necessária',
+    startBtn: 'Iniciar Seleção',
+    formHeading: 'Onde enviamos a sua proposta personalizada?',
+    errName: 'Introduza o seu nome', errPhone: 'Introduza um número válido',
+    disclaimer: 'Sem spam. Uma chamada da nossa equipa. Sem compromissos.',
     steps: [
       { question: 'Qual marca lhe interessa?', options: ['BMW', 'Mercedes-Benz', 'Ambas', 'Ainda não sei'] },
       { question: 'Que tipo de veículo procura?', options: ['Elétrico', 'Híbrido', 'Híbrido Plug-in', 'Ainda não sei'] },

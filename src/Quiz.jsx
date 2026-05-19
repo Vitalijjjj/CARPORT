@@ -38,8 +38,8 @@ export default function Quiz() {
   function handleSubmit(e) {
     e.preventDefault()
     const errs = {}
-    if (!name.trim()) errs.name = 'Enter your name'
-    if (phone.replace(/\D/g, '').length < 5) errs.phone = 'Enter a valid phone number'
+    if (!name.trim()) errs.name = t.quiz.errName
+    if (phone.replace(/\D/g, '').length < 5) errs.phone = t.quiz.errPhone
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSent(true)
   }
@@ -57,17 +57,17 @@ export default function Quiz() {
             <div className="quiz-left-stats">
               <div className="quiz-stat-item">
                 <span className="quiz-stat-n">500+</span>
-                <span className="quiz-stat-l">cars sourced</span>
+                <span className="quiz-stat-l">{t.quiz.stat1}</span>
               </div>
               <div className="quiz-stat-sep" />
               <div className="quiz-stat-item">
                 <span className="quiz-stat-n">3 min</span>
-                <span className="quiz-stat-l">to get matched</span>
+                <span className="quiz-stat-l">{t.quiz.stat2}</span>
               </div>
               <div className="quiz-stat-sep" />
               <div className="quiz-stat-item">
                 <span className="quiz-stat-n">Free</span>
-                <span className="quiz-stat-l">consultation</span>
+                <span className="quiz-stat-l">{t.quiz.stat3}</span>
               </div>
             </div>
           </div>
@@ -96,9 +96,9 @@ export default function Quiz() {
                       <path d="M18 20h12"/>
                     </svg>
                   </div>
-                  <p className="quiz-intro-label">5 quick questions · No account needed</p>
+                  <p className="quiz-intro-label">{t.quiz.introLabel}</p>
                   <button className="quiz-start-btn" onClick={() => setStep(1)}>
-                    Start Car Selection
+                    {t.quiz.startBtn}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="m9 5 7 7-7 7"/>
                     </svg>
@@ -110,7 +110,7 @@ export default function Quiz() {
                   <div className="quiz-progress-wrap">
                     <div className="quiz-progress-bar" style={{ width: '100%' }} />
                   </div>
-                  <h3 className="quiz-q">Where should we send your personalised offer?</h3>
+                  <h3 className="quiz-q">{t.quiz.formHeading}</h3>
                   <form onSubmit={handleSubmit} noValidate>
                     <div className="quiz-field">
                       <input
@@ -138,7 +138,7 @@ export default function Quiz() {
                         <path d="m9 5 7 7-7 7"/>
                       </svg>
                     </button>
-                    <p className="quiz-disclaimer">No spam. One call from our team. No obligations.</p>
+                    <p className="quiz-disclaimer">{t.quiz.disclaimer}</p>
                   </form>
                 </div>
 

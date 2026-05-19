@@ -165,6 +165,12 @@ const en = {
     sentSub: 'Our team will review your preferences and contact you with suitable options.',
     namePlaceholder: 'Your name', phonePlaceholder: '+351 000 000 000',
     submit: 'View Results', back: 'Back',
+    stat1: 'cars sourced', stat2: 'to get matched', stat3: 'consultation',
+    introLabel: '5 quick questions · No account needed',
+    startBtn: 'Start Car Selection',
+    formHeading: 'Where should we send your personalised offer?',
+    errName: 'Enter your name', errPhone: 'Enter a valid phone number',
+    disclaimer: 'No spam. One call from our team. No obligations.',
     steps: [
       { question: 'Which brand are you interested in?', options: ['BMW', 'Mercedes-Benz', 'Both', 'Not sure yet'] },
       { question: 'What type of vehicle are you looking for?', options: ['Electric', 'Hybrid', 'Plug-in Hybrid', 'Not sure yet'] },
