@@ -18,7 +18,7 @@
 /* ── Page hero ──────────────────────────────────────────────────── */
 .cat-hero {
   background: var(--ink);
-  padding: 52px 0 56px;
+  padding: 157px 0 56px;
   position: relative;
   overflow: hidden;
 }
@@ -807,7 +807,7 @@
 @media (max-width: 768px) {
   .cat-wrap { padding: 0 20px; }
 
-  .cat-hero { padding: 36px 0 40px; }
+  .cat-hero { padding: 115px 0 40px; }
   .cat-hero-stats { gap: 16px; }
   .cat-hs-n { font-size: 22px; }
 
