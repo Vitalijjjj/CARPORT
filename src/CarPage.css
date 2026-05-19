@@ -121,21 +121,6 @@
 .pgc-title{font-size:18px;font-weight:400;margin-bottom:4px}
 .pgc-sub{font-size:14px;color:var(--muted)}
 
-/* ── REVIEWS ── */
-.feedback{padding:0 0 80px}
-.feedback-grid{display:grid;grid-template-columns:320px 1fr;gap:48px;align-items:start}
-.feedback h2{font-family:var(--display);font-weight:700;font-size:32px;line-height:1.2;margin-bottom:16px}
-.fb-arrows{display:flex;gap:8px;margin-top:24px}
-.fb-arrow{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;transition:background .2s;cursor:pointer}
-.fb-arrow:hover{background:var(--soft)}
-.fb-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.fb-card{background:var(--soft);border-radius:var(--radius-md);padding:24px}
-.fb-stars{color:#FFB800;font-size:14px;letter-spacing:2px;margin-bottom:10px}
-.fb-title{font-size:16px;font-weight:400;margin-bottom:10px}
-.fb-text{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:20px}
-.fb-author{display:flex;gap:12px;align-items:center}
-.fb-avatar{width:36px;height:36px;border-radius:50%;background-size:cover;background-position:center;flex-shrink:0}
-.fb-author .name{font-size:14px;font-weight:400}
 
 /* ── SIMILAR ── */
 .similar{padding:0 0 80px}
@@ -199,12 +184,6 @@
   /* Post CTA */
   .post-gallery-cta{padding:20px;flex-direction:column;align-items:flex-start;margin:24px 0}
   .post-gallery-cta .btn{width:100%;justify-content:center}
-
-  /* Reviews */
-  .feedback{padding:0 0 44px}
-  .feedback-grid{grid-template-columns:1fr;gap:24px}
-  .feedback h2{font-size:24px}
-  .fb-cards{grid-template-columns:1fr}
 
   /* Similar */
   .similar{padding:0 0 44px}

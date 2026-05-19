@@ -4,6 +4,7 @@ import { fetchPublicCar, fetchPublicCars } from './publicApi'
 import Modal from './Modal'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import ReviewsSection from './ReviewsSection'
 import { useLang } from './lang/LangContext'
 import './CarPage.css'
 
@@ -387,39 +388,7 @@ export default function CarPage() {
       </div>
 
       {/* ── REVIEWS ── */}
-      <section className="feedback">
-        <div className="wrap">
-          <div className="feedback-grid">
-            <div>
-              <h2>Feedback from<br/>satisfied customers</h2>
-              <div className="fb-arrows">
-                <button className="fb-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="m15 5-7 7 7 7"/></svg></button>
-                <button className="fb-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="m9 5 7 7-7 7"/></svg></button>
-              </div>
-            </div>
-            <div className="fb-cards">
-              <div className="fb-card">
-                <div className="fb-stars">★★★★★</div>
-                <div className="fb-title">Perfect car for my business trip!</div>
-                <p className="fb-text">I needed a reliable car for my client meetings, and this vehicle exceeded my expectations. The booking process was seamless, and the car was in excellent condition. Highly recommended!</p>
-                <div className="fb-author">
-                  <div className="fb-avatar" style={{ backgroundImage:"url('/assets/customer-2.jpg')" }} />
-                  <div className="name">Mark Stevens</div>
-                </div>
-              </div>
-              <div className="fb-card">
-                <div className="fb-stars">★★★★★</div>
-                <div className="fb-title">Comfortable and great value!</div>
-                <p className="fb-text">I purchased a car through TurboEagle and the service was excellent. Transparent process, full history provided, and delivery to Porto was on time. Definitely coming back.</p>
-                <div className="fb-author">
-                  <div className="fb-avatar" style={{ backgroundImage:"url('/assets/customer-1.jpg')" }} />
-                  <div className="name">Emma Johnson</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ReviewsSection onCta={() => setModal(true)} />
 
       {/* ── SIMILAR ── */}
       {similar.length > 0 && (
