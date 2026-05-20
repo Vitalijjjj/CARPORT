@@ -246,6 +246,15 @@ export default function AdminCarFormPage() {
       .catch(() => navigate('/admin/cars'))
   }, [id, isEdit, navigate])
 
+  // Auto-fill meta_title for new cars when brand/model/year are set
+  useEffect(() => {
+    if (isEdit) return
+    if (form.meta_title) return
+    if (!form.brand && !form.model) return
+    const parts = [form.brand, form.model, form.year].filter(Boolean)
+    setForm(f => ({ ...f, meta_title: `${parts.join(' ')} – TURBOEAGLE`.slice(0, 60) }))
+  }, [form.brand, form.model, form.year, isEdit]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Toast helper ────────────────────────────────────────────────
   function showToast(message, type = 'success') {
     setToast({ message, type })
@@ -253,6 +262,13 @@ export default function AdminCarFormPage() {
   }
 
   // ── Field updater from DOM events ────────────────────────────────
+  function generateMetaTitle() {
+    const parts = [form.brand, form.model, form.year].filter(Boolean)
+    if (!parts.length) return
+    const title = `${parts.join(' ')} – TURBOEAGLE`.slice(0, 60)
+    setVal('meta_title', title)
+  }
+
   function set(field) {
     return e => {
       const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -1017,7 +1033,19 @@ export default function AdminCarFormPage() {
           <div className="af-grid af-grid-1">
 
             <Field
-              label="Meta Title"
+              label={
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  Meta Title
+                  <button
+                    type="button"
+                    className="btn-admin-secondary"
+                    style={{ padding: '2px 10px', fontSize: '12px', lineHeight: '1.6' }}
+                    onClick={generateMetaTitle}
+                  >
+                    Generate
+                  </button>
+                </span>
+              }
               error={errors.meta_title}
               hint={`${form.meta_title.length}/60 characters — shown in browser tab and Google results`}
             >
