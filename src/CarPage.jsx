@@ -304,10 +304,9 @@ export default function CarPage() {
               </div>
 
               {/* Benefit badges */}
-              {(car.financing || car.warranty) && (
+              {car.warranty && (
                 <div className="benefit-row">
-                  {car.financing && <span className="benefit">✓ {t.car.financingAvailable}</span>}
-                  {car.warranty  && <span className="benefit">✓ {t.car.warrantyAvailable}</span>}
+                  <span className="benefit">✓ {t.car.warrantyAvailable}</span>
                 </div>
               )}
 

@@ -2,7 +2,7 @@ const pt = {
   // Nav
   nav: {
     catalog: 'Catálogo', cars: 'Carros', import: 'Importação',
-    financing: 'Financiamento', tradeIn: 'Retoma', reviews: 'Avaliações',
+    financing: 'Financiamento', tradeIn: 'Seleção', reviews: 'Avaliações',
     location: 'Localização', faq: 'FAQ', getOffer: 'Pedir Oferta',
   },
   // Hero
@@ -46,7 +46,7 @@ const pt = {
       { h: 'Stock Exclusivo', p: 'Veículos elétricos e híbridos BMW e Mercedes-Benz selecionados pela condição, configuração e valor.' },
       { h: 'Suporte de Garantia', p: 'Veículos selecionados vêm com opções de garantia, dando mais confiança após a compra.' },
       { h: 'Financiamento Rápido', p: 'Ajudamos a compreender as opções de financiamento disponíveis e a avançar de forma rápida e clara.' },
-      { h: 'Retoma Disponível', p: 'Use o seu carro atual como parte do pagamento e facilite a transição para o próximo veículo.' },
+      { h: 'Pesquisa Personalizada', p: 'Diga-nos exatamente o que procura. Encontramos e importamos o veículo certo da Alemanha de acordo com as suas especificações.' },
       { h: 'Importação da Alemanha', p: 'Se o veículo certo não estiver em stock, podemos encontrá-lo na Alemanha e gerir todo o processo.' },
       { h: 'Inspeção no Local', p: 'Um especialista pode inspecionar o veículo antes da compra para reduzir o risco e confirmar o estado real.' },
       { h: 'Custos Transparentes', p: 'Explicamos a parte financeira com clareza para que compreenda o quadro completo antes de decidir.' },
@@ -71,7 +71,7 @@ const pt = {
   // Location
   location: {
     eyebrow: 'Visite-Nos', h2: 'Visite o Nosso Showroom',
-    sub: 'Visite-nos em Portugal para ver os veículos disponíveis, discutir financiamento, avaliar opções de retoma ou iniciar um pedido de importação personalizada.',
+    sub: 'Visite-nos em Portugal para ver os veículos disponíveis, discutir financiamento ou iniciar um pedido de importação personalizada da Alemanha.',
     cta1: 'Marcar Visita', cta2: 'Obter Direções',
   },
   // FAQ
@@ -83,7 +83,7 @@ const pt = {
       { q: 'Os carros vêm com garantia?', a: 'Veículos selecionados vêm com opções de garantia. O prazo exato depende do carro específico, estado e condições de compra. A informação de garantia é apresentada na página do veículo ou durante a consulta.' },
       { q: 'Os carros têm documentos de histórico de serviço?', a: 'Sempre que disponível, fornecemos registos de manutenção e informação do histórico de serviço. Isto ajuda o comprador a perceber como o veículo foi mantido.' },
       { q: 'Posso financiar um carro?', a: 'Sim. O financiamento está disponível para veículos selecionados. A nossa equipa pode ajudar a entender as opções disponíveis e preparar um pedido de financiamento.' },
-      { q: 'Posso usar o meu carro atual como retoma?', a: 'Sim. A retoma está disponível. Pode enviar-nos informação sobre o seu carro atual e ajudaremos a estimar como pode ser usado na próxima compra.' },
+      { q: 'Podem encontrar um carro específico que procuro?', a: 'Sim. Se tem um modelo, ano ou configuração específicos em mente, podemos procurá-lo e importá-lo da Alemanha. Contacte-nos com os seus requisitos e ajudaremos a encontrar o veículo certo.' },
       { q: 'Podem importar um carro da Alemanha?', a: 'Sim. Oferecemos um serviço completo de importação da Alemanha, incluindo pesquisa de veículos, inspeção, transparência financeira, logística e documentação.' },
       { q: 'Fazem entrega em todo o Portugal?', a: 'Sim. A entrega em Portugal pode ser organizada consoante o veículo e a localização.' },
       { q: 'Quanto tempo demora o processo de importação?', a: 'O prazo depende do veículo específico, inspeção, processo de compra, logística e documentação. Após compreender o pedido, podemos dar uma estimativa mais precisa.' },
@@ -97,7 +97,7 @@ const pt = {
     h2: 'Pronto para Encontrar o BMW\nou Mercedes Certo?',
     sub: 'Diga-nos o que procura e ajudaremos a encontrar a melhor opção disponível — do nosso stock ou através de uma importação personalizada da Alemanha.',
     p1: 'Veículos em stock', p2: 'Importação personalizada', p3: 'Apoio ao financiamento',
-    p4: 'Retoma disponível', p5: 'Opções de garantia', p6: 'Entrega em Portugal',
+    p4: 'Serviço de seleção', p5: 'Opções de garantia', p6: 'Entrega em Portugal',
     cta1: 'Pedir Oferta Pessoal', cta2: 'Ver Carros Disponíveis',
   },
   // Sticky CTA
@@ -166,7 +166,7 @@ const pt = {
     home: 'Início', cars: 'Carros', importGermany: 'Importação da Alemanha',
     financingLink: 'Financiamento', reviewsLink: 'Avaliações', locationLink: 'Localização',
     availableCars: 'Carros Disponíveis', customImport: 'Importação Personalizada',
-    financing: 'Financiamento', tradeIn: 'Retoma',
+    financing: 'Financiamento', tradeIn: 'Seleção',
     warrantySupport: 'Apoio de Garantia', portugalDelivery: 'Entrega em Portugal',
     getOffer: 'Pedir Oferta',
     copyright: '© TURBOEAGLE — Comércio de Automóveis. Todos os direitos reservados.',
@@ -174,7 +174,7 @@ const pt = {
   },
   // Quiz
   quiz: {
-    eyebrow: 'Retoma', h2: 'Qual é o Seu Próximo Carro?',
+    eyebrow: 'Seleção de Veículo', h2: 'Qual é o Seu Próximo Carro?',
     sub: 'Responda a algumas perguntas rápidas e ajudaremos a encontrar as melhores opções para si.',
     step: 'Passo', of: 'de',
     sentTitle: 'Pedido recebido!',
@@ -194,6 +194,27 @@ const pt = {
       { question: 'Tem interesse em financiamento?', options: ['Sim', 'Não', 'Talvez — quero comparar opções'] },
       { question: 'Quando planeia comprar?', options: ['O mais rápido possível', 'Dentro de 30 dias', 'Dentro de 2–3 meses', 'Ainda estou a avaliar'] },
     ],
+  },
+  importForm: {
+    eyebrow: 'Importação da Alemanha',
+    h2: 'Poupe 15%+ no Seu Próximo Carro',
+    sub: 'Diga-nos exatamente o que procura. Importamos diretamente da Alemanha — com inspeção completa, garantia e entrega em Portugal.',
+    benefit1: 'Importação direta da Alemanha',
+    benefit2: 'Inspeção completa antes da compra',
+    benefit3: 'Até 15% abaixo do preço de retalho',
+    namePlaceholder: 'O seu nome',
+    phonePlaceholder: '+351 000 000 000',
+    brandLabel: 'Marca', brandBoth: 'Ambas as marcas',
+    modelLabel: 'Modelo', modelPlaceholder: 'Modelo (ex. BMW iX3, M3…)',
+    yearLabel: 'Ano', yearPlaceholder: 'Ano (ex. 2022 ou mais recente)',
+    mileageLabel: 'Km', mileagePlaceholder: 'Km máx. (ex. 50 000 km)',
+    budgetLabel: 'Orçamento',
+    budget1: 'Até €30 000', budget2: '€30 000 – €45 000',
+    budget3: '€45 000 – €65 000', budget4: '€65 000+',
+    submit: 'Solicitar Importação',
+    sending: 'A enviar…',
+    sent: 'Pedido recebido!', sentSub: 'Entraremos em contacto em 15 minutos.',
+    errName: 'Introduza o seu nome', errPhone: 'Introduza um número válido',
   },
   search: {
     placeholder: 'Pesquisar carros por nome, marca, categoria…',

@@ -11,6 +11,7 @@ import Quiz from './Quiz'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import ReviewsSection from './ReviewsSection'
+import ImportForm from './ImportForm'
 import './App.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -641,7 +642,10 @@ export default function App() {
       {/* 6. VIDEO TESTIMONIALS */}
       <ReviewsSection onCta={() => setModal(true)} />
 
-      {/* 7. LOCATION */}
+      {/* 7. IMPORT FORM */}
+      <ImportForm />
+
+      {/* 8. LOCATION */}
       <section className="location" id="location">
         <div className="wrap">
           <div className="loc-inner">

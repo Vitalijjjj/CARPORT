@@ -161,7 +161,6 @@ function CatalogCard({ car, onRequest }) {
           <div className="cc-price-col">
             <span className="cc-price">€ {fmt(car.price)}</span>
             <div className="cc-badges">
-              {car.financing && <span className="cc-badge">{t.catalog.financing}</span>}
               {car.warranty  && <span className="cc-badge">{t.catalog.warranty}</span>}
             </div>
           </div>
@@ -260,7 +259,6 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
 
       {/* Toggles */}
       <FilterGroup label={t.catalog.options} defaultOpen={false}>
-        <Toggle label={t.catalog.financing} checked={filters.financing} onChange={v => set('financing', v)} />
         <Toggle label={t.catalog.warranty}  checked={filters.warranty}  onChange={v => set('warranty', v)} />
       </FilterGroup>
     </aside>
@@ -321,7 +319,7 @@ export default function CatalogPage() {
   const [filters,    setFilters]    = useState({
     brand: 'all', fuelType: 'all',
     priceMax: 200000, yearMin: 2018, mileageMax: 200000,
-    status: 'all', financing: false, warranty: false,
+    status: 'all', warranty: false,
   })
   const [sort,       setSort]       = useState('newest')
   const [modal,      setModal]      = useState(false)
@@ -357,7 +355,7 @@ export default function CatalogPage() {
     setFilters({
       brand: 'all', fuelType: 'all',
       priceMax: PRICE_MAX, yearMin: YEAR_MIN, mileageMax: MIL_MAX,
-      status: 'all', financing: false, warranty: false,
+      status: 'all', warranty: false,
     })
   }
 
@@ -368,7 +366,6 @@ export default function CatalogPage() {
     filters.yearMin   > YEAR_MIN,
     filters.mileageMax < MIL_MAX,
     filters.status    !== 'all',
-    filters.financing,
     filters.warranty,
   ].filter(Boolean).length
 
@@ -380,7 +377,6 @@ export default function CatalogPage() {
       if (c.price      > filters.priceMax)   return false
       if (c.year       < filters.yearMin)    return false
       if (c.mileageNum > filters.mileageMax) return false
-      if (filters.financing && !c.financing) return false
       if (filters.warranty  && !c.warranty)  return false
       return true
     })
@@ -488,7 +484,6 @@ export default function CatalogPage() {
               {filters.status !== 'all' && (
                 <Chip label={filters.status === 'in_stock' ? t.car.available : t.car.reserved} onRemove={() => set('status', 'all')} />
               )}
-              {filters.financing && <Chip label={t.catalog.financing} onRemove={() => set('financing', false)} />}
               {filters.warranty  && <Chip label={t.catalog.warranty}  onRemove={() => set('warranty',  false)} />}
             </div>
           )}

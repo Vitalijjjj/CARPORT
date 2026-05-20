@@ -498,15 +498,6 @@ export default function AdminCarFormPage() {
               </select>
             </Field>
 
-            <Field label="Location" error={errors.location}>
-              <input
-                className="af-input"
-                value={form.location}
-                onChange={set('location')}
-                placeholder="e.g. Lisbon, Portugal"
-              />
-            </Field>
-
           </div>
         </Section>
 
@@ -539,18 +530,6 @@ export default function AdminCarFormPage() {
             </Field>
           </div>
 
-          <div className="af-toggles-row">
-            <Toggle
-              label="Financing available"
-              checked={form.financing_available}
-              onChange={v => setVal('financing_available', v)}
-            />
-            <Toggle
-              label="Trade-in accepted"
-              checked={form.trade_in_available}
-              onChange={v => setVal('trade_in_available', v)}
-            />
-          </div>
         </Section>
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
