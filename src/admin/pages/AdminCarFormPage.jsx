@@ -1,34 +1,35 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { apiGetCar, apiCreateCar, apiUpdateCar, apiUploadImage } from '../adminApi'
+import a from '../adminLang'
 
 /* ── Option lists ──────────────────────────────────────────────────── */
 const CURRENT_YEAR = new Date().getFullYear()
 
 const STATUS_OPTIONS = [
-  { value: 'available', label: 'Available — visible in catalog' },
-  { value: 'reserved',  label: 'Reserved — still visible, marked reserved' },
-  { value: 'sold',      label: 'Sold — still visible, marked sold' },
-  { value: 'hidden',    label: 'Hidden — not visible to visitors' },
+  { value: 'available', label: () => a.form.statusAvailable },
+  { value: 'reserved',  label: () => a.form.statusReserved },
+  { value: 'sold',      label: () => a.form.statusSold },
+  { value: 'hidden',    label: () => a.form.statusHidden },
 ]
 
 const FUEL_OPTIONS = [
-  { value: 'electric', label: 'Electric' },
-  { value: 'hybrid',   label: 'Hybrid (PHEV / MHEV)' },
-  { value: 'petrol',   label: 'Petrol' },
-  { value: 'diesel',   label: 'Diesel' },
+  { value: 'electric', label: () => a.form.fuelElectric },
+  { value: 'hybrid',   label: () => a.form.fuelHybrid },
+  { value: 'petrol',   label: () => a.form.fuelPetrol },
+  { value: 'diesel',   label: () => a.form.fuelDiesel },
 ]
 
 const TRANSMISSION_OPTIONS = [
-  { value: 'automatic', label: 'Automatic' },
-  { value: 'manual',    label: 'Manual' },
+  { value: 'automatic', label: () => a.form.transAutomatic },
+  { value: 'manual',    label: () => a.form.transManual },
 ]
 
 const DRIVE_TYPE_OPTIONS = [
-  { value: 'AWD', label: 'AWD — All-Wheel Drive' },
-  { value: 'RWD', label: 'RWD — Rear-Wheel Drive' },
-  { value: 'FWD', label: 'FWD — Front-Wheel Drive' },
-  { value: '4WD', label: '4WD — Four-Wheel Drive' },
+  { value: 'AWD', label: () => a.form.driveAWD },
+  { value: 'RWD', label: () => a.form.driveRWD },
+  { value: 'FWD', label: () => a.form.driveFWD },
+  { value: '4WD', label: () => a.form.drive4WD },
 ]
 
 /* ── Empty form defaults ───────────────────────────────────────────── */
@@ -78,50 +79,50 @@ function validate(form) {
   const errors = {}
 
   if (!form.brand.trim()) {
-    errors.brand = 'Brand is required'
+    errors.brand = a.form.errBrand
   }
 
   if (!form.model.trim()) {
-    errors.model = 'Model is required'
+    errors.model = a.form.errModel
   }
 
   const year = parseInt(form.year)
   if (!year || year < 1980 || year > CURRENT_YEAR + 1) {
-    errors.year = `Enter a valid year between 1980 and ${CURRENT_YEAR + 1}`
+    errors.year = a.form.errYear(CURRENT_YEAR + 1)
   }
 
   const price = parseFloat(form.price)
   if (!form.price || isNaN(price) || price <= 0) {
-    errors.price = 'Enter a valid price greater than 0'
+    errors.price = a.form.errPrice
   }
 
   const mileage = parseInt(form.mileage)
   if (form.mileage === '' || isNaN(mileage) || mileage < 0) {
-    errors.mileage = 'Enter valid mileage — 0 or more km'
+    errors.mileage = a.form.errMileage
   }
 
   if (!form.fuel_type) {
-    errors.fuel_type = 'Select a fuel type'
+    errors.fuel_type = a.form.errFuel
   }
 
   if (!form.transmission) {
-    errors.transmission = 'Select a transmission'
+    errors.transmission = a.form.errTransmission
   }
 
   if (!form.status) {
-    errors.status = 'Select a status'
+    errors.status = a.form.errStatus
   }
 
   if (!form.short_description.trim()) {
-    errors.short_description = 'Short description is required'
+    errors.short_description = a.form.errShortDesc
   } else if (form.short_description.trim().length > 250) {
-    errors.short_description = 'Short description must be 250 characters or less'
+    errors.short_description = a.form.errShortDescLen
   }
 
   if (form.power !== '') {
     const p = parseInt(form.power)
     if (isNaN(p) || p <= 0) {
-      errors.power = 'Power must be a positive number'
+      errors.power = a.form.errPower
     }
   }
 
@@ -130,30 +131,30 @@ function validate(form) {
   if (isEV && form.battery_capacity !== '') {
     const bc = parseFloat(form.battery_capacity)
     if (isNaN(bc) || bc <= 0) {
-      errors.battery_capacity = 'Battery capacity must be greater than 0'
+      errors.battery_capacity = a.form.errBattery
     }
   }
 
   if (isEV && form.battery_health !== '') {
     const bh = parseInt(form.battery_health)
     if (isNaN(bh) || bh < 0 || bh > 100) {
-      errors.battery_health = 'Battery health must be between 0 and 100'
+      errors.battery_health = a.form.errBatteryHealth
     }
   }
 
   if (isEV && form.electric_range !== '') {
     const er = parseInt(form.electric_range)
     if (isNaN(er) || er <= 0) {
-      errors.electric_range = 'Electric range must be greater than 0'
+      errors.electric_range = a.form.errRange
     }
   }
 
   if (form.meta_title && form.meta_title.length > 60) {
-    errors.meta_title = 'Meta title must be 60 characters or less'
+    errors.meta_title = a.form.errMetaTitle
   }
 
   if (form.meta_description && form.meta_description.length > 160) {
-    errors.meta_description = 'Meta description must be 160 characters or less'
+    errors.meta_description = a.form.errMetaDesc
   }
 
   return errors
@@ -308,13 +309,13 @@ export default function AdminCarFormPage() {
 
       if (isEdit) {
         await apiUpdateCar(id, payload)
-        showToast('Car saved successfully')
+        showToast(a.form.savedOk)
       } else {
         const { id: newId } = await apiCreateCar(payload)
         navigate(`/admin/cars/${newId}/edit`)
       }
     } catch (err) {
-      showToast(err.message || 'Failed to save car', 'error')
+      showToast(err.message || a.form.saveFailed, 'error')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -336,7 +337,7 @@ export default function AdminCarFormPage() {
           main_image: f.main_image || url, // first upload becomes main image
         }))
       } catch (err) {
-        showToast(`Upload failed: ${err.message}`, 'error')
+        showToast(a.form.uploadFailed(err.message), 'error')
       }
     }
 
@@ -386,7 +387,7 @@ export default function AdminCarFormPage() {
     return (
       <div className="admin-loading" style={{ paddingTop: 80 }}>
         <div className="admin-spinner" />
-        <p>Loading car data…</p>
+        <p>{a.form.loading}</p>
       </div>
     )
   }
@@ -413,14 +414,14 @@ export default function AdminCarFormPage() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="m15 18-6-6 6-6"/>
             </svg>
-            Back to Cars
+            {a.form.backToCars}
           </Link>
-          <h1 className="af-title">{isEdit ? 'Edit Car' : 'Add New Car'}</h1>
+          <h1 className="af-title">{isEdit ? a.form.titleEdit : a.form.titleAdd}</h1>
         </div>
         <div className="af-header-actions">
           {errorCount > 0 && (
             <span className="af-error-count">
-              ⚠ {errorCount} field{errorCount !== 1 ? 's' : ''} need attention
+              {a.form.errorCount(errorCount)}
             </span>
           )}
           <button
@@ -429,7 +430,7 @@ export default function AdminCarFormPage() {
             onClick={() => navigate('/admin/cars')}
             disabled={saving}
           >
-            Cancel
+            {a.form.cancel}
           </button>
           <button
             type="button"
@@ -437,7 +438,7 @@ export default function AdminCarFormPage() {
             onClick={handleSubmit}
             disabled={saving || uploading}
           >
-            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Car'}
+            {saving ? a.form.saving : isEdit ? a.form.save : a.form.create}
           </button>
         </div>
       </div>
@@ -447,16 +448,16 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 1 — Basic Info
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Basic Info">
+        <Section title={a.form.sBasicInfo}>
           <div className="af-grid af-grid-3">
 
-            <Field label="Brand" required error={errors.brand}>
+            <Field label={a.form.brand} required error={errors.brand}>
               <input
                 list="brand-suggestions"
                 className={`af-input${errors.brand ? ' af-input--error' : ''}`}
                 value={form.brand}
                 onChange={set('brand')}
-                placeholder="e.g. BMW"
+                placeholder={a.form.brandPlaceholder}
                 autoComplete="off"
               />
               <datalist id="brand-suggestions">
@@ -472,25 +473,25 @@ export default function AdminCarFormPage() {
               </datalist>
             </Field>
 
-            <Field label="Model" required error={errors.model}>
+            <Field label={a.form.model} required error={errors.model}>
               <input
                 className={`af-input${errors.model ? ' af-input--error' : ''}`}
                 value={form.model}
                 onChange={set('model')}
-                placeholder="e.g. i4"
+                placeholder={a.form.modelPlaceholder}
               />
             </Field>
 
-            <Field label="Version / Trim" error={errors.version}>
+            <Field label={a.form.version} error={errors.version}>
               <input
                 className="af-input"
                 value={form.version}
                 onChange={set('version')}
-                placeholder="e.g. eDrive40 M Sport"
+                placeholder={a.form.versionPlaceholder}
               />
             </Field>
 
-            <Field label="Year" required error={errors.year}>
+            <Field label={a.form.year} required error={errors.year}>
               <input
                 type="number"
                 className={`af-input${errors.year ? ' af-input--error' : ''}`}
@@ -502,14 +503,14 @@ export default function AdminCarFormPage() {
               />
             </Field>
 
-            <Field label="Status" required error={errors.status}>
+            <Field label={a.form.status} required error={errors.status}>
               <select
                 className={`af-input${errors.status ? ' af-input--error' : ''}`}
                 value={form.status}
                 onChange={set('status')}
               >
                 {STATUS_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{o.label()}</option>
                 ))}
               </select>
             </Field>
@@ -520,9 +521,9 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 2 — Pricing
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Pricing">
+        <Section title={a.form.sPricing}>
           <div className="af-grid af-grid-2">
-            <Field label="Price (€)" required error={errors.price}>
+            <Field label={a.form.price} required error={errors.price}>
               <input
                 type="number"
                 className={`af-input${errors.price ? ' af-input--error' : ''}`}
@@ -530,18 +531,18 @@ export default function AdminCarFormPage() {
                 onChange={set('price')}
                 min="0"
                 step="100"
-                placeholder="e.g. 54990"
+                placeholder={a.form.pricePlaceholder}
               />
             </Field>
 
-            <Field label="Mileage (km)" required error={errors.mileage}>
+            <Field label={a.form.mileage} required error={errors.mileage}>
               <input
                 type="number"
                 className={`af-input${errors.mileage ? ' af-input--error' : ''}`}
                 value={form.mileage}
                 onChange={set('mileage')}
                 min="0"
-                placeholder="e.g. 32000"
+                placeholder={a.form.mileagePlaceholder}
               />
             </Field>
           </div>
@@ -551,52 +552,52 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 3 — Technical Specifications
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Technical Specifications">
+        <Section title={a.form.sTech}>
           <div className="af-grid af-grid-3">
 
-            <Field label="Fuel Type" required error={errors.fuel_type}>
+            <Field label={a.form.fuelType} required error={errors.fuel_type}>
               <select
                 className={`af-input${errors.fuel_type ? ' af-input--error' : ''}`}
                 value={form.fuel_type}
                 onChange={set('fuel_type')}
               >
                 {FUEL_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{o.label()}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Transmission" required error={errors.transmission}>
+            <Field label={a.form.transmission} required error={errors.transmission}>
               <select
                 className={`af-input${errors.transmission ? ' af-input--error' : ''}`}
                 value={form.transmission}
                 onChange={set('transmission')}
               >
                 {TRANSMISSION_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{o.label()}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Power (hp)" error={errors.power}>
+            <Field label={a.form.power} error={errors.power}>
               <input
                 type="number"
                 className={`af-input${errors.power ? ' af-input--error' : ''}`}
                 value={form.power}
                 onChange={set('power')}
                 min="0"
-                placeholder="e.g. 286"
+                placeholder={a.form.powerPlaceholder}
               />
             </Field>
 
-            <Field label="Drive Type" error={errors.drive_type}>
+            <Field label={a.form.drive} error={errors.drive_type}>
               <select
                 className="af-input"
                 value={form.drive_type}
                 onChange={set('drive_type')}
               >
                 {DRIVE_TYPE_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{o.label()}</option>
                 ))}
               </select>
             </Field>
@@ -605,7 +606,7 @@ export default function AdminCarFormPage() {
             {isEV && (
               <>
                 <Field
-                  label="Battery Capacity (kWh)"
+                  label={a.form.battery}
                   error={errors.battery_capacity}
                 >
                   <input
@@ -615,14 +616,14 @@ export default function AdminCarFormPage() {
                     onChange={set('battery_capacity')}
                     min="0"
                     step="0.1"
-                    placeholder="e.g. 83.9"
+                    placeholder={a.form.batteryPlaceholder}
                   />
                 </Field>
 
                 <Field
-                  label="Battery Health (%)"
+                  label={a.form.batteryHealth}
                   error={errors.battery_health}
-                  hint="0 – 100"
+                  hint={a.form.batteryHealthHint}
                 >
                   <input
                     type="number"
@@ -631,12 +632,12 @@ export default function AdminCarFormPage() {
                     onChange={set('battery_health')}
                     min="0"
                     max="100"
-                    placeholder="e.g. 94"
+                    placeholder={a.form.batteryHealthPlaceholder}
                   />
                 </Field>
 
                 <Field
-                  label="Electric Range (km WLTP)"
+                  label={a.form.range}
                   error={errors.electric_range}
                 >
                   <input
@@ -645,7 +646,7 @@ export default function AdminCarFormPage() {
                     value={form.electric_range}
                     onChange={set('electric_range')}
                     min="0"
-                    placeholder="e.g. 521"
+                    placeholder={a.form.rangePlaceholder}
                   />
                 </Field>
               </>
@@ -657,23 +658,23 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 4 — Appearance
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Appearance">
+        <Section title={a.form.sAppearance}>
           <div className="af-grid af-grid-2">
-            <Field label="Exterior Color" error={errors.exterior_color}>
+            <Field label={a.form.exterior} error={errors.exterior_color}>
               <input
                 className="af-input"
                 value={form.exterior_color}
                 onChange={set('exterior_color')}
-                placeholder="e.g. Mineral White Metallic"
+                placeholder={a.form.exteriorPlaceholder}
               />
             </Field>
 
-            <Field label="Interior Color" error={errors.interior_color}>
+            <Field label={a.form.interior} error={errors.interior_color}>
               <input
                 className="af-input"
                 value={form.interior_color}
                 onChange={set('interior_color')}
-                placeholder="e.g. Black Sensatec"
+                placeholder={a.form.interiorPlaceholder}
               />
             </Field>
           </div>
@@ -682,20 +683,20 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 5 — Options & Services
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Options &amp; Services">
+        <Section title={a.form.sOptions}>
           <div className="af-options-grid">
             <Toggle
-              label="Warranty available"
+              label={a.form.warranty}
               checked={form.warranty_available}
               onChange={v => setVal('warranty_available', v)}
             />
             <Toggle
-              label="Service history available"
+              label={a.form.serviceHistory}
               checked={form.service_history_available}
               onChange={v => setVal('service_history_available', v)}
             />
             <Toggle
-              label="Delivery across Portugal"
+              label={a.form.delivery}
               checked={form.delivery_available_portugal}
               onChange={v => setVal('delivery_available_portugal', v)}
             />
@@ -704,15 +705,15 @@ export default function AdminCarFormPage() {
           {form.warranty_available && (
             <div className="af-grid af-grid-2" style={{ marginTop: 20 }}>
               <Field
-                label="Warranty Term"
+                label={a.form.warrantyTerm}
                 error={errors.warranty_term}
-                hint="e.g. 12 months, 2 years"
+                hint={a.form.warrantyTermHint}
               >
                 <input
                   className="af-input"
                   value={form.warranty_term}
                   onChange={set('warranty_term')}
-                  placeholder="e.g. 24 months"
+                  placeholder={a.form.warrantyTermPlaceholder}
                 />
               </Field>
             </div>
@@ -722,11 +723,11 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 6 — Descriptions
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Descriptions">
+        <Section title={a.form.sDescriptions}>
           <div className="af-lang-tabs">
             {['pt', 'en', 'uk'].map(l => (
               <button key={l} type="button" className={`af-lang-tab${contentLang === l ? ' active' : ''}`} onClick={() => setContentLang(l)}>
-                {l === 'pt' ? 'PT (main)' : l === 'en' ? 'EN' : 'UA'}
+                {l === 'pt' ? a.form.tabPT : l === 'en' ? a.form.tabEN : a.form.tabUA}
               </button>
             ))}
           </div>
@@ -735,10 +736,10 @@ export default function AdminCarFormPage() {
             {contentLang === 'pt' && (
               <>
                 <Field
-                  label="Short Description"
+                  label={a.form.shortDesc}
                   required
                   error={errors.short_description}
-                  hint={`${form.short_description.length}/250 characters — shown in catalog cards and previews`}
+                  hint={a.form.shortDescHint(form.short_description.length)}
                 >
                   <textarea
                     className={`af-input af-textarea${errors.short_description ? ' af-input--error' : ''}`}
@@ -746,20 +747,20 @@ export default function AdminCarFormPage() {
                     onChange={set('short_description')}
                     maxLength={250}
                     rows={3}
-                    placeholder="Brief summary shown in listing cards and search previews…"
+                    placeholder={a.form.shortDescPlaceholder}
                   />
                 </Field>
                 <Field
-                  label="Full Description"
+                  label={a.form.fullDesc}
                   error={errors.full_description}
-                  hint="Displayed on the car detail page — supports plain text"
+                  hint={a.form.fullDescHint}
                 >
                   <textarea
                     className="af-input af-textarea af-textarea--tall"
                     value={form.full_description}
                     onChange={set('full_description')}
                     rows={8}
-                    placeholder="Full car description with all relevant details, history and highlights…"
+                    placeholder={a.form.fullDescPlaceholder}
                   />
                 </Field>
               </>
@@ -768,9 +769,9 @@ export default function AdminCarFormPage() {
             {contentLang === 'en' && (
               <>
                 <Field
-                  label="Short Description (English)"
+                  label={a.form.shortDescEN}
                   error={errors.short_description_en}
-                  hint={`${form.short_description_en.length}/250 characters`}
+                  hint={a.form.shortDescENHint(form.short_description_en.length)}
                 >
                   <textarea
                     className="af-input af-textarea"
@@ -778,20 +779,20 @@ export default function AdminCarFormPage() {
                     onChange={set('short_description_en')}
                     maxLength={250}
                     rows={3}
-                    placeholder="English version of the short description…"
+                    placeholder={a.form.shortDescENPlaceholder}
                   />
                 </Field>
                 <Field
-                  label="Full Description (English)"
+                  label={a.form.fullDescEN}
                   error={errors.full_description_en}
-                  hint="Displayed when site language is set to English"
+                  hint={a.form.fullDescENHint}
                 >
                   <textarea
                     className="af-input af-textarea af-textarea--tall"
                     value={form.full_description_en}
                     onChange={set('full_description_en')}
                     rows={8}
-                    placeholder="English version of the full description…"
+                    placeholder={a.form.fullDescENPlaceholder}
                   />
                 </Field>
               </>
@@ -800,9 +801,9 @@ export default function AdminCarFormPage() {
             {contentLang === 'uk' && (
               <>
                 <Field
-                  label="Short Description (Ukrainian)"
+                  label={a.form.shortDescUA}
                   error={errors.short_description_uk}
-                  hint={`${form.short_description_uk.length}/250 characters`}
+                  hint={a.form.shortDescUAHint(form.short_description_uk.length)}
                 >
                   <textarea
                     className="af-input af-textarea"
@@ -810,20 +811,20 @@ export default function AdminCarFormPage() {
                     onChange={set('short_description_uk')}
                     maxLength={250}
                     rows={3}
-                    placeholder="Ukrainian version of the short description…"
+                    placeholder={a.form.shortDescUAPlaceholder}
                   />
                 </Field>
                 <Field
-                  label="Full Description (Ukrainian)"
+                  label={a.form.fullDescUA}
                   error={errors.full_description_uk}
-                  hint="Displayed when site language is set to Ukrainian"
+                  hint={a.form.fullDescUAHint}
                 >
                   <textarea
                     className="af-input af-textarea af-textarea--tall"
                     value={form.full_description_uk}
                     onChange={set('full_description_uk')}
                     rows={8}
-                    placeholder="Ukrainian version of the full description…"
+                    placeholder={a.form.fullDescUAPlaceholder}
                   />
                 </Field>
               </>
@@ -835,11 +836,11 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 7 — Equipment & Feature Tags
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Equipment &amp; Feature Tags">
+        <Section title={a.form.sEquipment}>
           <div className="af-lang-tabs">
             {['pt', 'en', 'uk'].map(l => (
               <button key={l} type="button" className={`af-lang-tab${contentLang === l ? ' active' : ''}`} onClick={() => setContentLang(l)}>
-                {l === 'pt' ? 'PT (main)' : l === 'en' ? 'EN' : 'UA'}
+                {l === 'pt' ? a.form.tabPT : l === 'en' ? a.form.tabEN : a.form.tabUA}
               </button>
             ))}
           </div>
@@ -847,23 +848,23 @@ export default function AdminCarFormPage() {
 
             {contentLang === 'pt' && (
               <Field
-                label="Equipment List"
-                hint="Full OEM equipment — one item per line"
+                label={a.form.equipmentList}
+                hint={a.form.equipmentHint}
               >
                 <textarea
                   className="af-input af-textarea"
                   value={form.equipment}
                   onChange={set('equipment')}
                   rows={7}
-                  placeholder={'Heated front and rear seats\nPanoramic glass roof\nWireless charging pad\nHarman Kardon surround sound\nHead-up display\nAdaptive cruise control with stop & go'}
+                  placeholder={'Aquecimento dos bancos dianteiros e traseiros\nTecto panorâmico\nCarregamento sem fios\nSom Harman Kardon\nHead-up display\nCruise control adaptativo com stop & go'}
                 />
               </Field>
             )}
 
             {contentLang === 'en' && (
               <Field
-                label="Equipment List (English)"
-                hint="English translation of equipment — one item per line"
+                label={a.form.equipmentListEN}
+                hint={a.form.equipmentENHint}
               >
                 <textarea
                   className="af-input af-textarea"
@@ -877,8 +878,8 @@ export default function AdminCarFormPage() {
 
             {contentLang === 'uk' && (
               <Field
-                label="Equipment List (Ukrainian)"
-                hint="Ukrainian translation of equipment — one item per line"
+                label={a.form.equipmentListUA}
+                hint={a.form.equipmentUAHint}
               >
                 <textarea
                   className="af-input af-textarea"
@@ -891,8 +892,8 @@ export default function AdminCarFormPage() {
             )}
 
             <Field
-              label="Feature Tags"
-              hint="Short highlights shown as badges on the listing (press Enter or click Add)"
+              label={a.form.featureTags}
+              hint={a.form.featureTagsHint}
             >
               <div className="af-features-wrap">
                 {form.features.map((feature, index) => (
@@ -901,7 +902,7 @@ export default function AdminCarFormPage() {
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      aria-label={`Remove ${feature}`}
+                      aria-label={`${a.form.remove} ${feature}`}
                     >
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M18 6 6 18M6 6l12 12"/>
@@ -915,14 +916,14 @@ export default function AdminCarFormPage() {
                     value={featureInput}
                     onChange={e => setFeatureInput(e.target.value)}
                     onKeyDown={handleFeatureKeyDown}
-                    placeholder="e.g. Apple CarPlay, 360° Camera…"
+                    placeholder={a.form.featureTagsPlaceholder}
                   />
                   <button
                     type="button"
                     className="btn-admin-secondary btn-sm"
                     onClick={addFeature}
                   >
-                    Add
+                    {a.form.add}
                   </button>
                 </div>
               </div>
@@ -934,13 +935,13 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 8 — Gallery & Images
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="Gallery &amp; Images">
+        <Section title={a.form.sGallery}>
 
-          <Field label="YouTube Video URL">
+          <Field label={a.form.youtubeUrl}>
             <input
               className="af-input"
               type="url"
-              placeholder="https://youtu.be/... або https://youtube.com/watch?v=..."
+              placeholder={a.form.youtubePlaceholder}
               value={form.youtube_url}
               onChange={set('youtube_url')}
             />
@@ -950,7 +951,7 @@ export default function AdminCarFormPage() {
                 <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', maxWidth: 320 }}>
                   <img src={`https://img.youtube.com/vi/${m[1]}/mqdefault.jpg`} alt="YouTube preview" style={{ width: '100%', display: 'block' }} />
                 </div>
-              ) : <span style={{ fontSize: 12, color: '#ef4444', marginTop: 4, display: 'block' }}>Невалідне посилання YouTube</span>
+              ) : <span style={{ fontSize: 12, color: '#ef4444', marginTop: 4, display: 'block' }}>{a.form.invalidYoutube}</span>
             })()}
           </Field>
 
@@ -962,7 +963,7 @@ export default function AdminCarFormPage() {
               disabled={uploading}
             >
               {uploading ? (
-                <><span className="admin-spinner-sm" /> Uploading…</>
+                <><span className="admin-spinner-sm" /> {a.form.uploading}</>
               ) : (
                 <>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -970,14 +971,14 @@ export default function AdminCarFormPage() {
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
-                  Upload Images
+                  {a.form.uploadImages}
                 </>
               )}
             </button>
             <span className="af-gallery-hint">
               {form.gallery.length > 0
-                ? `${form.gallery.length} image${form.gallery.length !== 1 ? 's' : ''} — hover to set main or remove`
-                : 'No images yet — JPEG, PNG or WebP, max 10 MB each'
+                ? a.form.imageCount(form.gallery.length)
+                : a.form.noImages
               }
             </span>
             <input
@@ -999,7 +1000,7 @@ export default function AdminCarFormPage() {
                 >
                   <img src={url} alt="" loading="lazy" />
                   {form.main_image === url && (
-                    <span className="af-gallery-main-badge">Main</span>
+                    <span className="af-gallery-main-badge">{a.form.mainBadge}</span>
                   )}
                   <div className="af-gallery-overlay">
                     {form.main_image !== url && (
@@ -1008,7 +1009,7 @@ export default function AdminCarFormPage() {
                         className="af-gallery-btn"
                         onClick={() => setMainImage(url)}
                       >
-                        Set as Main
+                        {a.form.setMain}
                       </button>
                     )}
                     <button
@@ -1016,7 +1017,7 @@ export default function AdminCarFormPage() {
                       className="af-gallery-btn af-gallery-btn--delete"
                       onClick={() => removeGalleryImage(url)}
                     >
-                      Remove
+                      {a.form.remove}
                     </button>
                   </div>
                 </div>
@@ -1029,39 +1030,39 @@ export default function AdminCarFormPage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             SECTION 9 — SEO
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <Section title="SEO">
+        <Section title={a.form.sSEO}>
           <div className="af-grid af-grid-1">
 
             <Field
               label={
                 <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  Meta Title
+                  {a.form.metaTitle}
                   <button
                     type="button"
                     className="btn-admin-secondary"
                     style={{ padding: '2px 10px', fontSize: '12px', lineHeight: '1.6' }}
                     onClick={generateMetaTitle}
                   >
-                    Generate
+                    {a.form.generate}
                   </button>
                 </span>
               }
               error={errors.meta_title}
-              hint={`${form.meta_title.length}/60 characters — shown in browser tab and Google results`}
+              hint={a.form.metaTitleHint(form.meta_title.length)}
             >
               <input
                 className={`af-input${errors.meta_title ? ' af-input--error' : ''}`}
                 value={form.meta_title}
                 onChange={set('meta_title')}
                 maxLength={80}
-                placeholder="e.g. BMW i4 eDrive40 M Sport 2023 – TurboEagle"
+                placeholder={a.form.metaTitlePlaceholder}
               />
             </Field>
 
             <Field
-              label="Meta Description"
+              label={a.form.metaDesc}
               error={errors.meta_description}
-              hint={`${form.meta_description.length}/160 characters — shown in Google search snippets`}
+              hint={a.form.metaDescHint(form.meta_description.length)}
             >
               <textarea
                 className={`af-input af-textarea${errors.meta_description ? ' af-input--error' : ''}`}
@@ -1069,7 +1070,7 @@ export default function AdminCarFormPage() {
                 onChange={set('meta_description')}
                 maxLength={200}
                 rows={3}
-                placeholder="e.g. Buy a BMW i4 eDrive40 M Sport 2023, 32,000 km, 286 hp. Full history, warranty available. Delivery across Portugal."
+                placeholder={a.form.metaDescPlaceholder}
               />
             </Field>
 
@@ -1081,7 +1082,7 @@ export default function AdminCarFormPage() {
           <div className="af-save-bar-inner">
             {errorCount > 0 && (
               <span className="af-error-count">
-                ⚠ {errorCount} field{errorCount !== 1 ? 's' : ''} need attention
+                {a.form.errorCount(errorCount)}
               </span>
             )}
             <span className="af-save-bar-spacer" />
@@ -1091,14 +1092,14 @@ export default function AdminCarFormPage() {
               onClick={() => navigate('/admin/cars')}
               disabled={saving}
             >
-              Cancel
+              {a.form.cancel}
             </button>
             <button
               type="submit"
               className="btn-admin-primary"
               disabled={saving || uploading}
             >
-              {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Car'}
+              {saving ? a.form.saving : isEdit ? a.form.save : a.form.create}
             </button>
           </div>
         </div>
