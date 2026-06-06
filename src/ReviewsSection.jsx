@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useLang } from './lang/LangContext'
 import { fetchPublicReviews } from './publicApi'
 
@@ -21,8 +21,11 @@ function avatarChar(name) {
 
 export default function ReviewsSection({ onCta }) {
   const { t, lang } = useLang()
-  const [vtIdx, setVtIdx] = useState(0)
-  const [dbReviews, setDbReviews] = useState(null) // null = loading/unknown
+  const [vtIdx, setVtIdx]           = useState(0)
+  const [atStart, setAtStart]       = useState(true)
+  const [atEnd, setAtEnd]           = useState(false)
+  const [hasOverflow, setHasOverflow] = useState(false)
+  const [dbReviews, setDbReviews]   = useState(null) // null = loading/unknown
   const vtRef = useRef(null)
 
   // Fetch managed reviews for the active language; fall back to static ones on empty/error
@@ -44,29 +47,48 @@ export default function ReviewsSection({ onCta }) {
 
   const reviews = (dbReviews && dbReviews.length > 0) ? dbReviews : staticReviews
 
-  // Track the active card for the dots
+  // Width of one card incl. gap, used for arrow/dot stepping
+  function cardStep() {
+    const el = vtRef.current
+    if (!el) return 0
+    const card = el.querySelector('.vt-card')
+    const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap) || 24
+    return (card ? card.offsetWidth : el.clientWidth) + gap
+  }
+
+  // Recompute active index + edge/overflow state from scroll position
+  const sync = useCallback(() => {
+    const el = vtRef.current
+    if (!el) return
+    const step = cardStep() || 1
+    setVtIdx(Math.round(el.scrollLeft / step))
+    setAtStart(el.scrollLeft <= 2)
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 2)
+    setHasOverflow(el.scrollWidth > el.clientWidth + 2)
+  }, [])
+
   useEffect(() => {
     const el = vtRef.current
     if (!el) return
-    const cards = Array.from(el.querySelectorAll('.vt-card'))
-    if (!cards.length) return
-    const io = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting && e.intersectionRatio >= 0.5)
-            setVtIdx(cards.indexOf(e.target))
-        })
-      },
-      { root: el, threshold: 0.5 }
-    )
-    cards.forEach(c => io.observe(c))
-    return () => io.disconnect()
-  }, [reviews.length])
+    sync()
+    el.addEventListener('scroll', sync, { passive: true })
+    window.addEventListener('resize', sync)
+    return () => {
+      el.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+    }
+  }, [sync, reviews.length])
+
+  function step(dir) {
+    const el = vtRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * cardStep(), behavior: 'smooth' })
+  }
 
   function scrollToVt(i) {
     const el = vtRef.current
     if (!el) return
-    el.querySelectorAll('.vt-card')[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+    el.scrollTo({ left: i * cardStep(), behavior: 'smooth' })
   }
 
   return (
@@ -78,29 +100,53 @@ export default function ReviewsSection({ onCta }) {
           <p className="vt-sub">{t.reviews.sub}</p>
         </div>
 
-        <div className="vt-grid" ref={vtRef}>
-          {reviews.map((rev, i) => (
-            <div className="vt-card" key={rev.id ?? i}>
-              <div
-                className="vt-thumb"
-                style={rev.image ? { backgroundImage: `url('${rev.image}')` } : undefined}
-              >
-                {rev.badge && <div className="vt-badge">{rev.badge}</div>}
-              </div>
-              <div className="vt-info">
-                <Stars rating={rev.rating} />
-                {rev.title && <div className="vt-title">{rev.title}</div>}
-                {rev.quote && <p className="vt-quote">{rev.quote}</p>}
-                <div className="vt-author">
-                  <div className="vt-avatar-placeholder">{avatarChar(rev.name)}</div>
-                  <div>
-                    <div className="vt-name">{rev.name}</div>
-                    {rev.location && <div className="vt-loc">{rev.location}</div>}
+        <div className="vt-track-wrap">
+          {hasOverflow && (
+            <button
+              className="vt-arrow vt-arrow--prev"
+              onClick={() => step(-1)}
+              disabled={atStart}
+              aria-label="Previous reviews"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="m15 5-7 7 7 7"/></svg>
+            </button>
+          )}
+
+          <div className="vt-grid" ref={vtRef}>
+            {reviews.map((rev, i) => (
+              <div className="vt-card" key={rev.id ?? i}>
+                <div
+                  className="vt-thumb"
+                  style={rev.image ? { backgroundImage: `url('${rev.image}')` } : undefined}
+                >
+                  {rev.badge && <div className="vt-badge">{rev.badge}</div>}
+                </div>
+                <div className="vt-info">
+                  <Stars rating={rev.rating} />
+                  {rev.title && <div className="vt-title">{rev.title}</div>}
+                  {rev.quote && <p className="vt-quote">{rev.quote}</p>}
+                  <div className="vt-author">
+                    <div className="vt-avatar-placeholder">{avatarChar(rev.name)}</div>
+                    <div>
+                      <div className="vt-name">{rev.name}</div>
+                      {rev.location && <div className="vt-loc">{rev.location}</div>}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {hasOverflow && (
+            <button
+              className="vt-arrow vt-arrow--next"
+              onClick={() => step(1)}
+              disabled={atEnd}
+              aria-label="Next reviews"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+          )}
         </div>
 
         {reviews.length > 1 && (
