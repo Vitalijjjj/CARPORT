@@ -177,6 +177,49 @@ async function initDb() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
 
+  // Seed the reviews currently shown on the site (PT/EN/UK variants) so they
+  // appear in the admin panel — only when the table is still empty.
+  const [revCount] = await db.query('SELECT COUNT(*) AS n FROM reviews')
+  if (revCount[0].n === 0) {
+    const seedReviews = [
+      {
+        name: 'R. & A. M.', location: 'Lisboa, Portugal', badge: 'Mercedes-Benz · Lisboa', image: '/assets/review-1.jpg',
+        pt: ['Mercedes-Benz entregue em Lisboa', 'Ficámos muito satisfeitos com todo o processo. A equipa guiou-nos em cada etapa e o carro superou as nossas expectativas. Entrega impecável ao pôr do sol!'],
+        en: ['Mercedes-Benz delivered in Lisbon', 'We were very happy with the whole process. The team guided us at every step and the car exceeded our expectations. A perfect sunset delivery!'],
+        uk: ['Mercedes-Benz доставлено в Лісабон', 'Ми дуже задоволені всім процесом. Команда супроводжувала нас на кожному кроці, а авто перевершило наші очікування. Ідеальна передача на заході сонця!'],
+      },
+      {
+        name: 'D. F.', location: 'Porto, Portugal', badge: 'BMW · Porto', image: '/assets/review-2.jpg',
+        pt: ['BMW encontrado e entregue no Porto', 'Processo rápido e completamente transparente. Conseguiram encontrar exatamente o BMW que procurava. Recomendo sem hesitar a qualquer pessoa.'],
+        en: ['BMW found and delivered in Porto', 'Fast and completely transparent process. They found exactly the BMW I was looking for. I would recommend TURBOEAGLE to anyone without hesitation.'],
+        uk: ['BMW знайдено і доставлено в Порту', 'Швидкий і повністю прозорий процес. Знайшли саме той BMW, який я шукав. Рекомендую TURBOEAGLE без вагань.'],
+      },
+      {
+        name: 'M. & J. P.', location: 'Setúbal, Portugal', badge: 'BMW 3 · Setúbal', image: '/assets/review-3.jpg',
+        pt: ['BMW 3 Series — casal feliz em Setúbal', 'Atendimento excelente do início ao fim. Entregaram o BMW dos nossos sonhos dentro do prazo prometido. A equipa está sempre disponível para ajudar.'],
+        en: ['BMW 3 Series — happy couple in Setúbal', 'Excellent service from start to finish. They delivered our dream BMW within the promised timeframe. The team is always available to help.'],
+        uk: ['BMW 3 Series — щаслива пара в Сетубалі', 'Відмінний сервіс від початку до кінця. Доставили BMW нашої мрії в обіцяний термін. Команда завжди готова допомогти.'],
+      },
+      {
+        name: 'S. C.', location: 'Cascais, Portugal', badge: 'Mercedes-Benz · Cascais', image: '/assets/review-4.jpg',
+        pt: ['Mercedes-Benz em Cascais — entrega no próprio dia', 'Equipa profissional e muito transparente. Encontraram o Mercedes perfeito para mim e todo o processo foi simples e sem surpresas. Muito obrigada!'],
+        en: ['Mercedes-Benz in Cascais — same-day delivery', 'Very professional and transparent team. They found the perfect Mercedes for me and the whole process was straightforward with no surprises. Thank you!'],
+        uk: ['Mercedes-Benz у Кашкайші — передача того ж дня', 'Дуже професійна та прозора команда. Знайшли ідеальний Mercedes для мене, весь процес пройшов легко і без жодних сюрпризів. Дуже дякую!'],
+      },
+    ]
+    const rows = []
+    seedReviews.forEach((r, i) => {
+      for (const lng of ['pt', 'en', 'uk']) {
+        rows.push([r.name, r.location, r[lng][0], r[lng][1], 5, r.image, r.badge, lng, 'visible', i])
+      }
+    })
+    await db.query(
+      'INSERT INTO reviews (name, location, title, quote, rating, image, badge, lang, status, sort_order) VALUES ?',
+      [rows]
+    )
+    console.log(`✓ Seeded ${rows.length} reviews`)
+  }
+
   // Create first admin if none exist; if ADMIN_PASS is set, always sync the password
   const [existing] = await db.query('SELECT id FROM admin_users LIMIT 1')
   const email = process.env.ADMIN_EMAIL || 'admin@carrai.com'
