@@ -14,6 +14,7 @@ const pt = {
     chip1: 'Carros em stock', chip2: 'Importação da Alemanha',
     chip3: 'Garantia', chip4: 'Financiamento', chip5: 'Entrega em Portugal',
     specRange: 'Autonomia', specPower: 'Potência', specYear: 'Ano',
+    specPrice: 'Preço', viewThisCar: 'Ver carro',
   },
   // Trust bar
   trust: {

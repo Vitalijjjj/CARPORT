@@ -124,6 +124,7 @@
 .hero-specs{display:flex;gap:40px}
 .spec .small{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em}
 .spec .v{font-family:var(--display);font-weight:600;font-size:20px;color:#fff;margin-top:3px}
+.hero-car-mobile{display:none}
 .hero-cta-row{display:flex;gap:10px;flex-wrap:wrap}
 .hero-btn-ghost{
   background:rgba(255,255,255,0.12);
@@ -571,6 +572,43 @@ section[id]{scroll-margin-top:80px}
   .hero-btn-ghost         { font-size: 15px; padding: 11px 16px; }
   .hero-trust-chips       { display: none; }
   .hero-car-card          { display: none; }
+
+  /* Mobile: clear tappable link to open the featured car from the banner */
+  .hero-car-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    text-decoration: none;
+    color: #fff;
+  }
+  .hcm-name {
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .hcm-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    padding: 7px 12px;
+    border-radius: 9999px;
+  }
 
   /* ── Mobile slide nav ─────────────────────────────────────────── */
   .hero-mobile-nav {

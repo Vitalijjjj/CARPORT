@@ -12,6 +12,7 @@ const en = {
     chip1: 'Cars in stock', chip2: 'Import from Germany',
     chip3: 'Warranty', chip4: 'Financing', chip5: 'Delivery across Portugal',
     specRange: 'Range', specPower: 'Power', specYear: 'Year',
+    specPrice: 'Price', viewThisCar: 'View car',
   },
   trust: {
     warranty: 'Warranty', warrantyDesc: 'Options available',

@@ -462,10 +462,16 @@ export default function App() {
               <h1>{t.hero.h1.split('\n').map((l,i,a) => <span key={i}>{l}{i<a.length-1&&<br/>}</span>)}</h1>
               <p className="hero-body-desc">{t.hero.desc}</p>
               <div className="hero-specs">
-                <div className="spec"><div className="small">{t.hero.specRange}</div><div className="v">{hero.range}</div></div>
+                <div className="spec"><div className="small">{t.hero.specPrice}</div><div className="v">{hero.price}</div></div>
                 <div className="spec"><div className="small">{t.hero.specPower}</div><div className="v">{hero.hp}</div></div>
                 <div className="spec"><div className="small">{t.hero.specYear}</div><div className="v">{hero.year}</div></div>
               </div>
+              {hero.id && (
+                <Link to={`/car/${hero.id}`} className="hero-car-mobile">
+                  <span className="hcm-name">{hero.title}</span>
+                  <span className="hcm-go">{t.hero.viewThisCar}<span aria-hidden="true">→</span></span>
+                </Link>
+              )}
               <div className="hero-cta-row">
                 <Link className="btn btn-primary" to="/cars">
                   {t.hero.cta1}

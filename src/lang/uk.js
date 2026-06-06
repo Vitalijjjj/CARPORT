@@ -12,6 +12,7 @@ const uk = {
     chip1: 'Авто в наявності', chip2: 'Імпорт з Німеччини',
     chip3: 'Гарантія', chip4: 'Фінансування', chip5: 'Доставка по Португалії',
     specRange: 'Запас ходу', specPower: 'Потужність', specYear: 'Рік',
+    specPrice: 'Ціна', viewThisCar: 'Переглянути авто',
   },
   trust: {
     warranty: 'Гарантія', warrantyDesc: 'Є варіанти',
