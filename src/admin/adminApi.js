@@ -244,6 +244,27 @@ export async function apiDeleteReview(id) {
 
 // ── Image upload ───────────────────────────────────────────────────
 
+// Default compression for stored photos — smaller = faster catalog/hero load
+const IMG_MAX_W   = 1280
+const IMG_QUALITY = 0.72
+
+// Resize/compress any image src (object URL or data URL) to a JPEG data URL
+function compressImageSrc(src, { maxW = IMG_MAX_W, quality = IMG_QUALITY } = {}) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      let w = img.width, h = img.height
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => reject(new Error('Failed to load image'))
+    img.src = src
+  })
+}
+
 export async function apiUploadImage(file) {
   if (IS_MOCK) {
     await new Promise(r => setTimeout(r, 600))
@@ -252,20 +273,19 @@ export async function apiUploadImage(file) {
   }
 
   // Resize client-side and return as base64 data URL — no filesystem dependency
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const objectUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      const MAX_W = 1400
-      let w = img.width, h = img.height
-      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W }
-      const canvas = document.createElement('canvas')
-      canvas.width = w; canvas.height = h
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
-      resolve({ url: canvas.toDataURL('image/jpeg', 0.82), filename: file.name })
-    }
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')) }
-    img.src = objectUrl
-  })
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const url = await compressImageSrc(objectUrl)
+    return { url, filename: file.name }
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+// Re-compress an already-stored base64 image (used by the "optimize photos" tool).
+// Non-base64 values (e.g. /uploads/... or /assets/... URLs) are returned unchanged.
+export async function apiRecompressDataUrl(dataUrl) {
+  if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) return dataUrl
+  try { return await compressImageSrc(dataUrl) }
+  catch { return dataUrl }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { apiGetCars, apiUpdateCarStatus, apiDeleteCar } from '../adminApi'
+import { apiGetCars, apiGetCar, apiUpdateCar, apiUpdateCarStatus, apiDeleteCar, apiRecompressDataUrl } from '../adminApi'
 import a from '../adminLang'
 
 const STATUS_COLORS = {
@@ -47,6 +47,9 @@ export default function AdminCarsListPage() {
   const [toast,          setToast]          = useState(null)
   const [search,         setSearch]         = useState('')
   const [statusFilter,   setStatusFilter]   = useState('all')
+  const [optimizing,     setOptimizing]     = useState(false)
+  const [optDone,        setOptDone]        = useState(0)
+  const [optTotal,       setOptTotal]       = useState(0)
 
   function showToast(message, type = 'success') {
     setToast({ message, type })
@@ -82,6 +85,35 @@ export default function AdminCarsListPage() {
     } catch (err) {
       showToast(err.message || a.list.deleteFailed, 'error')
     }
+  }
+
+  // One-time maintenance: re-compress every stored photo to shrink payload sizes
+  async function handleOptimizePhotos() {
+    if (optimizing || cars.length === 0) return
+    setOptimizing(true)
+    setOptDone(0)
+    setOptTotal(cars.length)
+    let updated = 0
+    for (const c of cars) {
+      try {
+        const full = await apiGetCar(c.id)
+        const map = new Map()
+        const gallery = []
+        for (const img of (full.gallery || [])) {
+          const out = await apiRecompressDataUrl(img)
+          map.set(img, out)
+          gallery.push(out)
+        }
+        const main_image = full.main_image
+          ? (map.get(full.main_image) || await apiRecompressDataUrl(full.main_image))
+          : (full.main_image || '')
+        await apiUpdateCar(c.id, { ...full, gallery, main_image })
+        updated++
+      } catch { /* skip cars that fail, continue */ }
+      setOptDone(d => d + 1)
+    }
+    setOptimizing(false)
+    showToast(a.list.optimizeDone(updated))
   }
 
   // Client-side filter + search
@@ -131,12 +163,25 @@ export default function AdminCarsListPage() {
             {statusFilter !== 'all' && a.list.filterActive(a.status[statusFilter])}
           </p>
         </div>
-        <Link to="/admin/cars/create" className="btn-admin-primary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          {a.list.addCar}
-        </Link>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button
+            type="button"
+            className="btn-admin-secondary"
+            onClick={handleOptimizePhotos}
+            disabled={optimizing || loading || cars.length === 0}
+            title={a.list.optimizeHint}
+          >
+            {optimizing
+              ? <><span className="admin-spinner-sm" /> {a.list.optimizing(optDone, optTotal)}</>
+              : a.list.optimize}
+          </button>
+          <Link to="/admin/cars/create" className="btn-admin-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            {a.list.addCar}
+          </Link>
+        </div>
       </div>
 
       {/* ── Toolbar: search + status filter ─────────────────────── */}

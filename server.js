@@ -262,6 +262,18 @@ function parseJson(val, fallback) {
   try { return JSON.parse(val) } catch { return fallback }
 }
 
+// Columns returned for list endpoints — excludes the heavy base64 `gallery`
+// and long text blobs so the catalog/hero load fast. Single-car fetches use SELECT *.
+const CAR_LIST_COLUMNS = [
+  'id', 'brand', 'model', 'version', 'year', 'price', 'mileage',
+  'fuel_type', 'transmission', 'power', 'battery_capacity', 'battery_health',
+  'electric_range', 'drive_type', 'exterior_color', 'interior_color', 'location',
+  'status', 'warranty_available', 'warranty_term', 'financing_available',
+  'trade_in_available', 'service_history_available', 'delivery_available_portugal',
+  'short_description', 'short_description_en', 'short_description_uk',
+  'features', 'main_image', 'youtube_url', 'meta_title', 'created_at', 'updated_at',
+].join(', ')
+
 function decodeCar(row) {
   return {
     ...row,
@@ -380,7 +392,7 @@ app.get('/api/public_cars.php', async (req, res) => {
       if (!rows[0]) return res.status(404).json({ error: 'Car not found' })
       return res.json(decodeCar(rows[0]))
     }
-    const [rows] = await db.query("SELECT * FROM cars WHERE status NOT IN ('hidden','sold') ORDER BY created_at DESC")
+    const [rows] = await db.query(`SELECT ${CAR_LIST_COLUMNS} FROM cars WHERE status NOT IN ('hidden','sold') ORDER BY created_at DESC`)
     res.json(rows.map(decodeCar))
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
@@ -396,8 +408,8 @@ app.get('/api/cars.php', async (req, res) => {
       return res.json(decodeCar(rows[0]))
     }
     const sql = auth
-      ? 'SELECT * FROM cars ORDER BY created_at DESC'
-      : "SELECT * FROM cars WHERE status NOT IN ('hidden','sold') ORDER BY created_at DESC"
+      ? `SELECT ${CAR_LIST_COLUMNS} FROM cars ORDER BY created_at DESC`
+      : `SELECT ${CAR_LIST_COLUMNS} FROM cars WHERE status NOT IN ('hidden','sold') ORDER BY created_at DESC`
     const [rows] = await db.query(sql)
     res.json(rows.map(decodeCar))
   } catch (err) { res.status(500).json({ error: err.message }) }
