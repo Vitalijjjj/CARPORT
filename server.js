@@ -176,35 +176,56 @@ async function initDb() {
       KEY reviews_lang_idx   (lang)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+  // Per-language text columns (one review row holds all translations)
+  for (const sql of [
+    "ALTER TABLE reviews ADD COLUMN title_en VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE reviews ADD COLUMN quote_en TEXT DEFAULT NULL",
+    "ALTER TABLE reviews ADD COLUMN title_uk VARCHAR(200) DEFAULT NULL",
+    "ALTER TABLE reviews ADD COLUMN quote_uk TEXT DEFAULT NULL",
+  ]) {
+    try { await db.query(sql) } catch (e) { if (e.code !== 'ER_DUP_FIELDNAME') throw e }
+  }
 
-  // Default reviews shown on the site — ONE entry each, language 'all' so the same
-  // reviews appear on every language version (no per-language duplicates).
+  // Default reviews shown on the site — ONE entry each, with PT/EN/UK text in the
+  // same row (no per-language duplicate rows).
   const SEED_REVIEWS = [
     { name: 'R. & A. M.', location: 'Lisboa, Portugal', badge: 'Mercedes-Benz · Lisboa', image: '/assets/review-1.jpg',
-      title: 'Mercedes-Benz entregue em Lisboa', quote: 'Ficámos muito satisfeitos com todo o processo. A equipa guiou-nos em cada etapa e o carro superou as nossas expectativas. Entrega impecável ao pôr do sol!' },
+      pt: ['Mercedes-Benz entregue em Lisboa', 'Ficámos muito satisfeitos com todo o processo. A equipa guiou-nos em cada etapa e o carro superou as nossas expectativas. Entrega impecável ao pôr do sol!'],
+      en: ['Mercedes-Benz delivered in Lisbon', 'We were very happy with the whole process. The team guided us at every step and the car exceeded our expectations. A perfect sunset delivery!'],
+      uk: ['Mercedes-Benz доставлено в Лісабон', 'Ми дуже задоволені всім процесом. Команда супроводжувала нас на кожному кроці, а авто перевершило наші очікування. Ідеальна передача на заході сонця!'] },
     { name: 'D. F.', location: 'Porto, Portugal', badge: 'BMW · Porto', image: '/assets/review-2.jpg',
-      title: 'BMW encontrado e entregue no Porto', quote: 'Processo rápido e completamente transparente. Conseguiram encontrar exatamente o BMW que procurava. Recomendo sem hesitar a qualquer pessoa.' },
+      pt: ['BMW encontrado e entregue no Porto', 'Processo rápido e completamente transparente. Conseguiram encontrar exatamente o BMW que procurava. Recomendo sem hesitar a qualquer pessoa.'],
+      en: ['BMW found and delivered in Porto', 'Fast and completely transparent process. They found exactly the BMW I was looking for. I would recommend TURBOEAGLE to anyone without hesitation.'],
+      uk: ['BMW знайдено і доставлено в Порту', 'Швидкий і повністю прозорий процес. Знайшли саме той BMW, який я шукав. Рекомендую TURBOEAGLE без вагань.'] },
     { name: 'M. & J. P.', location: 'Setúbal, Portugal', badge: 'BMW 3 · Setúbal', image: '/assets/review-3.jpg',
-      title: 'BMW 3 Series — casal feliz em Setúbal', quote: 'Atendimento excelente do início ao fim. Entregaram o BMW dos nossos sonhos dentro do prazo prometido. A equipa está sempre disponível para ajudar.' },
+      pt: ['BMW 3 Series — casal feliz em Setúbal', 'Atendimento excelente do início ao fim. Entregaram o BMW dos nossos sonhos dentro do prazo prometido. A equipa está sempre disponível para ajudar.'],
+      en: ['BMW 3 Series — happy couple in Setúbal', 'Excellent service from start to finish. They delivered our dream BMW within the promised timeframe. The team is always available to help.'],
+      uk: ['BMW 3 Series — щаслива пара в Сетубалі', 'Відмінний сервіс від початку до кінця. Доставили BMW нашої мрії в обіцяний термін. Команда завжди готова допомогти.'] },
     { name: 'S. C.', location: 'Cascais, Portugal', badge: 'Mercedes-Benz · Cascais', image: '/assets/review-4.jpg',
-      title: 'Mercedes-Benz em Cascais — entrega no próprio dia', quote: 'Equipa profissional e muito transparente. Encontraram o Mercedes perfeito para mim e todo o processo foi simples e sem surpresas. Muito obrigada!' },
+      pt: ['Mercedes-Benz em Cascais — entrega no próprio dia', 'Equipa profissional e muito transparente. Encontraram o Mercedes perfeito para mim e todo o processo foi simples e sem surpresas. Muito obrigada!'],
+      en: ['Mercedes-Benz in Cascais — same-day delivery', 'Very professional and transparent team. They found the perfect Mercedes for me and the whole process was straightforward with no surprises. Thank you!'],
+      uk: ['Mercedes-Benz у Кашкайші — передача того ж дня', 'Дуже професійна та прозора команда. Знайшли ідеальний Mercedes для мене, весь процес пройшов легко і без жодних сюрпризів. Дуже дякую!'] },
   ]
-  const SEED_IMAGES   = SEED_REVIEWS.map(r => r.image)
-  const seedRows      = () => SEED_REVIEWS.map((r, i) => [r.name, r.location, r.title, r.quote, 5, r.image, r.badge, 'all', 'visible', i])
-  const SEED_INSERT   = 'INSERT INTO reviews (name, location, title, quote, rating, image, badge, lang, status, sort_order) VALUES ?'
+  const SEED_IMAGES = SEED_REVIEWS.map(r => r.image)
+  const seedRows    = () => SEED_REVIEWS.map((r, i) =>
+    [r.name, r.location, r.pt[0], r.pt[1], r.en[0], r.en[1], r.uk[0], r.uk[1], 5, r.image, r.badge, 'all', 'visible', i])
+  const SEED_INSERT = 'INSERT INTO reviews (name, location, title, quote, title_en, quote_en, title_uk, quote_uk, rating, image, badge, lang, status, sort_order) VALUES ?'
 
   const [revCount] = await db.query('SELECT COUNT(*) AS n FROM reviews')
   if (revCount[0].n === 0) {
     await db.query(SEED_INSERT, [seedRows()])
     console.log('✓ Seeded default reviews')
   } else {
-    // One-time cleanup: collapse the earlier per-language seed (pt/en/uk copies of
-    // the same review) into a single 'all' entry so reviews are identical everywhere.
-    const [dupes] = await db.query("SELECT COUNT(*) AS n FROM reviews WHERE image IN (?) AND lang <> 'all'", [SEED_IMAGES])
-    if (dupes[0].n > 0) {
+    // One-time cleanup: replace earlier seed variants (per-language rows, or single
+    // rows without translations) with one multilingual entry per review.
+    const [needs] = await db.query(
+      "SELECT COUNT(*) AS n FROM reviews WHERE image IN (?) AND (lang <> 'all' OR title_en IS NULL)",
+      [SEED_IMAGES]
+    )
+    if (needs[0].n > 0) {
       await db.query('DELETE FROM reviews WHERE image IN (?)', [SEED_IMAGES])
       await db.query(SEED_INSERT, [seedRows()])
-      console.log('✓ De-duplicated seeded reviews')
+      console.log('✓ Rebuilt seeded reviews with translations')
     }
   }
 
@@ -492,31 +513,44 @@ function reviewFields(body) {
   let rating = parseInt(body.rating)
   if (isNaN(rating)) rating = 5
   rating = Math.max(1, Math.min(5, rating))
-  const lang = ['all', 'pt', 'en', 'uk'].includes(body.lang) ? body.lang : 'all'
   return {
-    name:       body.name     || '',
-    location:   body.location || null,
-    title:      body.title    || null,
-    quote:      body.quote    || null,
+    name:       body.name      || '',
+    location:   body.location  || null,
+    title:      body.title     || null,   // PT (primary)
+    quote:      body.quote     || null,
+    title_en:   body.title_en  || null,
+    quote_en:   body.quote_en  || null,
+    title_uk:   body.title_uk  || null,
+    quote_uk:   body.quote_uk  || null,
     rating,
-    image:      body.image    || null,
-    badge:      body.badge    || null,
-    lang,
+    image:      body.image     || null,
+    badge:      body.badge     || null,
+    lang:       'all',
     status:     body.status === 'hidden' ? 'hidden' : 'visible',
     sort_order: parseInt(body.sort_order) || 0,
     updated_at: new Date(),
   }
 }
 
-// GET /api/public_reviews.php?lang=xx — visible reviews for the chosen language
+// GET /api/public_reviews.php?lang=xx — visible reviews, text resolved for the language
 app.get('/api/public_reviews.php', async (req, res) => {
   try {
     const lang = ['pt', 'en', 'uk'].includes(req.query.lang) ? req.query.lang : 'pt'
     const [rows] = await db.query(
-      "SELECT id, name, location, title, quote, rating, image, badge, lang FROM reviews WHERE status = 'visible' AND lang IN ('all', ?) ORDER BY sort_order ASC, created_at DESC",
-      [lang]
+      "SELECT * FROM reviews WHERE status = 'visible' ORDER BY sort_order ASC, created_at DESC"
     )
-    res.json(rows)
+    const out = rows.map(r => ({
+      id:       r.id,
+      name:     r.name,
+      location: r.location,
+      rating:   r.rating,
+      image:    r.image,
+      badge:    r.badge,
+      // Fall back to PT when a translation is empty
+      title:    (lang === 'en' ? r.title_en : lang === 'uk' ? r.title_uk : r.title) || r.title,
+      quote:    (lang === 'en' ? r.quote_en : lang === 'uk' ? r.quote_uk : r.quote) || r.quote,
+    }))
+    res.json(out)
   } catch (err) { res.status(500).json({ error: err.message }) }
 })
 

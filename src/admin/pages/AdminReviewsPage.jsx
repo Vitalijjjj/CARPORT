@@ -5,17 +5,19 @@ import {
 import a from '../adminLang'
 
 const EMPTY_REVIEW = {
-  name: '', location: '', title: '', quote: '',
-  rating: 5, badge: '', lang: 'all', status: 'visible',
+  name: '', location: '',
+  title: '', quote: '',          // PT (primary)
+  title_en: '', quote_en: '',
+  title_uk: '', quote_uk: '',
+  rating: 5, badge: '', status: 'visible',
   sort_order: 0, image: '',
 }
 
-const LANG_LABELS = {
-  all: () => a.reviews.langAll,
-  pt:  () => a.reviews.langPt,
-  en:  () => a.reviews.langEn,
-  uk:  () => a.reviews.langUk,
-}
+const TEXT_LANGS = [
+  { key: 'pt', label: 'PT', title: 'title',    quote: 'quote' },
+  { key: 'en', label: 'EN', title: 'title_en', quote: 'quote_en' },
+  { key: 'uk', label: 'UA', title: 'title_uk', quote: 'quote_uk' },
+]
 
 export default function AdminReviewsPage() {
   const [reviews,  setReviews]  = useState([])
@@ -96,7 +98,6 @@ export default function AdminReviewsPage() {
                 <th>{a.reviews.colClient}</th>
                 <th>{a.reviews.colReview}</th>
                 <th>{a.reviews.colRating}</th>
-                <th>{a.reviews.colLang}</th>
                 <th>{a.reviews.colStatus}</th>
                 <th style={{ width: 110 }}>{a.reviews.colActions}</th>
               </tr>
@@ -121,7 +122,6 @@ export default function AdminReviewsPage() {
                     <div className="admin-car-meta" style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{rev.quote || ''}</div>
                   </td>
                   <td style={{ color: '#f59e0b', letterSpacing: 1 }}>{'★'.repeat(Math.max(0, Math.min(5, rev.rating)))}</td>
-                  <td>{(LANG_LABELS[rev.lang] || LANG_LABELS.all)()}</td>
                   <td>
                     <span className={`admin-status-badge admin-status--${rev.status === 'visible' ? 'green' : 'slate'}`}>
                       {rev.status === 'visible' ? a.reviews.visible : a.reviews.hidden}
@@ -175,6 +175,7 @@ function ReviewFormModal({ review, onClose, onSaved, onToast }) {
   const [saving, setSaving]     = useState(false)
   const [uploading, setUploading] = useState(false)
   const [err, setErr]           = useState('')
+  const [textLang, setTextLang] = useState('pt')
   const fileRef = useRef(null)
 
   function set(field) {
@@ -230,14 +231,40 @@ function ReviewFormModal({ review, onClose, onSaved, onToast }) {
           <input className="af-input" value={form.location || ''} onChange={set('location')} placeholder={a.reviews.fLocationPlaceholder} />
         </div>
 
+        {/* Review text per language */}
         <div className="af-field" style={{ marginTop: 14 }}>
-          <label className="af-label">{a.reviews.fTitle}</label>
-          <input className="af-input" value={form.title || ''} onChange={set('title')} placeholder={a.reviews.fTitlePlaceholder} />
-        </div>
-
-        <div className="af-field" style={{ marginTop: 14 }}>
-          <label className="af-label">{a.reviews.fQuote}</label>
-          <textarea className="af-input af-textarea" rows={4} value={form.quote || ''} onChange={set('quote')} placeholder={a.reviews.fQuotePlaceholder} />
+          <label className="af-label">{a.reviews.fText}</label>
+          <div className="af-lang-tabs">
+            {TEXT_LANGS.map(l => (
+              <button
+                key={l.key}
+                type="button"
+                className={`af-lang-tab${textLang === l.key ? ' active' : ''}`}
+                onClick={() => setTextLang(l.key)}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          {TEXT_LANGS.map(l => textLang === l.key && (
+            <div key={l.key}>
+              <input
+                className="af-input"
+                style={{ marginBottom: 8 }}
+                value={form[l.title] || ''}
+                onChange={set(l.title)}
+                placeholder={`${a.reviews.fTitle} (${l.label})`}
+              />
+              <textarea
+                className="af-input af-textarea"
+                rows={4}
+                value={form[l.quote] || ''}
+                onChange={set(l.quote)}
+                placeholder={`${a.reviews.fQuote} (${l.label})`}
+              />
+            </div>
+          ))}
+          <span className="af-hint">{a.reviews.textHint}</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
@@ -253,16 +280,7 @@ function ReviewFormModal({ review, onClose, onSaved, onToast }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginTop: 14 }}>
-          <div className="af-field">
-            <label className="af-label">{a.reviews.fLang}</label>
-            <select className="af-input" value={form.lang} onChange={set('lang')}>
-              <option value="all">{a.reviews.langAll}</option>
-              <option value="pt">{a.reviews.langPt}</option>
-              <option value="en">{a.reviews.langEn}</option>
-              <option value="uk">{a.reviews.langUk}</option>
-            </select>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
           <div className="af-field">
             <label className="af-label">{a.reviews.fStatus}</label>
             <select className="af-input" value={form.status} onChange={set('status')}>
