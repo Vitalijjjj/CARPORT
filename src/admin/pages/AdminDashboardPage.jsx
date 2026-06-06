@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGetCars } from '../adminApi'
-
-const STATUS_LABELS = {
-  available: 'Available',
-  reserved:  'Reserved',
-  sold:      'Sold',
-  hidden:    'Hidden',
-}
+import a from '../adminLang'
 
 const STATUS_COLORS = {
   available: 'green',
@@ -43,50 +37,50 @@ export default function AdminDashboardPage() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Dashboard</h1>
-          <p className="admin-page-sub">Overview of your inventory</p>
+          <h1 className="admin-page-title">{a.dashboard.title}</h1>
+          <p className="admin-page-sub">{a.dashboard.subtitle}</p>
         </div>
         <Link to="/admin/cars/create" className="btn-admin-primary">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          Add Car
+          {a.dashboard.addCar}
         </Link>
       </div>
 
       {/* ── Stats ───────────────────────────────────────────────── */}
       <div className="admin-stats-grid">
         <div className="admin-stat-card">
-          <span className="admin-stat-label">Total Cars</span>
+          <span className="admin-stat-label">{a.dashboard.total}</span>
           <span className="admin-stat-value">{loading ? '—' : stats.total}</span>
         </div>
         <div className="admin-stat-card admin-stat-card--green">
-          <span className="admin-stat-label">Available</span>
+          <span className="admin-stat-label">{a.dashboard.available}</span>
           <span className="admin-stat-value">{loading ? '—' : stats.available}</span>
         </div>
         <div className="admin-stat-card admin-stat-card--amber">
-          <span className="admin-stat-label">Reserved</span>
+          <span className="admin-stat-label">{a.dashboard.reserved}</span>
           <span className="admin-stat-value">{loading ? '—' : stats.reserved}</span>
         </div>
         <div className="admin-stat-card admin-stat-card--slate">
-          <span className="admin-stat-label">Sold</span>
+          <span className="admin-stat-label">{a.dashboard.sold}</span>
           <span className="admin-stat-value">{loading ? '—' : stats.sold}</span>
         </div>
         <div className="admin-stat-card admin-stat-card--red">
-          <span className="admin-stat-label">Hidden</span>
+          <span className="admin-stat-label">{a.dashboard.hidden}</span>
           <span className="admin-stat-value">{loading ? '—' : stats.hidden}</span>
         </div>
       </div>
 
       {error && (
-        <div className="admin-error-banner">Failed to load data: {error}</div>
+        <div className="admin-error-banner">{a.dashboard.failedToLoad} {error}</div>
       )}
 
       {/* ── Recent cars ─────────────────────────────────────────── */}
       <div className="admin-section-card">
         <div className="admin-section-card-header">
-          <h2 className="admin-section-card-title">Recent Cars</h2>
-          <Link to="/admin/cars" className="admin-link">View all →</Link>
+          <h2 className="admin-section-card-title">{a.dashboard.recentCars}</h2>
+          <Link to="/admin/cars" className="admin-link">{a.dashboard.viewAll}</Link>
         </div>
 
         {loading ? (
@@ -95,17 +89,17 @@ export default function AdminDashboardPage() {
           </div>
         ) : recentCars.length === 0 ? (
           <div className="admin-empty-sm">
-            No cars yet. &nbsp;
-            <Link to="/admin/cars/create" className="admin-link">Add your first car</Link>
+            {a.dashboard.noCars} &nbsp;
+            <Link to="/admin/cars/create" className="admin-link">{a.dashboard.addFirst}</Link>
           </div>
         ) : (
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Car</th>
-                <th>Year</th>
-                <th>Price</th>
-                <th>Status</th>
+                <th>{a.dashboard.colCar}</th>
+                <th>{a.dashboard.colYear}</th>
+                <th>{a.dashboard.colPrice}</th>
+                <th>{a.dashboard.colStatus}</th>
                 <th style={{ width: 60 }}></th>
               </tr>
             </thead>
@@ -138,11 +132,11 @@ export default function AdminDashboardPage() {
                   <td>€ {Number(car.price).toLocaleString('de-DE')}</td>
                   <td>
                     <span className={`admin-status-badge admin-status--${STATUS_COLORS[car.status] || 'slate'}`}>
-                      {STATUS_LABELS[car.status] || car.status}
+                      {a.status[car.status] || car.status}
                     </span>
                   </td>
                   <td>
-                    <Link to={`/admin/cars/${car.id}/edit`} className="admin-link">Edit</Link>
+                    <Link to={`/admin/cars/${car.id}/edit`} className="admin-link">{a.dashboard.edit}</Link>
                   </td>
                 </tr>
               ))}

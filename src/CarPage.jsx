@@ -163,7 +163,7 @@ function ImageSlider({ items, onOpenLightbox }) {
       </div>
       {items.length > 1 && (
         <div className="slider-thumbs">
-          {items.slice(0, 8).map((item, i) => (
+          {items.map((item, i) => (
             <button key={i} className={`sl-thumb${i === idx ? ' active' : ''}`} onClick={() => setIdx(i)}>
               {item.type === 'video' ? (
                 <div className="sl-thumb-video">

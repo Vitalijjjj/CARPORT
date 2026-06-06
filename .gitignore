@@ -11,6 +11,10 @@ node_modules
 dist-ssr
 *.local
 
+# Tooling / build caches (not part of the project)
+.claude/
+.next/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

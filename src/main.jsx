@@ -18,6 +18,7 @@ import AdminLoginPage     from './admin/pages/AdminLoginPage.jsx'
 import AdminDashboardPage from './admin/pages/AdminDashboardPage.jsx'
 import AdminCarsListPage  from './admin/pages/AdminCarsListPage.jsx'
 import AdminCarFormPage   from './admin/pages/AdminCarFormPage.jsx'
+import AdminReviewsPage   from './admin/pages/AdminReviewsPage.jsx'
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation()
@@ -71,6 +72,7 @@ function Root() {
             <Route path="cars"             element={<AdminCarsListPage />} />
             <Route path="cars/create"      element={<AdminCarFormPage />} />
             <Route path="cars/:id/edit"    element={<AdminCarFormPage />} />
+            <Route path="reviews"          element={<AdminReviewsPage />} />
           </Route>
         </Routes>
         <SiteWidgets />

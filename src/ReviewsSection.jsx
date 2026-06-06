@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLang } from './lang/LangContext'
+import { fetchPublicReviews } from './publicApi'
 
 function BtnArrow() {
   return (
@@ -9,15 +10,46 @@ function BtnArrow() {
   )
 }
 
+function Stars({ rating = 5 }) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0))
+  return <div className="vt-stars">{'★'.repeat(r)}{'☆'.repeat(5 - r)}</div>
+}
+
+function avatarChar(name) {
+  return (name || '?').trim().charAt(0).toUpperCase()
+}
+
 export default function ReviewsSection({ onCta }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [vtIdx, setVtIdx] = useState(0)
+  const [dbReviews, setDbReviews] = useState(null) // null = loading/unknown
   const vtRef = useRef(null)
 
+  // Fetch managed reviews for the active language; fall back to static ones on empty/error
+  useEffect(() => {
+    let alive = true
+    fetchPublicReviews(lang)
+      .then(data => { if (alive) setDbReviews(Array.isArray(data) ? data : []) })
+      .catch(() => { if (alive) setDbReviews([]) })
+    return () => { alive = false }
+  }, [lang])
+
+  // Static fallback reviews (used when no managed reviews exist)
+  const staticReviews = [
+    { name: 'R. & A. M.', location: 'Lisboa, Portugal', badge: 'Mercedes-Benz · Lisboa', image: '/assets/review-1.jpg', rating: 5, title: t.reviews.r1title, quote: t.reviews.r1quote },
+    { name: 'D. F.',      location: 'Porto, Portugal',   badge: 'BMW · Porto',           image: '/assets/review-2.jpg', rating: 5, title: t.reviews.r2title, quote: t.reviews.r2quote },
+    { name: 'M. & J. P.', location: 'Setúbal, Portugal', badge: 'BMW 3 · Setúbal',       image: '/assets/review-3.jpg', rating: 5, title: t.reviews.r3title, quote: t.reviews.r3quote },
+    { name: 'S. C.',      location: 'Cascais, Portugal', badge: 'Mercedes-Benz · Cascais', image: '/assets/review-4.jpg', rating: 5, title: t.reviews.r4title, quote: t.reviews.r4quote },
+  ]
+
+  const reviews = (dbReviews && dbReviews.length > 0) ? dbReviews : staticReviews
+
+  // Track the active card for the dots
   useEffect(() => {
     const el = vtRef.current
     if (!el) return
     const cards = Array.from(el.querySelectorAll('.vt-card'))
+    if (!cards.length) return
     const io = new IntersectionObserver(
       entries => {
         entries.forEach(e => {
@@ -29,7 +61,7 @@ export default function ReviewsSection({ onCta }) {
     )
     cards.forEach(c => io.observe(c))
     return () => io.disconnect()
-  }, [])
+  }, [reviews.length])
 
   function scrollToVt(i) {
     const el = vtRef.current
@@ -47,89 +79,42 @@ export default function ReviewsSection({ onCta }) {
         </div>
 
         <div className="vt-grid" ref={vtRef}>
-          <div className="vt-card">
-            <div className="vt-thumb" style={{ backgroundImage: "url('/assets/review-1.jpg')" }}>
-              <div className="vt-badge">Mercedes-Benz · Lisboa</div>
-            </div>
-            <div className="vt-info">
-              <div className="vt-stars">★★★★★</div>
-              <div className="vt-title">{t.reviews.r1title}</div>
-              <p className="vt-quote">{t.reviews.r1quote}</p>
-              <div className="vt-author">
-                <div className="vt-avatar-placeholder">R</div>
-                <div>
-                  <div className="vt-name">R. &amp; A. M.</div>
-                  <div className="vt-loc">Lisboa, Portugal</div>
+          {reviews.map((rev, i) => (
+            <div className="vt-card" key={rev.id ?? i}>
+              <div
+                className="vt-thumb"
+                style={rev.image ? { backgroundImage: `url('${rev.image}')` } : undefined}
+              >
+                {rev.badge && <div className="vt-badge">{rev.badge}</div>}
+              </div>
+              <div className="vt-info">
+                <Stars rating={rev.rating} />
+                {rev.title && <div className="vt-title">{rev.title}</div>}
+                {rev.quote && <p className="vt-quote">{rev.quote}</p>}
+                <div className="vt-author">
+                  <div className="vt-avatar-placeholder">{avatarChar(rev.name)}</div>
+                  <div>
+                    <div className="vt-name">{rev.name}</div>
+                    {rev.location && <div className="vt-loc">{rev.location}</div>}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="vt-card">
-            <div className="vt-thumb" style={{ backgroundImage: "url('/assets/review-2.jpg')" }}>
-              <div className="vt-badge">BMW · Porto</div>
-            </div>
-            <div className="vt-info">
-              <div className="vt-stars">★★★★★</div>
-              <div className="vt-title">{t.reviews.r2title}</div>
-              <p className="vt-quote">{t.reviews.r2quote}</p>
-              <div className="vt-author">
-                <div className="vt-avatar-placeholder">D</div>
-                <div>
-                  <div className="vt-name">D. F.</div>
-                  <div className="vt-loc">Porto, Portugal</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="vt-card">
-            <div className="vt-thumb" style={{ backgroundImage: "url('/assets/review-3.jpg')" }}>
-              <div className="vt-badge">BMW 3 · Setúbal</div>
-            </div>
-            <div className="vt-info">
-              <div className="vt-stars">★★★★★</div>
-              <div className="vt-title">{t.reviews.r3title}</div>
-              <p className="vt-quote">{t.reviews.r3quote}</p>
-              <div className="vt-author">
-                <div className="vt-avatar-placeholder">M</div>
-                <div>
-                  <div className="vt-name">M. &amp; J. P.</div>
-                  <div className="vt-loc">Setúbal, Portugal</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="vt-card">
-            <div className="vt-thumb" style={{ backgroundImage: "url('/assets/review-4.jpg')" }}>
-              <div className="vt-badge">Mercedes-Benz · Cascais</div>
-            </div>
-            <div className="vt-info">
-              <div className="vt-stars">★★★★★</div>
-              <div className="vt-title">{t.reviews.r4title}</div>
-              <p className="vt-quote">{t.reviews.r4quote}</p>
-              <div className="vt-author">
-                <div className="vt-avatar-placeholder">S</div>
-                <div>
-                  <div className="vt-name">S. C.</div>
-                  <div className="vt-loc">Cascais, Portugal</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="vt-dots">
-          {[0, 1, 2, 3].map(i => (
-            <button
-              key={i}
-              className={`vt-dot${vtIdx === i ? ' active' : ''}`}
-              onClick={() => scrollToVt(i)}
-              aria-label={`Review ${i + 1}`}
-            />
           ))}
         </div>
+
+        {reviews.length > 1 && (
+          <div className="vt-dots">
+            {reviews.map((_, i) => (
+              <button
+                key={i}
+                className={`vt-dot${vtIdx === i ? ' active' : ''}`}
+                onClick={() => scrollToVt(i)}
+                aria-label={`Review ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {onCta && (
           <div className="vt-cta">

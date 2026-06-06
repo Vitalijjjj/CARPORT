@@ -113,12 +113,12 @@ export default function ImportForm() {
                 {/* Row 2: brand + model */}
                 <div className="import-row-2">
                   <div className="import-field">
-                    <select value={form.brand} onChange={set('brand')}>
-                      <option value="">{f.brandLabel}</option>
-                      <option value="BMW">BMW</option>
-                      <option value="Mercedes-Benz">Mercedes-Benz</option>
-                      <option value={f.brandBoth}>{f.brandBoth}</option>
-                    </select>
+                    <input
+                      type="text"
+                      placeholder={f.brandPlaceholder}
+                      value={form.brand}
+                      onChange={set('brand')}
+                    />
                   </div>
                   <div className="import-field">
                     <input

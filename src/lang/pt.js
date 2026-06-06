@@ -205,6 +205,7 @@ const pt = {
     namePlaceholder: 'O seu nome',
     phonePlaceholder: '+351 000 000 000',
     brandLabel: 'Marca', brandBoth: 'Ambas as marcas',
+    brandPlaceholder: 'Marca (ex. BMW, Mercedes-Benz, Audi…)',
     modelLabel: 'Modelo', modelPlaceholder: 'Modelo (ex. BMW iX3, M3…)',
     yearLabel: 'Ano', yearPlaceholder: 'Ano (ex. 2022 ou mais recente)',
     mileageLabel: 'Km', mileagePlaceholder: 'Km máx. (ex. 50 000 km)',

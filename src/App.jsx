@@ -36,12 +36,6 @@ function formatCounter(val, { prefix, suffix, decimals }) {
 /* Static data                                                          */
 /* ------------------------------------------------------------------ */
 
-const heroData = [
-  { title: 'BMW i4 eDrive40',         range: '590 km', hp: '340 HP', year: '2023', price: '€52 900', id: 'bmw-i4-edrive40' },
-  { title: 'BMW X5 xDrive45e',        range: '87 km EV', hp: '394 HP', year: '2023', price: '€79 900', id: 'bmw-x5-45e' },
-  { title: 'Mercedes-Benz EQE 350',   range: '654 km', hp: '292 HP', year: '2023', price: '€63 800', id: 'mercedes-eqe-350' },
-]
-
 const heroImages = [
   'assets/car-bmw-i4.jpg',
   'assets/car-bmw-x5.jpg',
@@ -208,15 +202,19 @@ export default function App() {
   const [stickyVis,   setStickyVis]   = useState(false)
   const [openFaq,     setOpenFaq]     = useState(null)
   const [swipeHinted, setSwipeHinted] = useState(false)
-  const [dbCars,   setDbCars]     = useState(null) // null = loading
+  const [dbCars,   setDbCars]     = useState(null) // null = still loading
 
   useEffect(() => {
     fetchPublicCars()
-      .then(data => setDbCars(data.length > 0 ? data : null))
-      .catch(() => setDbCars(null))
+      // Use real cars; only fall back to legacy data if the DB is empty or the request fails.
+      .then(data => setDbCars(data.length > 0 ? data : OLIMP_CARS))
+      .catch(() => setDbCars(OLIMP_CARS))
   }, [])
 
-  const catalogCars = dbCars ?? OLIMP_CARS
+  // While loading we render skeletons instead of legacy placeholder cars/photos,
+  // so real cars and their photos appear directly with no placeholder flash.
+  const loading     = dbCars === null
+  const catalogCars = dbCars ?? []
 
   const heroSlides = useMemo(() => {
     if (dbCars && dbCars.length > 0) {
@@ -234,7 +232,8 @@ export default function App() {
         financing: car.financing,
       }))
     }
-    return heroData.map((h, i) => ({ ...h, bgImage: heroImages[i], warranty: true, financing: true }))
+    // dbCars === null → still loading: no slides yet (a skeleton is shown instead)
+    return []
   }, [dbCars])
 
   const cardCtxRef   = useRef(null)
@@ -384,7 +383,7 @@ export default function App() {
     if (filter === 'warranty')  return c.warranty
     return true
   })
-  const hero = heroSlides[Math.min(heroIdx, heroSlides.length - 1)] ?? heroSlides[0]
+  const hero = heroSlides[Math.min(heroIdx, heroSlides.length - 1)] ?? heroSlides[0] ?? {}
 
   return (
     <div className="page" id="page">
@@ -399,12 +398,18 @@ export default function App() {
       <section className="hero" id="top">
         <div className="hero-stage" id="heroStage">
 
+          {loading && (
+            <div className="hero-slide active">
+              <div className="img hero-img-skel" />
+            </div>
+          )}
           {heroSlides.map((slide, i) => (
             <div key={i} className={`hero-slide${heroIdx === i ? ' active' : ''}`}>
               <div className="img" style={{ backgroundImage: `url('${slide.bgImage}')` }} />
             </div>
           ))}
 
+          {heroSlides.length > 1 && (<>
           <div className="hero-side-nav">
             <div className="hero-menu">
               {heroSlides.map((slide, i) => (
@@ -440,6 +445,7 @@ export default function App() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 5 7 7-7 7"/></svg>
             </button>
           </div>
+          </>)}
 
           <div className="hero-body"
             onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
@@ -461,10 +467,10 @@ export default function App() {
                 <div className="spec"><div className="small">{t.hero.specYear}</div><div className="v">{hero.year}</div></div>
               </div>
               <div className="hero-cta-row">
-                <button className="btn btn-primary" onClick={() => setModal(true)}>
+                <Link className="btn btn-primary" to="/cars">
                   {t.hero.cta1}
                   <BtnArrow />
-                </button>
+                </Link>
                 <button className="btn hero-btn-ghost" onClick={() => setModal(true)}>
                   {t.hero.cta2}
                 </button>
@@ -479,6 +485,7 @@ export default function App() {
             </div>
 
             <div className="hero-body-right">
+              {!loading && hero.id && (
               <div className="hero-car-card">
                 <div className="hero-car-label">Featured</div>
                 <div className="hero-car-model">{hero.title}</div>
@@ -492,6 +499,7 @@ export default function App() {
                   Ask About This Car <span aria-hidden="true">→</span>
                 </Link>
               </div>
+              )}
             </div>
           </div>
 
@@ -563,7 +571,22 @@ export default function App() {
             )}
           </div>
           <div className="models-grid">
-            {visibleCars.length === 0
+            {loading
+              ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="mcard mcard-skel" aria-hidden="true">
+                  <div className="shot mcard-skel-shot" />
+                  <div>
+                    <div className="mcard-skel-line mcard-skel-line--lg" />
+                    <div className="mcard-skel-line mcard-skel-line--sm" />
+                    <div className="mcard-skel-stats">
+                      <div className="mcard-skel-line" />
+                      <div className="mcard-skel-line" />
+                      <div className="mcard-skel-line" />
+                    </div>
+                  </div>
+                </div>
+              ))
+              : visibleCars.length === 0
               ? (
                 <div className="models-empty">
                   <p>{t.models.emptyText}</p>
@@ -775,9 +798,9 @@ export default function App() {
                 {t.finalCta.cta1}
                 <BtnArrow />
               </button>
-              <a href="#models" className="final-cta-sec">
+              <Link to="/cars" className="final-cta-sec">
                 {t.finalCta.cta2}
-              </a>
+              </Link>
             </div>
           </div>
         </div>

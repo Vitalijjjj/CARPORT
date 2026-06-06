@@ -62,6 +62,13 @@ export async function fetchPublicCars() {
   return (await res.json()).map(normalizeCar)
 }
 
+export async function fetchPublicReviews(lang = 'pt') {
+  if (IS_MOCK) return []
+  const res = await fetch(`${API_BASE}/public_reviews.php?lang=${encodeURIComponent(lang)}`)
+  if (!res.ok) throw new Error('Failed to load reviews')
+  return await res.json()
+}
+
 export async function fetchPublicCar(id) {
   if (IS_MOCK) {
     const car = OLIMP_CARS.find(c => c.id === id)

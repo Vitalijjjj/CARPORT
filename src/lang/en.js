@@ -189,6 +189,7 @@ const en = {
     namePlaceholder: 'Your name',
     phonePlaceholder: '+351 000 000 000',
     brandLabel: 'Brand', brandBoth: 'Both brands',
+    brandPlaceholder: 'Brand (e.g. BMW, Mercedes-Benz, Audi…)',
     modelLabel: 'Model', modelPlaceholder: 'Model (e.g. BMW iX3, M3…)',
     yearLabel: 'Year', yearPlaceholder: 'Year (e.g. 2022 or newer)',
     mileageLabel: 'Mileage', mileagePlaceholder: 'Max mileage (e.g. 50,000 km)',

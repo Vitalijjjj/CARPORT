@@ -179,6 +179,69 @@ export async function apiDeleteCar(id) {
   return handleResponse(res)
 }
 
+// ── Reviews ─────────────────────────────────────────────────────────
+
+let mockReviews = [
+  {
+    id: 1, name: 'R. & A. M.', location: 'Lisboa, Portugal', title: 'Mercedes-Benz delivered in Lisbon',
+    quote: 'We were very happy with the whole process.', rating: 5, image: '', badge: 'Mercedes-Benz · Lisboa',
+    lang: 'all', status: 'visible', sort_order: 0,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+  },
+]
+let mockNextReviewId = mockReviews.length + 1
+
+export async function apiGetReviews() {
+  if (IS_MOCK) {
+    await new Promise(r => setTimeout(r, 250))
+    return [...mockReviews]
+  }
+  const res = await fetch(`${API_BASE}/reviews.php`, { headers: getAuthHeaders() })
+  return handleResponse(res)
+}
+
+export async function apiCreateReview(data) {
+  if (IS_MOCK) {
+    await new Promise(r => setTimeout(r, 350))
+    const review = { ...data, id: mockNextReviewId++, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+    mockReviews.push(review)
+    return { id: review.id, ok: true }
+  }
+  const res = await fetch(`${API_BASE}/reviews.php`, {
+    method:  'POST',
+    headers: getAuthHeaders(),
+    body:    JSON.stringify(data),
+  })
+  return handleResponse(res)
+}
+
+export async function apiUpdateReview(id, data) {
+  if (IS_MOCK) {
+    await new Promise(r => setTimeout(r, 350))
+    mockReviews = mockReviews.map(r => r.id === Number(id) ? { ...r, ...data, updated_at: new Date().toISOString() } : r)
+    return { ok: true }
+  }
+  const res = await fetch(`${API_BASE}/reviews.php?id=${encodeURIComponent(id)}`, {
+    method:  'PUT',
+    headers: getAuthHeaders(),
+    body:    JSON.stringify(data),
+  })
+  return handleResponse(res)
+}
+
+export async function apiDeleteReview(id) {
+  if (IS_MOCK) {
+    await new Promise(r => setTimeout(r, 250))
+    mockReviews = mockReviews.filter(r => r.id !== Number(id))
+    return { ok: true }
+  }
+  const res = await fetch(`${API_BASE}/reviews.php?id=${encodeURIComponent(id)}`, {
+    method:  'DELETE',
+    headers: getAuthHeaders(),
+  })
+  return handleResponse(res)
+}
+
 // ── Image upload ───────────────────────────────────────────────────
 
 export async function apiUploadImage(file) {

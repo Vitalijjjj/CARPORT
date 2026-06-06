@@ -29,8 +29,9 @@ if (!existsSync(join(__dirname, 'dist', 'index.html'))) {
 
 // ── Middleware ────────────────────────────────────────────────────
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }))
-app.use(express.json({ limit: '13mb' }))
-app.use(express.urlencoded({ extended: true, limit: '13mb' }))
+// Cars can carry up to 25 gallery photos as base64 data URLs — allow a large body
+app.use(express.json({ limit: '60mb' }))
+app.use(express.urlencoded({ extended: true, limit: '60mb' }))
 
 // ── Database pool ─────────────────────────────────────────────────
 // Hostinger Node.js and MySQL are on the same machine.
@@ -152,6 +153,27 @@ async function initDb() {
       quiz_answers JSON         DEFAULT NULL,
       created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      name        VARCHAR(150) NOT NULL DEFAULT '',
+      location    VARCHAR(150) DEFAULT NULL,
+      title       VARCHAR(200) DEFAULT NULL,
+      quote       TEXT         DEFAULT NULL,
+      rating      TINYINT UNSIGNED NOT NULL DEFAULT 5,
+      image       MEDIUMTEXT   DEFAULT NULL,
+      badge       VARCHAR(150) DEFAULT NULL,
+      lang        VARCHAR(5)   NOT NULL DEFAULT 'all',
+      status      ENUM('visible','hidden') NOT NULL DEFAULT 'visible',
+      sort_order  INT NOT NULL DEFAULT 0,
+      created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY reviews_status_idx (status),
+      KEY reviews_lang_idx   (lang)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
 
@@ -420,6 +442,76 @@ app.post('/api/leads.php', async (req, res) => {
     )
   } catch { /* ignore if table missing */ }
   res.json({ success: true, message: 'Thank you! We will contact you soon.' })
+})
+
+// ── Reviews ───────────────────────────────────────────────────────
+function reviewFields(body) {
+  let rating = parseInt(body.rating)
+  if (isNaN(rating)) rating = 5
+  rating = Math.max(1, Math.min(5, rating))
+  const lang = ['all', 'pt', 'en', 'uk'].includes(body.lang) ? body.lang : 'all'
+  return {
+    name:       body.name     || '',
+    location:   body.location || null,
+    title:      body.title    || null,
+    quote:      body.quote    || null,
+    rating,
+    image:      body.image    || null,
+    badge:      body.badge    || null,
+    lang,
+    status:     body.status === 'hidden' ? 'hidden' : 'visible',
+    sort_order: parseInt(body.sort_order) || 0,
+    updated_at: new Date(),
+  }
+}
+
+// GET /api/public_reviews.php?lang=xx — visible reviews for the chosen language
+app.get('/api/public_reviews.php', async (req, res) => {
+  try {
+    const lang = ['pt', 'en', 'uk'].includes(req.query.lang) ? req.query.lang : 'pt'
+    const [rows] = await db.query(
+      "SELECT id, name, location, title, quote, rating, image, badge, lang FROM reviews WHERE status = 'visible' AND lang IN ('all', ?) ORDER BY sort_order ASC, created_at DESC",
+      [lang]
+    )
+    res.json(rows)
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
+// GET /api/reviews.php — admin list (auth)
+app.get('/api/reviews.php', async (req, res) => {
+  if (!requireAuth(req, res)) return
+  try {
+    const [rows] = await db.query('SELECT * FROM reviews ORDER BY sort_order ASC, created_at DESC')
+    res.json(rows)
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
+app.post('/api/reviews.php', async (req, res) => {
+  try {
+    if (!requireAuth(req, res)) return
+    const [result] = await db.query('INSERT INTO reviews SET ?', [reviewFields(req.body)])
+    res.json({ success: true, id: result.insertId })
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
+app.put('/api/reviews.php', async (req, res) => {
+  try {
+    if (!requireAuth(req, res)) return
+    const { id } = req.query
+    if (!id) return res.status(400).json({ error: 'id required' })
+    await db.query('UPDATE reviews SET ? WHERE id = ?', [reviewFields(req.body), id])
+    res.json({ success: true })
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
+
+app.delete('/api/reviews.php', async (req, res) => {
+  try {
+    if (!requireAuth(req, res)) return
+    const { id } = req.query
+    if (!id) return res.status(400).json({ error: 'id required' })
+    await db.query('DELETE FROM reviews WHERE id = ?', [id])
+    res.json({ success: true })
+  } catch (err) { res.status(500).json({ error: err.message }) }
 })
 
 // ── POST /api/quiz.php ────────────────────────────────────────────

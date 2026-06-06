@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { apiLogin } from '../adminApi'
+import a from '../adminLang'
 import '../Admin.css'
 
 function validate(form) {
   const errors = {}
   if (!form.email.trim()) {
-    errors.email = 'Email is required'
+    errors.email = a.login.errEmailRequired
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = 'Enter a valid email address'
+    errors.email = a.login.errEmailInvalid
   }
   if (!form.password) {
-    errors.password = 'Password is required'
+    errors.password = a.login.errPasswordRequired
   }
   return errors
 }
@@ -49,7 +50,7 @@ export default function AdminLoginPage() {
       localStorage.setItem('admin_user', JSON.stringify(admin))
       navigate('/admin')
     } catch (err) {
-      setServerError(err.message || 'Invalid email or password')
+      setServerError(err.message || a.login.errInvalid)
     }
 
     setLoading(false)
@@ -64,7 +65,7 @@ export default function AdminLoginPage() {
           <span className="admin-login-logo-badge">Admin</span>
         </div>
 
-        <h1 className="admin-login-title">Sign in</h1>
+        <h1 className="admin-login-title">{a.login.title}</h1>
 
         {serverError && (
           <div className="admin-login-error" role="alert">
@@ -75,7 +76,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} noValidate>
 
           <div className="admin-login-field">
-            <label className="af-label" htmlFor="login-email">Email</label>
+            <label className="af-label" htmlFor="login-email">{a.login.email}</label>
             <input
               id="login-email"
               type="email"
@@ -84,7 +85,7 @@ export default function AdminLoginPage() {
               onChange={handleChange('email')}
               autoComplete="email"
               autoFocus
-              placeholder="admin@turboeagle.pt"
+              placeholder={a.login.emailPlaceholder}
               disabled={loading}
             />
             {errors.email && (
@@ -93,7 +94,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="admin-login-field">
-            <label className="af-label" htmlFor="login-password">Password</label>
+            <label className="af-label" htmlFor="login-password">{a.login.password}</label>
             <input
               id="login-password"
               type="password"
@@ -115,13 +116,13 @@ export default function AdminLoginPage() {
             disabled={loading}
             style={{ marginTop: 8 }}
           >
-            {loading ? 'Signing in…' : 'Sign In'}
+            {loading ? a.login.submitting : a.login.submit}
           </button>
 
         </form>
 
         <p className="admin-login-back">
-          <Link to="/" className="admin-link">← Back to website</Link>
+          <Link to="/" className="admin-link">{a.login.back}</Link>
         </p>
 
       </div>

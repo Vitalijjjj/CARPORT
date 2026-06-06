@@ -189,6 +189,7 @@ const uk = {
     namePlaceholder: 'Ваше ім\'я',
     phonePlaceholder: '+351 000 000 000',
     brandLabel: 'Марка', brandBoth: 'Обидві марки',
+    brandPlaceholder: 'Марка (напр. BMW, Mercedes-Benz, Audi…)',
     modelLabel: 'Модель', modelPlaceholder: 'Модель (напр. BMW iX3, M3…)',
     yearLabel: 'Рік', yearPlaceholder: 'Рік (напр. 2022 або новіший)',
     mileageLabel: 'Пробіг', mileagePlaceholder: 'Макс. пробіг (напр. 50 000 км)',

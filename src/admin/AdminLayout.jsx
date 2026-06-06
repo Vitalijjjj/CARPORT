@@ -1,4 +1,5 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import a from './adminLang'
 import './Admin.css'
 
 function SidebarLink({ to, end, icon, label }) {
@@ -47,7 +48,7 @@ export default function AdminLayout() {
           <SidebarLink
             to="/admin"
             end
-            label="Dashboard"
+            label={a.nav.dashboard}
             icon={
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -59,13 +60,22 @@ export default function AdminLayout() {
           />
           <SidebarLink
             to="/admin/cars"
-            label="Cars"
+            label={a.nav.cars}
             icon={
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <rect x="1" y="9" width="22" height="10" rx="2"/>
                 <path d="M5 9V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/>
                 <circle cx="7.5" cy="19" r="1.5"/>
                 <circle cx="16.5" cy="19" r="1.5"/>
+              </svg>
+            }
+          />
+          <SidebarLink
+            to="/admin/reviews"
+            label={a.nav.reviews}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 17.3 6.2 20l1.1-6.4L2.6 9.1l6.5-.9L12 2.3l2.9 5.9 6.5.9-4.7 4.5 1.1 6.4z"/>
               </svg>
             }
           />
@@ -84,8 +94,8 @@ export default function AdminLayout() {
           <button
             className="admin-logout-btn"
             onClick={handleLogout}
-            title="Sign out"
-            aria-label="Sign out"
+            title={a.nav.signOut}
+            aria-label={a.nav.signOut}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

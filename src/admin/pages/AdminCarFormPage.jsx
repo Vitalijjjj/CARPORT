@@ -5,6 +5,7 @@ import a from '../adminLang'
 
 /* ── Option lists ──────────────────────────────────────────────────── */
 const CURRENT_YEAR = new Date().getFullYear()
+const MAX_PHOTOS = 25
 
 const STATUS_OPTIONS = [
   { value: 'available', label: () => a.form.statusAvailable },
@@ -324,8 +325,21 @@ export default function AdminCarFormPage() {
 
   // ── Image upload ─────────────────────────────────────────────────
   async function handleImageUpload(e) {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+    const picked = Array.from(e.target.files || [])
+    if (picked.length === 0) return
+
+    // Cap the total gallery size at MAX_PHOTOS (25)
+    const remaining = MAX_PHOTOS - form.gallery.length
+    if (remaining <= 0) {
+      showToast(a.form.photoLimit(MAX_PHOTOS), 'error')
+      if (fileRef.current) fileRef.current.value = ''
+      return
+    }
+    const files = picked.slice(0, remaining)
+    if (picked.length > remaining) {
+      showToast(a.form.photoLimitTrim(MAX_PHOTOS), 'error')
+    }
+
     setUploading(true)
 
     for (const file of files) {
@@ -960,7 +974,7 @@ export default function AdminCarFormPage() {
               type="button"
               className="btn-admin-secondary"
               onClick={() => fileRef.current?.click()}
-              disabled={uploading}
+              disabled={uploading || form.gallery.length >= MAX_PHOTOS}
             >
               {uploading ? (
                 <><span className="admin-spinner-sm" /> {a.form.uploading}</>
@@ -977,8 +991,8 @@ export default function AdminCarFormPage() {
             </button>
             <span className="af-gallery-hint">
               {form.gallery.length > 0
-                ? a.form.imageCount(form.gallery.length)
-                : a.form.noImages
+                ? a.form.imageCount(form.gallery.length, MAX_PHOTOS)
+                : a.form.noImages(MAX_PHOTOS)
               }
             </span>
             <input

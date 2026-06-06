@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGetCars, apiUpdateCarStatus, apiDeleteCar } from '../adminApi'
-
-const STATUS_LABELS = {
-  available: 'Available',
-  reserved:  'Reserved',
-  sold:      'Sold',
-  hidden:    'Hidden',
-}
+import a from '../adminLang'
 
 const STATUS_COLORS = {
   available: 'green',
@@ -16,23 +10,26 @@ const STATUS_COLORS = {
   hidden:    'red',
 }
 
+const STATUS_KEYS = ['available', 'reserved', 'sold', 'hidden']
+
 /* ── Delete confirmation modal ─────────────────────────────────── */
 function DeleteModal({ car, onConfirm, onCancel }) {
   return (
     <div className="admin-modal-backdrop" onClick={onCancel}>
       <div className="admin-modal" onClick={e => e.stopPropagation()}>
-        <h3>Delete Car</h3>
+        <h3>{a.list.deleteTitle}</h3>
         <p>
-          Are you sure you want to permanently delete{' '}
-          <strong>{car.brand} {car.model}{car.version ? ` ${car.version}` : ''}</strong>?
+          {a.list.deleteConfirm(
+            <strong key="name">{car.brand} {car.model}{car.version ? ` ${car.version}` : ''}</strong>
+          )}
         </p>
-        <p className="admin-modal-warn">This action cannot be undone.</p>
+        <p className="admin-modal-warn">{a.list.deleteWarning}</p>
         <div className="admin-modal-actions">
           <button className="btn-admin-secondary" onClick={onCancel}>
-            Cancel
+            {a.list.cancel}
           </button>
           <button className="btn-admin-danger" onClick={onConfirm}>
-            Delete permanently
+            {a.list.deletePermanently}
           </button>
         </div>
       </div>
@@ -67,9 +64,9 @@ export default function AdminCarsListPage() {
     try {
       await apiUpdateCarStatus(carId, newStatus)
       setCars(prev => prev.map(c => c.id === carId ? { ...c, status: newStatus } : c))
-      showToast('Status updated')
+      showToast(a.list.statusUpdated)
     } catch (err) {
-      showToast(err.message || 'Failed to update status', 'error')
+      showToast(err.message || a.list.statusFailed, 'error')
     }
     setStatusChanging(null)
   }
@@ -81,9 +78,9 @@ export default function AdminCarsListPage() {
     try {
       await apiDeleteCar(targetId)
       setCars(prev => prev.filter(c => c.id !== targetId))
-      showToast('Car deleted')
+      showToast(a.list.carDeleted)
     } catch (err) {
-      showToast(err.message || 'Failed to delete car', 'error')
+      showToast(err.message || a.list.deleteFailed, 'error')
     }
   }
 
@@ -128,17 +125,17 @@ export default function AdminCarsListPage() {
       {/* ── Page header ─────────────────────────────────────────── */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Cars</h1>
+          <h1 className="admin-page-title">{a.list.title}</h1>
           <p className="admin-page-sub">
-            {cars.length} car{cars.length !== 1 ? 's' : ''} in database
-            {statusFilter !== 'all' && ` · ${STATUS_LABELS[statusFilter]} filter active`}
+            {a.list.subtitle(cars.length)}
+            {statusFilter !== 'all' && a.list.filterActive(a.status[statusFilter])}
           </p>
         </div>
         <Link to="/admin/cars/create" className="btn-admin-primary">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          Add Car
+          {a.list.addCar}
         </Link>
       </div>
 
@@ -147,23 +144,27 @@ export default function AdminCarsListPage() {
         <input
           className="admin-search"
           type="search"
-          placeholder="Search brand, model, year…"
+          placeholder={a.list.search}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <div className="admin-toolbar-filters">
-          {['all', 'available', 'reserved', 'sold', 'hidden'].map(s => (
+          <button
+            className={`admin-filter-pill${statusFilter === 'all' ? ' active' : ''}`}
+            onClick={() => setStatusFilter('all')}
+          >
+            {a.list.all}
+          </button>
+          {STATUS_KEYS.map(s => (
             <button
               key={s}
               className={`admin-filter-pill${statusFilter === s ? ' active' : ''}`}
               onClick={() => setStatusFilter(s)}
             >
-              {s === 'all' ? 'All' : STATUS_LABELS[s]}
-              {s !== 'all' && (
-                <span className="admin-filter-pill-count">
-                  {cars.filter(c => c.status === s).length}
-                </span>
-              )}
+              {a.status[s]}
+              <span className="admin-filter-pill-count">
+                {cars.filter(c => c.status === s).length}
+              </span>
             </button>
           ))}
         </div>
@@ -172,7 +173,7 @@ export default function AdminCarsListPage() {
       {/* ── Error state ─────────────────────────────────────────── */}
       {error && (
         <div className="admin-error-banner">
-          Failed to load cars: {error}
+          {a.list.failedToLoad} {error}
         </div>
       )}
 
@@ -180,7 +181,7 @@ export default function AdminCarsListPage() {
       {loading && (
         <div className="admin-loading">
           <div className="admin-spinner" />
-          <p>Loading cars…</p>
+          <p>{a.list.loading}</p>
         </div>
       )}
 
@@ -190,8 +191,8 @@ export default function AdminCarsListPage() {
           {filtered.length === 0 ? (
             <div className="admin-empty">
               {search || statusFilter !== 'all'
-                ? 'No cars match your filters.'
-                : 'No cars yet.'
+                ? a.list.noMatch
+                : a.list.noCars
               }
               {!search && statusFilter === 'all' && (
                 <Link
@@ -199,7 +200,7 @@ export default function AdminCarsListPage() {
                   className="btn-admin-primary"
                   style={{ marginTop: 16 }}
                 >
-                  Add your first car
+                  {a.list.addFirst}
                 </Link>
               )}
             </div>
@@ -208,12 +209,12 @@ export default function AdminCarsListPage() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Car</th>
-                    <th>Year</th>
-                    <th>Price</th>
-                    <th>Mileage</th>
-                    <th>Status</th>
-                    <th style={{ width: 140 }}>Actions</th>
+                    <th>{a.list.colCar}</th>
+                    <th>{a.list.colYear}</th>
+                    <th>{a.list.colPrice}</th>
+                    <th>{a.list.colMileage}</th>
+                    <th>{a.list.colStatus}</th>
+                    <th style={{ width: 140 }}>{a.list.colActions}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,10 +260,10 @@ export default function AdminCarsListPage() {
                           value={car.status}
                           disabled={statusChanging === car.id}
                           onChange={e => handleStatusChange(car.id, e.target.value)}
-                          aria-label="Change status"
+                          aria-label={a.list.colStatus}
                         >
-                          {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
+                          {STATUS_KEYS.map(s => (
+                            <option key={s} value={s}>{a.status[s]}</option>
                           ))}
                         </select>
                       </td>
@@ -272,13 +273,13 @@ export default function AdminCarsListPage() {
                             to={`/admin/cars/${car.id}/edit`}
                             className="admin-action-btn admin-action-btn--edit"
                           >
-                            Edit
+                            {a.list.edit}
                           </Link>
                           <button
                             className="admin-action-btn admin-action-btn--delete"
                             onClick={() => setDeleteTarget(car)}
                           >
-                            Delete
+                            {a.list.delete}
                           </button>
                         </div>
                       </td>
