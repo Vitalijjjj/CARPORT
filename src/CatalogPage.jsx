@@ -107,12 +107,24 @@ function BrandSelect({ value, onChange }) {
   )
 }
 
+/* Localized fuel-type label for every fuel type (electric / hybrid / petrol / diesel) */
+function fuelLabelOf(t, fuelType) {
+  switch (fuelType) {
+    case 'electric':        return t.car.electric
+    case 'hybrid':
+    case 'plug-in hybrid':  return t.car.hybrid
+    case 'petrol':          return t.car.petrol
+    case 'diesel':          return t.car.diesel
+    default:                return fuelType ? fuelType.charAt(0).toUpperCase() + fuelType.slice(1) : ''
+  }
+}
+
 /* ─── CatalogCard ───────────────────────────────────────────────── */
 function CatalogCard({ car, onRequest }) {
   const navigate   = useNavigate()
   const { t }      = useLang()
   const brandLabel = BRAND_META[car.brand]?.label ?? car.brand
-  const fuelLabel  = car.fuelType === 'electric' ? t.car.electric : t.car.hybrid
+  const fuelLabel  = fuelLabelOf(t, car.fuelType)
   const statusLabels = { in_stock: t.car.available, reserved: t.car.reserved, incoming: t.car.incoming }
   const imgSrc     = car.img
     ? (car.img.startsWith('data:') || car.img.startsWith('/') || car.img.startsWith('http') ? car.img : `/${car.img}`)
@@ -153,7 +165,7 @@ function CatalogCard({ car, onRequest }) {
           </div>
           <div className="cc-spec">
             <span className="cc-sk">{t.car.engine}</span>
-            <span className="cc-sv">{car.engine}</span>
+            <span className="cc-sv">{car.engine || fuelLabel}</span>
           </div>
         </div>
 
@@ -209,7 +221,7 @@ function Sidebar({ filters, set, reset, activeCount, onClose, priceMin, priceMax
       {/* Fuel type */}
       <FilterGroup label={t.catalog.fuelType}>
         <Pills
-          options={[['all', t.catalog.allFuelTypes], ['electric', t.car.electric], ['hybrid', t.car.hybrid]]}
+          options={[['all', t.catalog.allFuelTypes], ['electric', t.car.electric], ['hybrid', t.car.hybrid], ['petrol', t.car.petrol], ['diesel', t.car.diesel]]}
           value={filters.fuelType}
           onChange={v => set('fuelType', v)}
         />
@@ -470,7 +482,7 @@ export default function CatalogPage() {
                 <Chip label={BRAND_META[filters.brand]?.label ?? filters.brand} onRemove={() => set('brand', 'all')} />
               )}
               {filters.fuelType !== 'all' && (
-                <Chip label={filters.fuelType === 'electric' ? t.car.electric : t.car.hybrid} onRemove={() => set('fuelType', 'all')} />
+                <Chip label={fuelLabelOf(t, filters.fuelType)} onRemove={() => set('fuelType', 'all')} />
               )}
               {filters.priceMax < PRICE_MAX && (
                 <Chip label={`${t.catalog.upTo} € ${fmt(filters.priceMax)}`} onRemove={() => set('priceMax', PRICE_MAX)} />
