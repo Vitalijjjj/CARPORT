@@ -56,7 +56,7 @@ export default function Footer({ onCta }) {
               <div className="footer-col">
                 <span className="footer-col-label">{t.footer.contactLabel}</span>
                 <a href="tel:+351928363003">+351 928 363 003</a>
-                <a href="mailto:info@turboeagle.pt">info@turboeagle.pt</a>
+                <a href="mailto:info@turboeagleauto.com">info@turboeagleauto.com</a>
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a>
                 <a href={IG_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
                 <a href={FB_URL} target="_blank" rel="noopener noreferrer">Facebook</a>

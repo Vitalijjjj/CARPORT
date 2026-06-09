@@ -12,6 +12,10 @@ import { dirname, join } from 'path'
 import { existsSync, mkdirSync, renameSync, statSync } from 'fs'
 import { execSync } from 'child_process'
 
+// Optional dependency — if nodemailer isn't installed, lead email is just disabled
+let nodemailer = null
+try { nodemailer = (await import('nodemailer')).default } catch { /* lead email disabled */ }
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app  = express()
 const PORT = process.env.PORT || 3000
@@ -59,6 +63,116 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit:    10,
 })
+
+// ── Lead email (SMTP) ─────────────────────────────────────────────
+// Configure via env vars: SMTP_USER + SMTP_PASS (Hostinger mailbox).
+// Optional: SMTP_HOST, SMTP_PORT, LEAD_EMAIL_TO, LEAD_EMAIL_FROM.
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.hostinger.com'
+const SMTP_PORT = parseInt(process.env.SMTP_PORT) || 465
+const SMTP_USER = process.env.SMTP_USER || ''
+const SMTP_PASS = (process.env.SMTP_PASS || '').replace(/\\#/g, '#')
+const LEAD_TO   = process.env.LEAD_EMAIL_TO   || 'info@turboeagleauto.com'
+const LEAD_FROM = process.env.LEAD_EMAIL_FROM || SMTP_USER || 'info@turboeagleauto.com'
+
+let mailer = null
+if (nodemailer && SMTP_USER && SMTP_PASS) {
+  mailer = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  })
+  console.log('✉ Lead email enabled →', LEAD_TO)
+} else {
+  console.log('✉ Lead email disabled (set SMTP_USER and SMTP_PASS env vars to enable)')
+}
+
+const SOURCE_LABELS = {
+  form:   'Pedido de contacto',
+  import: 'Pedido de importação da Alemanha',
+  quiz:   'Questionário de seleção',
+  popup:  'Oferta especial (popup)',
+  widget: 'Widget de ajuda',
+  car:    'Interesse numa viatura',
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+}
+
+function formatQuizAnswers(answers) {
+  let a = answers
+  if (typeof a === 'string') { try { a = JSON.parse(a) } catch { return escHtml(a) } }
+  if (Array.isArray(a)) {
+    return a.map((item, i) => {
+      if (item && typeof item === 'object') {
+        const q = item.question || item.q || `#${i + 1}`
+        const v = item.answer ?? item.a ?? item.value ?? ''
+        return `${escHtml(q)}: <b>${escHtml(v)}</b>`
+      }
+      return `${i + 1}. ${escHtml(item)}`
+    }).join('<br>')
+  }
+  if (a && typeof a === 'object') {
+    return Object.entries(a).map(([k, v]) => `${escHtml(k)}: <b>${escHtml(v)}</b>`).join('<br>')
+  }
+  return escHtml(a)
+}
+
+function leadEmailHtml(lead) {
+  const sourceLabel = SOURCE_LABELS[lead.source] || 'Novo contacto'
+  const when = new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })
+  const rows = []
+  const add = (label, html) => {
+    if (html === undefined || html === null || html === '') return
+    rows.push(`<tr>
+      <td style="padding:11px 16px;color:#64748b;font:600 12px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #eef2f6;white-space:nowrap;vertical-align:top">${label}</td>
+      <td style="padding:11px 16px;color:#0f172a;font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;border-bottom:1px solid #eef2f6">${html}</td>
+    </tr>`)
+  }
+  add('Nome', escHtml(lead.name))
+  if (lead.phone) add('Telefone', `<a href="tel:${escHtml(lead.phone)}" style="color:#006be6;text-decoration:none">${escHtml(lead.phone)}</a>`)
+  if (lead.email) add('Email', `<a href="mailto:${escHtml(lead.email)}" style="color:#006be6;text-decoration:none">${escHtml(lead.email)}</a>`)
+  if (lead.message) add('Mensagem', escHtml(lead.message).replace(/\n/g, '<br>'))
+  if (lead.car_id)  add('Viatura', `ID #${escHtml(lead.car_id)}`)
+  if (lead.quiz_answers) add('Respostas', formatQuizAnswers(lead.quiz_answers))
+
+  return `<!DOCTYPE html>
+<html><body style="margin:0;background:#f1f5f9;padding:24px 0">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9">
+    <tr><td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(15,23,42,.08)">
+        <tr><td style="background:#0b1220;padding:22px 24px">
+          <div style="color:#fff;font:700 18px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.06em">TURBOEAGLE</div>
+          <div style="color:#7c8aa0;font:13px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;margin-top:6px">${escHtml(sourceLabel)} · ${escHtml(when)}</div>
+        </td></tr>
+        <tr><td style="padding:8px 8px 4px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows.join('')}</table>
+        </td></tr>
+        <tr><td style="padding:16px 24px 22px;color:#94a3b8;font:12px/1.5 -apple-system,Segoe UI,Roboto,sans-serif">
+          Mensagem automática do site turboeagleauto.com
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`
+}
+
+async function sendLeadEmail(lead) {
+  if (!mailer) return
+  try {
+    const sourceLabel = SOURCE_LABELS[lead.source] || 'Novo contacto'
+    await mailer.sendMail({
+      from:    `"TURBOEAGLE Site" <${LEAD_FROM}>`,
+      to:      LEAD_TO,
+      replyTo: lead.email || undefined,
+      subject: `🚗 ${sourceLabel}${lead.name ? ` — ${lead.name}` : ''}`,
+      html:    leadEmailHtml(lead),
+    })
+  } catch (err) {
+    console.error('Lead email failed:', err.message)
+  }
+}
 
 // ── Auto-init: create tables + first admin on first boot ──────────
 async function initDb() {
@@ -505,6 +619,7 @@ app.post('/api/leads.php', async (req, res) => {
       [name || null, phone || null, email || null, message || null, source || 'form', car_id || null]
     )
   } catch { /* ignore if table missing */ }
+  sendLeadEmail({ name, phone, email, message, source: source || 'form', car_id })
   res.json({ success: true, message: 'Thank you! We will contact you soon.' })
 })
 
@@ -595,6 +710,7 @@ app.delete('/api/reviews.php', async (req, res) => {
 app.post('/api/quiz.php', async (req, res) => {
   const { name, phone, email, message, answers } = req.body
   if (!name && !phone && !email) return res.status(400).json({ error: 'At least name, phone, or email is required' })
+  sendLeadEmail({ name, phone, email, message, source: 'quiz', quiz_answers: answers })
   try {
     await db.query(
       'INSERT INTO leads (name, phone, email, message, source, quiz_answers) VALUES (?, ?, ?, ?, ?, ?)',

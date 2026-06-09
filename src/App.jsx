@@ -708,7 +708,7 @@ export default function App() {
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/>
                     <path d="m22 6-10 7L2 6"/>
                   </svg>
-                  <a href="mailto:info@turboeagle.pt">info@turboeagle.pt</a>
+                  <a href="mailto:info@turboeagleauto.com">info@turboeagleauto.com</a>
                 </div>
               </div>
               <div className="loc-actions">
