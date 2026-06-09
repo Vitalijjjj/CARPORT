@@ -3,7 +3,22 @@ const a = {
     dashboard: 'Painel',
     cars: 'Viaturas',
     reviews: 'Avaliações',
+    leads: 'Pedidos',
     signOut: 'Terminar sessão',
+  },
+
+  leads: {
+    title: 'Pedidos do site',
+    subtitle: n => `${n} pedido${n !== 1 ? 's' : ''} recebido${n !== 1 ? 's' : ''}`,
+    failedToLoad: 'Erro ao carregar pedidos:',
+    empty: 'Ainda não há pedidos.',
+    all: 'Todos',
+    colDate: 'Data',
+    colSource: 'Origem',
+    colName: 'Nome',
+    colContact: 'Contacto',
+    colMessage: 'Mensagem',
+    car: 'Viatura',
   },
 
   reviews: {

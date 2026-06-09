@@ -179,6 +179,20 @@ export async function apiDeleteCar(id) {
   return handleResponse(res)
 }
 
+// ── Leads ───────────────────────────────────────────────────────────
+
+export async function apiGetLeads() {
+  if (IS_MOCK) {
+    await new Promise(r => setTimeout(r, 250))
+    return [
+      { id: 2, name: 'João S.', phone: '+351 912 345 678', email: '', message: 'Marca: BMW | Modelo: iX3 | Orçamento: €45 000 – €65 000', source: 'import', car_id: null, quiz_answers: null, created_at: new Date().toISOString() },
+      { id: 1, name: 'Marta C.', phone: '+351 921 000 111', email: 'marta@example.com', message: 'Interessada no Mercedes EQE', source: 'form', car_id: 3, quiz_answers: null, created_at: new Date(Date.now() - 86400000).toISOString() },
+    ]
+  }
+  const res = await fetch(`${API_BASE}/leads.php`, { headers: getAuthHeaders() })
+  return handleResponse(res)
+}
+
 // ── Reviews ─────────────────────────────────────────────────────────
 
 let mockReviews = [
