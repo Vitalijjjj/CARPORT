@@ -74,17 +74,23 @@ const SMTP_PASS = (process.env.SMTP_PASS || '').replace(/\\#/g, '#')
 const LEAD_TO   = process.env.LEAD_EMAIL_TO   || 'info@turboeagleauto.com'
 const LEAD_FROM = process.env.LEAD_EMAIL_FROM || SMTP_USER || 'info@turboeagleauto.com'
 
+// Easiest option: Web3Forms (no mailbox/SMTP needed — just one access key).
+// Leads go to the email you registered the key with. https://web3forms.com
+const WEB3FORMS_KEY = process.env.WEB3FORMS_KEY || ''
+
 let mailer = null
-if (nodemailer && SMTP_USER && SMTP_PASS) {
+if (WEB3FORMS_KEY) {
+  console.log('✉ Lead email enabled via Web3Forms')
+} else if (nodemailer && SMTP_USER && SMTP_PASS) {
   mailer = nodemailer.createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
     secure: SMTP_PORT === 465,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   })
-  console.log('✉ Lead email enabled →', LEAD_TO)
+  console.log('✉ Lead email enabled via SMTP →', LEAD_TO)
 } else {
-  console.log('✉ Lead email disabled (set SMTP_USER and SMTP_PASS env vars to enable)')
+  console.log('✉ Lead email disabled (set WEB3FORMS_KEY, or SMTP_USER + SMTP_PASS, to enable)')
 }
 
 const SOURCE_LABELS = {
@@ -158,17 +164,65 @@ function leadEmailHtml(lead) {
 </body></html>`
 }
 
+// Plain-text quiz answers (for the Web3Forms field list)
+function quizAnswersText(answers) {
+  let a = answers
+  if (typeof a === 'string') { try { a = JSON.parse(a) } catch { return a } }
+  if (Array.isArray(a)) {
+    return a.map((item, i) => {
+      if (item && typeof item === 'object') {
+        const q = item.question || item.q || `#${i + 1}`
+        const v = item.answer ?? item.a ?? item.value ?? ''
+        return `${q}: ${v}`
+      }
+      return `${i + 1}. ${item}`
+    }).join('\n')
+  }
+  if (a && typeof a === 'object') {
+    return Object.entries(a).map(([k, v]) => `${k}: ${v}`).join('\n')
+  }
+  return String(a ?? '')
+}
+
+async function sendViaWeb3Forms(lead) {
+  const sourceLabel = SOURCE_LABELS[lead.source] || 'Novo contacto'
+  const payload = {
+    access_key: WEB3FORMS_KEY,
+    subject:    `🚗 ${sourceLabel}${lead.name ? ` — ${lead.name}` : ''}`,
+    from_name:  'TURBOEAGLE Site',
+    Origem:     sourceLabel,
+    Nome:       lead.name    || '—',
+    Telefone:   lead.phone   || '—',
+    Email:      lead.email   || '—',
+    Mensagem:   lead.message || '—',
+  }
+  if (lead.car_id)       payload['Viatura ID'] = String(lead.car_id)
+  if (lead.quiz_answers) payload['Respostas']  = quizAnswersText(lead.quiz_answers)
+  if (lead.email)        payload.replyto       = lead.email
+
+  const res = await fetch('https://api.web3forms.com/submit', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body:    JSON.stringify(payload),
+  })
+  if (!res.ok) throw new Error(`Web3Forms HTTP ${res.status}`)
+}
+
+async function sendViaSmtp(lead) {
+  const sourceLabel = SOURCE_LABELS[lead.source] || 'Novo contacto'
+  await mailer.sendMail({
+    from:    `"TURBOEAGLE Site" <${LEAD_FROM}>`,
+    to:      LEAD_TO,
+    replyTo: lead.email || undefined,
+    subject: `🚗 ${sourceLabel}${lead.name ? ` — ${lead.name}` : ''}`,
+    html:    leadEmailHtml(lead),
+  })
+}
+
 async function sendLeadEmail(lead) {
-  if (!mailer) return
   try {
-    const sourceLabel = SOURCE_LABELS[lead.source] || 'Novo contacto'
-    await mailer.sendMail({
-      from:    `"TURBOEAGLE Site" <${LEAD_FROM}>`,
-      to:      LEAD_TO,
-      replyTo: lead.email || undefined,
-      subject: `🚗 ${sourceLabel}${lead.name ? ` — ${lead.name}` : ''}`,
-      html:    leadEmailHtml(lead),
-    })
+    if (WEB3FORMS_KEY)   return await sendViaWeb3Forms(lead)
+    if (mailer)          return await sendViaSmtp(lead)
   } catch (err) {
     console.error('Lead email failed:', err.message)
   }
