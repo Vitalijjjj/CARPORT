@@ -11,10 +11,13 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync, mkdirSync, renameSync, statSync } from 'fs'
 import { execSync } from 'child_process'
+import { createRequire } from 'module'
 
-// Optional dependency — if nodemailer isn't installed, lead email is just disabled
+// Optional dependency — if nodemailer isn't installed, lead email is just disabled.
+// Loaded synchronously (no top-level await) for maximum Node-version compatibility.
+const require = createRequire(import.meta.url)
 let nodemailer = null
-try { nodemailer = (await import('nodemailer')).default } catch { /* lead email disabled */ }
+try { nodemailer = require('nodemailer') } catch { /* lead email disabled */ }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app  = express()
