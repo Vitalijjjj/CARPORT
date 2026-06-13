@@ -15,8 +15,8 @@
 
 /* ── IMAGE SLIDER ── */
 .img-slider{display:flex;flex-direction:column;gap:10px;position:sticky;top:80px}
-.slider-main{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:var(--soft);height:460px}
-.slider-img{width:100%;height:100%;object-fit:cover;display:block}
+.slider-main{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:#0e1116;height:460px}
+.slider-img{width:100%;height:100%;object-fit:contain;display:block}
 .slider-empty{background:var(--soft);border-radius:var(--radius-lg);height:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--muted);font-size:14px}
 
 .sl-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.92);border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:background .15s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -164,12 +164,12 @@
   .info h1{font-size:26px}
   .price-row .big{font-size:28px}
 
-  /* Specs */
-  .specs-grid{grid-template-columns:1fr 1fr}
-  .spec-item:nth-child(2n){border-right:none}
-  .spec-item:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+  /* Specs — single clean column on phones */
+  .specs-grid{grid-template-columns:1fr}
+  .spec-item{border-right:none}
+  .spec-item:nth-last-child(2):nth-child(odd){border-bottom:1px solid var(--line)}
+  .spec-item:nth-last-child(1):nth-child(odd){grid-column:auto;border-right:none}
   .spec-item:last-child{border-bottom:none}
-  .spec-item:nth-last-child(1):nth-child(odd){grid-column:span 2}
 
   /* About */
   .about-sec{padding:36px 0}
