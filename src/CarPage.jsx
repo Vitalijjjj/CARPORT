@@ -141,11 +141,11 @@ function ImageSlider({ items, onOpenLightbox }) {
             </div>
           </div>
         ) : (
-          <img
+          <div
             key={idx}
-            src={cur.src}
-            alt=""
-            className="slider-img slider-img--click"
+            className="slider-photo slider-img--click"
+            style={{ backgroundImage: `url('${cur.src}')` }}
+            role="img"
             onClick={() => onOpenLightbox(idx)}
           />
         )}
