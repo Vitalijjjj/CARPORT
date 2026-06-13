@@ -796,8 +796,20 @@ app.get('/api/health.php', async (_req, res) => {
 
 // ── Static files + SPA fallback ───────────────────────────────────
 app.use('/uploads', express.static(join(__dirname, 'uploads')))
-app.use(express.static(join(__dirname, 'dist')))
-app.get('*', (_req, res) => res.sendFile(join(__dirname, 'dist', 'index.html')))
+// Hashed JS/CSS can be cached forever; index.html must never be cached so a new
+// deploy is always picked up immediately (otherwise the browser keeps loading old
+// asset hashes — "nothing changed after deploy").
+app.use(express.static(join(__dirname, 'dist'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+    }
+  },
+}))
+app.get('*', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  res.sendFile(join(__dirname, 'dist', 'index.html'))
+})
 
 // ── Start ─────────────────────────────────────────────────────────
 // Start serving immediately; retry DB init until it succeeds.

@@ -150,8 +150,9 @@
    RESPONSIVE
    ================================================================= */
 @media (max-width: 768px) {
-  .page{padding-bottom:72px}
-  .crumb{padding:93px 0 8px;font-size:13px}
+  .page{padding-bottom:72px;overflow-x:hidden}
+  .crumb{padding:93px 0 8px;font-size:13px;overflow-wrap:break-word}
+  .info h1,.info .tagline,.about-text{overflow-wrap:break-word;word-break:break-word}
 
   /* Top */
   .top{padding:12px 0 40px}
