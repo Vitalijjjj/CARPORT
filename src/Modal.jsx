@@ -20,10 +20,22 @@ export default function Modal({ onClose, carName }) {
     return e
   }
 
-  function handleSubmit(ev) {
+  async function handleSubmit(ev) {
     ev.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
+    try {
+      await fetch('/api/leads.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          source:  carName ? 'car' : 'form',
+          message: carName ? `Interesse: ${carName}` : undefined,
+        }),
+      })
+    } catch { /* ignore — still show success */ }
     setSent(true)
   }
 

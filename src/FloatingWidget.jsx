@@ -34,12 +34,19 @@ export default function FloatingWidget() {
     }
   }, [])
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const errs = {}
     if (!name.trim()) errs.name = 'Enter your name'
     if (phone.replace(/\D/g, '').length < 5) errs.phone = 'Enter phone'
     if (Object.keys(errs).length) { setErrors(errs); return }
+    try {
+      await fetch('/api/leads.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, source: 'widget' }),
+      })
+    } catch { /* ignore — still show success */ }
     setSent(true)
     localStorage.setItem('carrai_widget_sent', '1')
   }

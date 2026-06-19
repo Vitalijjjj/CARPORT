@@ -35,12 +35,29 @@ export default function Quiz() {
     setStep(s => s + 1)
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const errs = {}
     if (!name.trim()) errs.name = t.quiz.errName
     if (phone.replace(/\D/g, '').length < 5) errs.phone = t.quiz.errPhone
     if (Object.keys(errs).length) { setErrors(errs); return }
+
+    // Map raw answer codes → readable "question: label" pairs for the lead card
+    const readable = steps
+      .map(s => {
+        const val = answers[s.id]
+        const opt = s.options.find(o => o.value === val)
+        return val ? { question: s.question, answer: opt ? opt.label : val } : null
+      })
+      .filter(Boolean)
+
+    try {
+      await fetch('/api/quiz.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, answers: readable }),
+      })
+    } catch { /* ignore — still show success */ }
     setSent(true)
   }
 

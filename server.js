@@ -81,6 +81,16 @@ const LEAD_FROM = process.env.LEAD_EMAIL_FROM || SMTP_USER || 'info@turboeagleau
 // Leads go to the email you registered the key with. https://web3forms.com
 const WEB3FORMS_KEY = process.env.WEB3FORMS_KEY || ''
 
+// ── Telegram notifications ────────────────────────────────────────
+// Every new lead is also pushed to a Telegram chat with rich formatting.
+// Override via env vars TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID.
+// '#' gets escaped by Hostinger as '\#' — unescape just in case.
+const TELEGRAM_BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '8626785157:AAFiEI7CXhAwkVBzdJ6QqkL5dincRcDmrfU').replace(/\\#/g, '#')
+const TELEGRAM_CHAT_ID   = (process.env.TELEGRAM_CHAT_ID   || '-5169754531').replace(/\\#/g, '#')
+const TELEGRAM_ON        = Boolean(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID)
+const PUBLIC_SITE        = process.env.PUBLIC_SITE_URL || 'https://turboeagleauto.com'
+console.log(TELEGRAM_ON ? '✈ Telegram lead notifications enabled' : '✈ Telegram disabled (set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)')
+
 let mailer = null
 if (WEB3FORMS_KEY) {
   console.log('✉ Lead email enabled via Web3Forms')
@@ -229,6 +239,103 @@ async function sendLeadEmail(lead) {
   } catch (err) {
     console.error('Lead email failed:', err.message)
   }
+}
+
+// ── Telegram: creative, scannable lead cards ──────────────────────
+// Telegram only supports a small HTML subset (<b> <i> <u> <s> <a> <code> <pre>),
+// no tables — so we build the "card" with emoji icons, rules and spacing.
+const TG_SOURCE = {
+  form:   { emoji: '📨', label: 'Pedido de contacto' },
+  import: { emoji: '🇩🇪', label: 'Importação da Alemanha' },
+  quiz:   { emoji: '🧭', label: 'Questionário de seleção' },
+  popup:  { emoji: '🎁', label: 'Oferta especial (popup)' },
+  widget: { emoji: '💬', label: 'Widget de ajuda' },
+  car:    { emoji: '🚗', label: 'Interesse numa viatura' },
+}
+const TG_DIGITS = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
+
+function tgQuizAnswers(answers) {
+  let a = answers
+  if (typeof a === 'string') { try { a = JSON.parse(a) } catch { return escHtml(a) } }
+  const line = (n, q, v) => `${TG_DIGITS[n] || `${n}.`} <i>${escHtml(q)}</i>\n      └ <b>${escHtml(v)}</b>`
+  if (Array.isArray(a)) {
+    return a.map((item, i) => {
+      if (item && typeof item === 'object') {
+        const q = item.question || item.q || `Pergunta ${i + 1}`
+        const v = item.answer ?? item.a ?? item.value ?? '—'
+        return line(i + 1, q, v)
+      }
+      return line(i + 1, `Pergunta ${i + 1}`, item)
+    }).join('\n')
+  }
+  if (a && typeof a === 'object') {
+    return Object.entries(a).map(([k, v], i) => line(i + 1, k, v)).join('\n')
+  }
+  return escHtml(a)
+}
+
+function telegramLeadHtml(lead) {
+  const src = TG_SOURCE[lead.source] || { emoji: '🔔', label: 'Novo contacto' }
+  const when = new Date().toLocaleString('pt-PT', {
+    timeZone: 'Europe/Lisbon', day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+  const RULE = '━━━━━━━━━━━━━━━━━━━━━'
+  const L = []
+  L.push(`${src.emoji} <b>NOVA SOLICITAÇÃO</b>  ·  TURBOEAGLE`)
+  L.push(RULE)
+  L.push(`🏷 <b>${escHtml(src.label)}</b>`)
+  L.push(`🕒 <code>${escHtml(when)}</code>`)
+  L.push('')
+
+  if (lead.name) L.push(`👤 <b>${escHtml(lead.name)}</b>`)
+  if (lead.phone) {
+    const tel = String(lead.phone).replace(/[^\d+]/g, '')
+    L.push(`📞 <a href="tel:${escHtml(tel)}">${escHtml(lead.phone)}</a>`)
+  }
+  if (lead.email) L.push(`✉️ <a href="mailto:${escHtml(lead.email)}">${escHtml(lead.email)}</a>`)
+  if (lead.message) L.push(`\n💬 <i>${escHtml(lead.message)}</i>`)
+  if (lead.car_id) {
+    const url = `${PUBLIC_SITE.replace(/\/$/, '')}/car/${encodeURIComponent(lead.car_id)}`
+    L.push(`\n🚙 Viatura <a href="${escHtml(url)}">#${escHtml(lead.car_id)}</a>`)
+  }
+  if (lead.quiz_answers) {
+    L.push('')
+    L.push(`📋 <b>Respostas do questionário</b>`)
+    L.push(tgQuizAnswers(lead.quiz_answers))
+  }
+  L.push('')
+  L.push(RULE)
+  L.push(`<i>↪️ Responda rápido — o cliente está à espera.</i>`)
+  return L.join('\n')
+}
+
+async function sendTelegram(lead) {
+  if (!TELEGRAM_ON) return
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text:    telegramLeadHtml(lead),
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      throw new Error(`Telegram HTTP ${res.status} ${body}`)
+    }
+  } catch (err) {
+    console.error('Telegram notify failed:', err.message)
+  }
+}
+
+// Fire-and-forget: notify every channel for a new lead.
+function notifyLead(lead) {
+  sendLeadEmail(lead)
+  sendTelegram(lead)
 }
 
 // ── Auto-init: create tables + first admin on first boot ──────────
@@ -676,7 +783,7 @@ app.post('/api/leads.php', async (req, res) => {
       [name || null, phone || null, email || null, message || null, source || 'form', car_id || null]
     )
   } catch { /* ignore if table missing */ }
-  sendLeadEmail({ name, phone, email, message, source: source || 'form', car_id })
+  notifyLead({ name, phone, email, message, source: source || 'form', car_id })
   res.json({ success: true, message: 'Thank you! We will contact you soon.' })
 })
 
@@ -767,7 +874,7 @@ app.delete('/api/reviews.php', async (req, res) => {
 app.post('/api/quiz.php', async (req, res) => {
   const { name, phone, email, message, answers } = req.body
   if (!name && !phone && !email) return res.status(400).json({ error: 'At least name, phone, or email is required' })
-  sendLeadEmail({ name, phone, email, message, source: 'quiz', quiz_answers: answers })
+  notifyLead({ name, phone, email, message, source: 'quiz', quiz_answers: answers })
   try {
     await db.query(
       'INSERT INTO leads (name, phone, email, message, source, quiz_answers) VALUES (?, ?, ?, ?, ?, ?)',
