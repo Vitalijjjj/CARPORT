@@ -415,6 +415,9 @@ async function initDb() {
   // Widen main_image to hold base64 data URLs
   for (const sql of [
     "ALTER TABLE cars MODIFY COLUMN main_image MEDIUMTEXT DEFAULT NULL",
+    // Older tables may have a narrower fuel_type ENUM (e.g. only electric/hybrid),
+    // which silently coerces petrol/diesel to '' on save. Widen it to all 4 types.
+    "ALTER TABLE cars MODIFY COLUMN fuel_type ENUM('electric','hybrid','petrol','diesel') NOT NULL DEFAULT 'electric'",
   ]) {
     try { await db.query(sql) } catch (e) { /* ignore if already correct type */ }
   }
